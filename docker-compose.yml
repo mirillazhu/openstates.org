@@ -1,4 +1,4 @@
-version: "3.5"
+# version: "3.5"
 
 networks:
   openstates-network:
@@ -28,11 +28,14 @@ services:
       - CACHE_URL
       - RECAPTCHA_PUBLIC_KEY
       - RECAPTCHA_PRIVATE_KEY
+      - PYTHONWARNINGS=always
     networks:
       - openstates-network
 
   nginx:
     build: docker/nginx
+    environment: 
+      - PYTHONWARNINGS=always
     ports:
       - "8000:80"
     depends_on:
@@ -44,6 +47,8 @@ services:
     profiles:
       - db
     image: postgres
+    platform: linux/amd64 # add for Mac M1 compatibility
+    # container_name: openstatesorg-db-1
     environment:
       POSTGRES_DATABASE: openstatesorg
       POSTGRES_PASSWORD: openstates

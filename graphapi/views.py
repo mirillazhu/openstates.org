@@ -6,7 +6,7 @@ GraphQLView.graphiql_template = "graphene_graphiql_explorer/graphiql.html"
 
 class KeyedGraphQLView(GraphQLView):
     def get_response(self, request, data, show_graphiql=False):
-        internal = request.get_host() in request.META.get("HTTP_ORIGIN", "")
+        internal = request.get_host() in request.headers.get("origin", "")
 
         # check key only if we're not handling a graphiql request
         if not show_graphiql and not internal:

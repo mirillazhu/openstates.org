@@ -6,6 +6,13 @@ from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GDAL_LIBRARY_PATH = (
+    "/opt/homebrew/lib/libgdal.dylib"  # added as goreman could not find GDAL
+)
+GEOS_LIBRARY_PATH = (
+    "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added as goreman could not find GEOS
+)
+
 
 TEMPLATES = [
     {
@@ -130,6 +137,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "allauth.account.middleware.AccountMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -163,7 +171,6 @@ SITE_ID = 1
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 

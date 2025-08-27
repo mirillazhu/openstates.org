@@ -93,7 +93,7 @@ def verify(key, zone):
 
 
 def get_key_from_request(request):
-    key = request.META.get("HTTP_X_API_KEY")
+    key = request.headers.get("x-api-key")
     if not key:
         key = request.GET.get("apikey")
     return key

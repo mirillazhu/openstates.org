@@ -14,7 +14,7 @@ def structlog_middleware(get_response):
 
         if msg:
             log = logger.bind(
-                user_agent=request.META.get("HTTP_USER_AGENT", "UNKNOWN"),
+                user_agent=request.headers.get("user-agent", "UNKNOWN"),
                 remote_addr=request.META.get("REMOTE_ADDR"),
                 api_key=get_key_from_request(request),
                 url=request.path_info,

@@ -1,10 +1,10 @@
-import pytz
 import datetime
 import pytest
 from django.contrib.auth.models import User
 from graphapi.tests.utils import populate_db
 from profiles.models import Subscription
 from openstates.data.models import Bill
+from zoneinfo import ZoneInfo
 from ..models import Notification
 from ..utils import utcnow
 from ..management.commands.process_subscriptions import (
@@ -26,8 +26,8 @@ def setup():
 def user():
     u = User.objects.create(username="testuser")
     u.profile.feature_subscriptions = True
-    u.profile.subscription_last_checked = pytz.utc.localize(
-        datetime.datetime(2020, 1, 1)
+    u.profile.subscription_last_checked = datetime.datetime(
+        2020, 1, 1, tzinfo=ZoneInfo("UTC")
     )
     u.profile.save()
     u.emailaddress_set.create(email="valid@example.com", verified=True, primary=True)

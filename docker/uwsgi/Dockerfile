@@ -15,8 +15,8 @@ RUN apt-get --allow-releaseinfo-change update -qq \
         postgresql-client \
         uwsgi \
         libpq5 \
-        libgdal32 \
-        libpcre3 \
+        libgdal36 \
+        libpcre2-8-0\
         python3-dev \
         git \
         build-essential \
@@ -24,7 +24,7 @@ RUN apt-get --allow-releaseinfo-change update -qq \
         libgeos-dev \
         libgdal-dev \
         libcap-dev \
-        libpcre3-dev \
+        libpcre2-dev \
         uwsgi-src \
         awscli \
     && cd /usr/lib/uwsgi/plugins \
@@ -49,7 +49,7 @@ RUN pip --no-cache-dir --disable-pip-version-check install poetry wheel
 RUN useradd -u $UID -Ulmr -d /home/openstates openstates
 USER openstates:openstates
 
-RUN poetry install --no-dev \
+RUN poetry install --without dev \
     && rm -r ~/.cache/pypoetry/cache ~/.cache/pypoetry/artifacts/
 
 USER root
@@ -63,7 +63,7 @@ RUN apt-get remove -y -qq build-essential \
       libgeos-dev \
       libgdal-dev \
       libcap-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       uwsgi-src \
     && apt-get autoremove -y
 USER openstates:openstates
