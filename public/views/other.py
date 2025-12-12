@@ -199,8 +199,6 @@ def site_search(request):
 
             context.update(
                 {
-                    "query": query,
-                    "state": state,
                     "bills": bills,
                     "people": people,
                     "form": form,
@@ -241,8 +239,6 @@ def site_search(request):
 
             context.update(
                 {
-                    "query": query,
-                    "state": state,
                     "bills": bills,
                     "people": people,
                 }

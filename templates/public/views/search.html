@@ -28,7 +28,9 @@
       Try searching for something:
     </h2>
     <form>
-      <input type="hidden" name="state" value="{{ state }}">
+      {% if state %}
+        <input type="hidden" name="state" value="{{ state }}">
+      {% endif %}
       <div class="input-group">
           <input class="input-group-field" type="search" placeholder="HB 21, Cannabis, Maria" name="query">
           <div class="input-group-button">
@@ -71,7 +73,7 @@
                                 <strong><a href="{% canonical_url bill %}">{{ bill.identifier }}</a></strong>
                                 <span class="u-color--gray">(<strong>{{ bill.legislative_session.jurisdiction }}</strong> - {{ bill.legislative_session.name }})</span>
                                 <br>
-                                <span>{{ bill.title|titlecase_caps }}</span>
+                                <span>{{ bill.title|"titlecase_caps" }}</span>
                             </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
                             <td>
