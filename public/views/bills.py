@@ -121,7 +121,6 @@ class BillList(View):
         sort = request.GET.get("sort", "-latest_action")
 
         form = {
-            "query": query,
             "chamber": chamber,
             "session": session,
             "sponsor": sponsor,
