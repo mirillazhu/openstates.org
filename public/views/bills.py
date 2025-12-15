@@ -5,8 +5,6 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, reverse, redirect
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views import View
-from django.utils.safestring import mark_safe
-from django.contrib import messages
 from openstates.data.models import (
     Membership,
     Bill,
@@ -52,8 +50,6 @@ class BillList(View):
             if form["session"] not in sessions:
                 raise Http404()
             summary.append("from " + sessions[form["session"]])
-        if form["query"]:
-            summary.append(f"matching term '{form['query']}'")
         if form["sponsor"]:
             # there are ways this can happen that are legit, so just warn about it
             if form["sponsor"] not in sponsors:
@@ -146,20 +142,8 @@ class BillList(View):
 
         return bills, form
 
-    def get(self, request, state):
-        """
-        form values:
-            query
-            chamber: lower|upper
-            session
-            status: passed-lower-chamber|passed-upper-chamber|signed
-            sponsor (ocd-person ID)
-            classification
-            subjects
-        """
-        bills, form = self.get_bills(request, state)
-
-        # pagination
+    def paginate_bills(self, request, bills):
+        # handle pagination for bills queryset
         try:
             page_num = int(request.GET.get("page", 1))
         except ValueError:
@@ -170,7 +154,10 @@ class BillList(View):
         except EmptyPage:
             raise Http404()
 
-        # get sort urls & arrow
+        return paginator, page_num
+
+    def get_sort_context(self, request):
+        # get sort urls & arrows
         sort = request.GET.get("sort", "-latest_action")
         latest_action_arrow = first_action_arrow = ""
         if sort == "-latest_action":
@@ -196,31 +183,35 @@ class BillList(View):
             if sort == "first_action":
                 first_action_arrow = "\u2191"  # up
 
-        context = {
-            "state": state,
-            "state_nav": "bills",
-            "bills": paginator.page(page_num),
-            "form": form,
+        return {
             "latest_action_sort_url": latest_action_sort_url,
             "first_action_sort_url": first_action_sort_url,
             "latest_action_arrow": latest_action_arrow,
             "first_action_arrow": first_action_arrow,
         }
-        context.update(self.get_filter_options(state))
-        context["search_summary"] = self.get_search_summary(
-            context["form"],
-            context["sessions"],
-            context["chambers"],
-            context["sponsors"],
-        )
 
-        if request.user.is_anonymous:
-            messages.success(
-                request,
-                mark_safe(
-                    '<a href="/accounts/signup/">Sign up</a> today to track legislation for free!'
-                ),
-            )
+    def get(self, request, state):
+        """
+        form values:
+            chamber: lower|upper
+            session
+            status: passed-lower-chamber|passed-upper-chamber|signed
+            sponsor (ocd-person ID)
+            classification
+            subjects
+        """
+        bills, form = self.get_bills(request, state)
+        paginator, page_num = self.paginate_bills(request, bills)
+        sort_context = self.get_sort_context(request)
+
+        context = {
+            "state": state,
+            "state_nav": "bills",
+            "bills": paginator.page(page_num),
+            "form": form,
+            **sort_context,
+        }
+        context.update(self.get_filter_options(state))
 
         return render(request, "public/views/bills.html", context)
 
