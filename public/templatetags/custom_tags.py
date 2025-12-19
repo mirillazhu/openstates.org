@@ -122,6 +122,7 @@ def titlecase_caps(title):
     if title.isupper():
         title = title.title()
         # handle apostrophes correctly
+        title = re.sub(r"’", "'", title)
         title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
     return title
 
