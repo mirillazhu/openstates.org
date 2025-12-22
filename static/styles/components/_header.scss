@@ -7,12 +7,13 @@
   grid-template-columns: auto;
 
   @include breakpoint(medium) {
-    grid-template-columns: auto 200px;
+    grid-template-columns: auto 300px;
   }
 }
 
 #header__login {
   align-self: center;
+  white-space: nowrap;
 
   font-size: 120%;
   padding-top: 1rem;
