@@ -4,16 +4,18 @@
 
 #header__top {
   display: grid;
-  grid-template-columns: auto;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
 
   @include breakpoint(medium) {
-    grid-template-columns: auto 300px;
+    grid-template-columns: 1fr auto;
   }
 }
 
 #header__login {
   align-self: center;
   white-space: nowrap;
+  justify-self: end;
 
   font-size: 120%;
   padding-top: 1rem;
