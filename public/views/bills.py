@@ -166,6 +166,8 @@ class BillList(View):
             classification
             subjects
         """
+        request.session["selected_state"] = state
+
         bills, form = self.get_bills(request, state)
 
         # pagination
@@ -329,6 +331,9 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
 
 
 def bill(request, state, session, bill_id):
+
+    request.session["selected_state"] = state
+
     # canonicalize without space
     if " " in bill_id:
         return redirect(
@@ -421,6 +426,8 @@ def bill(request, state, session, bill_id):
 @never_cache
 def bill_dashboard(request):
 
+    state = request.session.get("selected_state", "")
+
     bill_subscriptions = (
         request.user.subscriptions.filter(
             bill_id__isnull=False,
@@ -466,6 +473,7 @@ def bill_dashboard(request):
         "public/views/bill_dashboard.html",
         {
             "tracked_bills": tracked_bills,
+            "state": state,
         },
     )
 
@@ -491,7 +499,10 @@ def vote(request, vote_id):
         ),
         pk="ocd-vote/" + vote_id,
     )
+
     state = jid_to_abbr(vote.organization.jurisdiction_id)
+    request.session["selected_state"] = state
+
     vote_counts = sorted(vote.counts.all(), key=_vote_sort_key)
     person_votes = sorted(vote.votes.all().select_related("voter"), key=_vote_sort_key)
 

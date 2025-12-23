@@ -52,6 +52,8 @@ def state(request, state):
     RECENTLY_INTRODUCED_BILLS_TO_SHOW = 4
     RECENTLY_PASSED_BILLS_TO_SHOW = 4
 
+    request.session["selected_state"] = state
+
     jid = abbr_to_jid(state)
 
     # we need basically all of the orgs, so let's just do one big query for them
@@ -135,6 +137,8 @@ def state(request, state):
 def site_search(request):
     query = request.GET.get("query")
     state = request.GET.get("state")
+
+    request.session["selected_state"] = state
 
     bills = []
     people = []
