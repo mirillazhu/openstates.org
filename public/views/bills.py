@@ -1,5 +1,6 @@
 from collections import defaultdict
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import F, Func, Prefetch
 from django.http import HttpResponse, Http404
@@ -24,6 +25,7 @@ from utils.common import (
     pretty_url,
     sessions_with_bills,
 )
+from profiles.models import Subscription
 from utils.orgs import get_chambers_from_abbr
 from utils.bills import search_bills, EXCLUDED_CLASSIFICATIONS
 from .fallback import fallback
@@ -379,7 +381,7 @@ def bill(request, state, session, bill_id):
         bill.actions.all()
         .select_related("organization")
         .prefetch_related(related_entities)
-        .order_by("-date")
+        .order_by("-date", "-order")
     )
     votes = list(
         bill.votes.all().select_related("organization")
@@ -402,6 +404,20 @@ def bill(request, state, session, bill_id):
         read_link = sorted_links[0].url
     except IndexError:
         read_link = None
+
+    # update last viewed bill action for dashboard read/unread logic
+    latest_action = actions[0] if actions else None
+
+    if request.user.is_authenticated and latest_action:
+
+        # update last viewed bill action for subscription
+        updated = Subscription.objects.filter(user=request.user, bill=bill).update(
+            last_viewed_bill_action_id=latest_action.id
+        )
+
+        # if there is an update to last viewed bill action, clear cache item that tracks number of unread bills (context_preprocessors.py)
+        if updated > 0:
+            cache.delete(f"unread_bills_{request.user.id}")
 
     return render(
         request,
@@ -428,6 +444,9 @@ def bill_dashboard(request):
 
     state = request.session.get("selected_state", "")
 
+    # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
+    cache.delete(f"unread_bills_{request.user.id}")
+
     bill_subscriptions = (
         request.user.subscriptions.filter(
             bill_id__isnull=False,
@@ -437,15 +456,22 @@ def bill_dashboard(request):
         .order_by(F("bill__latest_action_date").desc(nulls_last=True))
     )
 
-    tracked_bills = [subscription.bill for subscription in bill_subscriptions]
+    tracked_bills = []
 
-    for bill in tracked_bills:
+    for subscription in bill_subscriptions:
+        bill = subscription.bill
 
         bill_state_abbr = get_state_abbr(bill.legislative_session.jurisdiction.name)
         bill.identifier_with_state = f"{bill_state_abbr} {bill.identifier}"
 
+        # get bills actions for determining (a) bill status and (2) whether the latest bill action is unread
+        actions = list(
+            bill.actions.all()
+            .select_related("organization")
+            .order_by("-date", "-order")
+        )
+
         # determine bill status
-        actions = list(bill.actions.all().select_related("organization"))
         # get second chamber name
         chambers = {
             c.classification: c.name for c in get_chambers_from_abbr(bill_state_abbr)
@@ -467,6 +493,23 @@ def bill_dashboard(request):
             if stage["text"] is not None:
                 bill.status = stage["text"]
                 break
+
+        # determine if there has been a bill update since user last viewed bill
+        latest_action = actions[0] if actions else None
+
+        if subscription.last_viewed_bill_action_id and latest_action:
+            if (
+                subscription.last_viewed_bill_action_id != latest_action.id
+            ):  # there is a new bill action
+                bill.has_unread_action = True
+            else:  # no new bill action; latest_action id is same as last viewed
+                bill.has_unread_action = False
+        elif latest_action:  # never viewed but has actions
+            bill.has_unread_action = True
+        else:  # bill has no actions
+            bill.has_unread_action = False
+
+        tracked_bills.append(bill)
 
     return render(
         request,

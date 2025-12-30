@@ -24,6 +24,7 @@ def header(context):
         "state": context.get("state"),
         "state_nav": context.get("state_nav"),
         "messages": context.get("messages"),
+        "unread_bills_count": context.get("unread_bills_count"),
         "states": states,
     }
 

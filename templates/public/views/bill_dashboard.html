@@ -25,7 +25,7 @@
                 </thead>
                 <tbody>
                     {% for bill in tracked_bills %}
-                        <tr class="row--align-top">
+                        <tr class="row--align-top {% if bill.has_unread_action %} bill-unread-action {% endif %}">
                             <td>
                                 <a href="{% canonical_url bill %}">
                                 <strong>{{ bill.identifier_with_state }}</strong>
