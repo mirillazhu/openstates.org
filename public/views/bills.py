@@ -455,7 +455,7 @@ def bill_dashboard(request):
             active=True,
         )
         .select_related("bill")
-        .order_by(F("bill__latest_action_date").desc(nulls_last=True))
+        .order_by(F("bill__latest_action_date").desc(nulls_last=True), "bill_id")
     )
 
     tracked_bills = []
