@@ -410,10 +410,12 @@ def bill(request, state, session, bill_id):
 
     if request.user.is_authenticated and latest_action:
 
-        # update last viewed bill action for subscription
-        updated = Subscription.objects.filter(user=request.user, bill=bill).update(
-            last_viewed_bill_action_id=latest_action.id
-        )
+        # update last viewed bill action if active subscription
+        updated = Subscription.objects.filter(
+            user=request.user,
+            bill=bill,
+            active=True,
+        ).update(last_viewed_bill_action_id=latest_action.id)
 
         # if there is an update to last viewed bill action, clear cache item that tracks number of unread bills (context_preprocessors.py)
         if updated > 0:
