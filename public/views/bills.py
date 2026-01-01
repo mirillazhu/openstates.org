@@ -285,6 +285,21 @@ def _document_sort_key(doc):
     return (100, doc.media_type)
 
 
+def get_bill_chambers(bill):
+    first_chamber = bill.from_organization.name
+
+    # get second chamber name (if exists)
+    state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
+    second_chamber = None
+    if len(chambers) > 1 and bill.from_organization.classification != "legislature":
+        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
+            bill.from_organization.classification
+        ]
+
+    return first_chamber, second_chamber
+
+
 def compute_bill_stages(actions, first_chamber, second_chamber):
     """
     return a structure with four entries like
@@ -388,14 +403,8 @@ def bill(request, state, session, bill_id):
     )  # .prefetch_related('counts')
 
     # stage calculation
-    # get other chamber name
-    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
-    second_chamber = None
-    if len(chambers) > 1 and bill.from_organization.classification != "legislature":
-        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-            bill.from_organization.classification
-        ]
-    stages = compute_bill_stages(actions, bill.from_organization.name, second_chamber)
+    first_chamber, second_chamber = get_bill_chambers(bill)
+    stages = compute_bill_stages(actions, first_chamber, second_chamber)
 
     versions = list(bill.versions.order_by("-date").prefetch_related("links"))
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
@@ -449,6 +458,7 @@ def bill_dashboard(request):
     # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
     cache.delete(f"unread_bills_{request.user.id}")
 
+    # get all active bill subscriptions
     bill_subscriptions = (
         request.user.subscriptions.filter(
             bill_id__isnull=False,
@@ -474,19 +484,8 @@ def bill_dashboard(request):
         )
 
         # determine bill status
-        # get second chamber name
-        chambers = {
-            c.classification: c.name for c in get_chambers_from_abbr(bill_state_abbr)
-        }
-        second_chamber = None
-        if len(chambers) > 1 and bill.from_organization.classification != "legislature":
-            second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-                bill.from_organization.classification
-            ]
-        # get bill stages
-        stages = compute_bill_stages(
-            actions, bill.from_organization.name, second_chamber
-        )
+        first_chamber, second_chamber = get_bill_chambers(bill)
+        stages = compute_bill_stages(actions, first_chamber, second_chamber)
         # get last stage
         bill.status = (
             "Introduced in " + bill.from_organization.name
