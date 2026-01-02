@@ -320,6 +320,9 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
         {"stage": "Governor", "text": None, "date": None},
     ]
 
+    if actions:
+        max_date = max(action.date for action in actions)
+
     for action in actions:
         if "introduction" in action.classification and stages[0]["date"] is None:
             stages[0]["date"] = action.date
@@ -354,7 +357,20 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
         elif "became-law" in action.classification and stages[3]["date"] is None:
             stages[3]["date"] = action.date
             stages[3]["text"] = "Became Law"
-        # TODO: veto, failure, override, withdrawal etc?
+        elif (
+            "executive-veto" in action.classification
+            or "veto-override-failure" in action.classification
+        ) and stages[3]["date"] is None:
+            # veto and override failure based on latest bill date only, since vetoes can have successful overrides
+            # would ideally also check order condition, but this is not consistent across states (usually an override would not be the same day as veto in any case)
+            if action.date == max_date:
+                stages[3]["date"] = action.date
+                if state == "us":
+                    stages[3]["text"] = "Vetoed by President"
+                elif state == "dc":
+                    stages[3]["text"] = "Vetoed by Mayor"
+                else:  # all states and puerto rico have governor
+                    stages[3]["text"] = "Vetoed by Governor"
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:
