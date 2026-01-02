@@ -287,6 +287,8 @@ def _document_sort_key(doc):
 
 def get_bill_chambers(bill):
     first_chamber = bill.from_organization.name
+    if first_chamber == "Nebraska Legislature":
+        first_chamber = "Legislature"  # shorten for formatting purposes
 
     # get second chamber name (if exists)
     state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
@@ -300,7 +302,7 @@ def get_bill_chambers(bill):
     return first_chamber, second_chamber
 
 
-def compute_bill_stages(actions, first_chamber, second_chamber):
+def compute_bill_stages(actions, first_chamber, second_chamber, state):
     """
     return a structure with four entries like
         stage: Introduced
@@ -323,7 +325,17 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
             stages[0]["date"] = action.date
             stages[0]["text"] = f"Introduced in {first_chamber}"
         elif "passage" in action.classification:
-            if action.organization.name == first_chamber:
+            if (
+                action.organization.name == first_chamber
+                or (
+                    state == "dc"
+                    and action.organization.name
+                    == "Council of the District of Columbia"
+                )
+                or (
+                    state == "ne" and action.organization.name == "Nebraska Legislature"
+                )
+            ):
                 stages[1]["date"] = action.date
                 stages[1]["text"] = f"Passed {first_chamber}"
             elif action.organization.name == second_chamber:
@@ -333,11 +345,16 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
             "executive-signature" in action.classification and stages[3]["date"] is None
         ):
             stages[3]["date"] = action.date
-            stages[3]["text"] = "Signed by Governor"
+            if state == "us":
+                stages[3]["text"] = "Signed by President"
+            elif state == "dc":
+                stages[3]["text"] = "Signed by Mayor"
+            else:  # all states and puerto rico have governor
+                stages[3]["text"] = "Signed by Governor"
         elif "became-law" in action.classification and stages[3]["date"] is None:
             stages[3]["date"] = action.date
             stages[3]["text"] = "Became Law"
-        # TODO: veto, failure, etc?
+        # TODO: veto, failure, override, withdrawal etc?
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:
@@ -404,7 +421,7 @@ def bill(request, state, session, bill_id):
 
     # stage calculation
     first_chamber, second_chamber = get_bill_chambers(bill)
-    stages = compute_bill_stages(actions, first_chamber, second_chamber)
+    stages = compute_bill_stages(actions, first_chamber, second_chamber, state)
 
     versions = list(bill.versions.order_by("-date").prefetch_related("links"))
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
@@ -453,6 +470,7 @@ def bill(request, state, session, bill_id):
 @never_cache
 def bill_dashboard(request):
 
+    # get state for state dropdown
     state = request.session.get("selected_state", "")
 
     # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
@@ -485,7 +503,8 @@ def bill_dashboard(request):
 
         # determine bill status
         first_chamber, second_chamber = get_bill_chambers(bill)
-        stages = compute_bill_stages(actions, first_chamber, second_chamber)
+        bill_state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+        stages = compute_bill_stages(actions, first_chamber, second_chamber, bill_state)
         # get last stage
         bill.status = (
             "Introduced in " + bill.from_organization.name
