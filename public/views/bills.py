@@ -310,7 +310,7 @@ def get_bill_chambers(bill):
     return first_chamber, second_chamber
 
 
-# helper function to set stage for compute_bill_stages, returns index of stage modified
+# helper function to set stage for compute_bill_stages, returns index of latest stage (by bill action order)
 def set_stage(stages, stage_index, date, text, current_latest_stage):
     if stages[stage_index]["date"] is None:
         stages[stage_index]["date"] = date
@@ -323,8 +323,8 @@ def set_stage(stages, stage_index, date, text, current_latest_stage):
     return current_latest_stage
 
 
-# assumes actions are sorted in descending order (most recent action first)
 # returns stages, latest_stage (for bill dashboard)
+# assumes bill actions are sorted in descending order (most recent action first)
 def compute_bill_stages(actions, first_chamber, second_chamber, state):
     """
     return a structure with four entries like
