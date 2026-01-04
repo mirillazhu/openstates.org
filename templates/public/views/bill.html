@@ -35,7 +35,7 @@
                                 <span class="meter-bar__title">{{ stage.stage }}</span>
                             </li>
                         {% else %}
-                            <li class="meter-bar meter-bar--green">
+                            <li class="meter-bar {% if 'Vetoed' in stage.text or 'Failed' in stage.text %}meter-bar--red{% else %}meter-bar--green{% endif %}">
                                 <span class="meter-bar__title">
                                     {% if stage.stage == 'Introduced' %}
                                         Introduced {% if not unicameral %}in {{ bill.from_organization.name }}{% endif %}
