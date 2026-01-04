@@ -288,9 +288,11 @@ def _document_sort_key(doc):
 # returns first_chamber, second_chamber
 def get_bill_chambers(bill):
     # unicameral logic
-    # include special case where bill may originate in house or senate, but all bill actions are from organization with "legislature" classification
+    # include special case where bill may originate in house or senate, but all bill actions are from organization with legislature/executive classification
     if (bill.from_organization.classification == "legislature") or (
-        not bill.actions.exclude(organization__classification="legislature").exists()
+        not bill.actions.exclude(
+            organization__classification__in=["legislature", "executive"]
+        ).exists()
     ):
         return "Legislature", None
 
