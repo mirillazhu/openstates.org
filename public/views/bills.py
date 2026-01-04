@@ -580,7 +580,7 @@ def bill_dashboard(request):
         else:
             bill.status = (
                 "Introduced in " + bill.from_organization.name
-            )  # fallback for bills with no actions
+            )  # fallback for bills with no stages
 
         # determine if there has been a bill update since user last viewed bill
         latest_action = actions[0] if actions else None
