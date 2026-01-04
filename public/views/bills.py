@@ -353,9 +353,8 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
 
     for action in actions:
         if "introduction" in action.classification:
-            latest_stage = set_stage(
-                stages, 0, action.date, f"Introduced in {first_chamber}", latest_stage
-            )
+            text = f"Introduced in {first_chamber}"
+            latest_stage = set_stage(stages, 0, action.date, text, latest_stage)
 
         # for passage and failure, latest action takes precedence
         # exclude override passage/failures, since these are handled below
@@ -367,13 +366,11 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 action.organization.name == first_chamber
                 or first_chamber == "Legislature"  # unicameral
             ):
-                latest_stage = set_stage(
-                    stages, 1, action.date, f"Passed {first_chamber}", latest_stage
-                )
+                text = f"Passed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
-                latest_stage = set_stage(
-                    stages, 2, action.date, f"Passed {second_chamber}", latest_stage
-                )
+                text = f"Passed {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
         elif (
             "failure" in action.classification
             and "veto-override-failure" not in action.classification
@@ -382,24 +379,21 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 action.organization.name == first_chamber
                 or first_chamber == "Legislature"  # unicameral
             ):
-                latest_stage = set_stage(
-                    stages, 1, action.date, f"Failed in {first_chamber}", latest_stage
-                )
+                text = f"Failed in {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
-                latest_stage = set_stage(
-                    stages, 2, action.date, f"Failed in {second_chamber}", latest_stage
-                )
+                text = f"Failed in {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
 
         elif "executive-signature" in action.classification:
-            latest_stage = set_stage(
-                stages, 3, action.date, f"Signed by {executive_title}", latest_stage
-            )
+            text = f"Signed by {executive_title}"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
         elif "became-law" in action.classification:
-            latest_stage = set_stage(stages, 3, action.date, "Became Law", latest_stage)
+            text = "Became Law"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
         elif "executive-veto" in action.classification:
-            latest_stage = set_stage(
-                stages, 3, action.date, f"Vetoed by {executive_title}", latest_stage
-            )
+            text = f"Vetoed by {executive_title}"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
 
         # successful override does not necessarily mean bill became law because override needs to pass in both chambers
         elif "veto-override-passage" in action.classification:
@@ -407,41 +401,21 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 action.organization.name == first_chamber
                 or first_chamber == "Legislature"  # unicameral
             ):
-                latest_stage = set_stage(
-                    stages,
-                    1,
-                    action.date,
-                    f"Override Passed {first_chamber}",
-                    latest_stage,
-                )
+                text = f"Override Passed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
-                latest_stage = set_stage(
-                    stages,
-                    2,
-                    action.date,
-                    f"Override Passed {second_chamber}",
-                    latest_stage,
-                )
+                text = (f"Override Passed {second_chamber}",)
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
         elif "veto-override-failure" in action.classification:
             if (
                 action.organization.name == first_chamber
                 or first_chamber == "Legislature"  # unicameral
             ):
-                latest_stage = set_stage(
-                    stages,
-                    1,
-                    action.date,
-                    f"Override Failed {first_chamber}",
-                    latest_stage,
-                )
+                text = f"Override Failed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
-                latest_stage = set_stage(
-                    stages,
-                    2,
-                    action.date,
-                    f"Override Failed {second_chamber}",
-                    latest_stage,
-                )
+                text = f"Override Failed {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:
