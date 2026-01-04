@@ -406,7 +406,7 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 text = f"Override Passed {first_chamber}"
                 latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
-                text = (f"Override Passed {second_chamber}",)
+                text = f"Override Passed {second_chamber}"
                 latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
         elif "veto-override-failure" in action.classification:
             if (
@@ -487,7 +487,7 @@ def bill(request, state, session, bill_id):
     stages, _ = compute_bill_stages(actions, first_chamber, second_chamber, state)
 
     unicameral = False
-    if state in ("dc", "ne") or first_chamber == "Legislature":
+    if first_chamber == "Legislature" and second_chamber is None:
         unicameral = True
 
     versions = list(bill.versions.order_by("-date").prefetch_related("links"))
