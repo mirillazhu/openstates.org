@@ -59,12 +59,10 @@
         <div class="cell medium-3">
             <div class="sidebar">
                 <h2 class="heading--medium">Filter Bills</h2>
-                <!-- TODO: Add a reset / clear all filters link -->
-                <!-- <span>Clear all filters</span> -->
                 <form>
-                    <label for="query">Search text</label>
-                    <input id="query" name="query" type="text" placeholder="Search text" value="{{ form.query }}" />
 
+                    <input type="hidden" name="state" value="{{ state }}" /> 
+                    
                     <label for="session">Session</label>
                     <select id="session" name="session">
                         <option value="">All Available Sessions</option>
