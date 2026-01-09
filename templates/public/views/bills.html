@@ -59,7 +59,7 @@
         <div class="cell medium-3">
             <div class="sidebar">
                 <h2 class="heading--medium">Filter Bills</h2>
-                <form>
+                <form onsubmit="cleanUrl(this)"> <!-- function defined in included form template -->
                     {% include 'public/components/search-options-form.html' %}
                 </form>
             </div>

@@ -123,7 +123,7 @@
           {% if query and state and base_bills_exist %} 
             <div class="sidebar">
               <h2 class="heading--medium">Filter Bills</h2>
-              <form>
+              <form onsubmit="cleanUrl(this)">
                 <input type="hidden" name="query" value="{{ query }}" /> 
                 <input type="hidden" name="state" value="{{ state }}" />
                 <input type="hidden" name="filter_form" value="true">  
