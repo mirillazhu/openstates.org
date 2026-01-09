@@ -70,11 +70,11 @@
     <label for="signed">Signed into Law</label>
 </fieldset>
 
-<label for="sponsor">Sponsor</label>
-<select id="sponsor" name="sponsor">
+<label for="sponsor_name">Sponsor</label>
+<select id="sponsor_name" name="sponsor_name">
     <option value="">Any Sponsor</option>
-    {% for sponsor_id, sponsor_name in sponsors.items %}
-    <option value="{{ sponsor_id }}" {% if sponsor_id == form.sponsor %} selected {% endif %}>
+    {% for sponsor_name in sponsor_names %}
+    <option value="{{ sponsor_name }}" {% if sponsor_name == form.sponsor_name %} selected {% endif %}>
         {{ sponsor_name }}
     </option>
     {% endfor %}

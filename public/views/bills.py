@@ -120,7 +120,7 @@ class BillList(View):
                 "sponsorships__person_id", flat=True
             ).distinct()
             available_sponsors = {
-                p.id: p.name
+                p.name
                 for p in Person.objects.filter(
                     id__in=sponsor_ids,
                     memberships__organization__jurisdiction_id=jid,
@@ -128,7 +128,8 @@ class BillList(View):
                 .order_by("name")
                 .distinct()
             }
-        options["sponsors"] = available_sponsors
+            available_sponsors = sorted(set(available_sponsors))
+        options["sponsor_names"] = available_sponsors
 
         return (
             options,
