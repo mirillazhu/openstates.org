@@ -77,32 +77,65 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    def get_filter_options(self, state):
+    # if there is no query (filtering from all bills, as in bills.html) or the query is the initial one (for search.html,
+    # i.e. hasn't been filtered yet), compute list of classifications, sponsors, and subjects from all available bills.
+    # otherwise, use saved lists of classifications, sponsors, and subjects previously computed.
+    def get_filter_options(
+        self,
+        state,
+        base_bills=None,
+        available_classifications=None,
+        available_subjects=None,
+        available_sponsors=None,
+    ):
         options = {}
         jid = abbr_to_jid(state)
-        bills = Bill.objects.all().filter(legislative_session__jurisdiction_id=jid)
         chambers = get_chambers_from_abbr(state)
         options["chambers"] = {c.classification: c.name for c in chambers}
         options["sessions"] = {s.identifier: s.name for s in sessions_with_bills(jid)}
-        options["sponsors"] = {
-            p.id: p.name
-            for p in Person.objects.filter(
-                memberships__organization__jurisdiction_id=jid
+
+        if (
+            base_bills is None
+        ):  # compute filters from all bills in jurisdiction (for bills.html)
+            base_bills = Bill.objects.all().filter(
+                legislative_session__jurisdiction_id=jid
             )
-            .order_by("name")
-            .distinct()
-        }
-        options["classifications"] = sorted(
-            bills.annotate(type=Unnest("classification", distinct=True))
-            .values_list("type", flat=True)
-            .distinct()
+
+        if available_classifications is None:
+            available_classifications = base_bills.annotate(
+                type=Unnest("classification", distinct=True)
+            ).values_list("type", flat=True)
+            available_classifications = sorted(set(available_classifications))
+        options["classifications"] = available_classifications
+
+        if available_subjects is None:
+            available_subjects = base_bills.annotate(
+                sub=Unnest("subject", distinct=True)
+            ).values_list("sub", flat=True)
+            available_subjects = sorted(set(available_subjects))
+        options["subjects"] = available_subjects
+
+        if available_sponsors is None:
+            sponsor_ids = base_bills.values_list(
+                "sponsorships__person_id", flat=True
+            ).distinct()
+            available_sponsors = {
+                p.id: p.name
+                for p in Person.objects.filter(
+                    id__in=sponsor_ids,
+                    memberships__organization__jurisdiction_id=jid,
+                )
+                .order_by("name")
+                .distinct()
+            }
+        options["sponsors"] = available_sponsors
+
+        return (
+            options,
+            available_classifications,
+            available_subjects,
+            available_sponsors,
         )
-        options["subjects"] = sorted(
-            bills.annotate(sub=Unnest("subject", distinct=True))
-            .values_list("sub", flat=True)
-            .distinct()
-        )
-        return options
 
     def get_bills(self, request, state):
         # query parameter filtering
@@ -203,6 +236,9 @@ class BillList(View):
         bills, form = self.get_bills(request, state)
         paginator, page_num = self.paginate_bills(request, bills)
         sort_context = self.get_sort_context(request)
+        filter_options, *_ = self.get_filter_options(
+            state
+        )  # for bills view, set available classifications, sponsors, and subjects to None so they are computed from set of all bills
 
         context = {
             "state": state,
@@ -211,7 +247,7 @@ class BillList(View):
             "form": form,
             **sort_context,
         }
-        context.update(self.get_filter_options(state))
+        context.update(filter_options)
 
         return render(request, "public/views/bills.html", context)
 

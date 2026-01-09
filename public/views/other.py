@@ -157,6 +157,42 @@ def site_search(request):
             paginator, page_num = bills_view.paginate_bills(request, bills)
             sort_context = bills_view.get_sort_context(request)
 
+            # compute/retrieve/set filter options
+            available_classifications = None
+            available_subjects = None
+            available_sponsors = None
+
+            initial_query = True
+            initial_query = not request.GET.get(
+                "filter_form"
+            )  # treat as initial query if request is not made through search options form
+
+            if (
+                initial_query
+            ):  # if initial query (i.e. hasn't been filtered yet), compute and set available classifications, subjects, sponsors from bills
+                (
+                    filter_options,
+                    available_classifications,
+                    available_subjects,
+                    available_sponsors,
+                ) = bills_view.get_filter_options(state, base_bills=bills)
+                request.session["available_classifications"] = available_classifications
+                request.session["available_subjects"] = available_subjects
+                request.session["available_sponsors"] = available_sponsors
+            else:  # if not initial query, retrieve previously computed classifications, subjects, sponsors
+                available_classifications = request.session.get(
+                    "available_classifications"
+                )
+                available_subjects = request.session.get("available_subjects")
+                available_sponsors = request.session.get("available_sponsors")
+                filter_options, *_ = bills_view.get_filter_options(
+                    state,
+                    base_bills=bills,
+                    available_classifications=available_classifications,
+                    available_subjects=available_subjects,
+                    available_sponsors=available_sponsors,
+                )  # include bills as fallback for computation in case session variables fail, but shouldn't need to be used
+
             # people search
             people = []
             for p in Person.objects.search(query, state=state):
@@ -172,7 +208,7 @@ def site_search(request):
                     **sort_context,
                 }
             )
-            context.update(bills_view.get_filter_options(state))
+            context.update(filter_options)
 
         else:  # no state provided (placeholder, can streamline later)
 

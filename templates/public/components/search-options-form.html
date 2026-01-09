@@ -72,7 +72,7 @@
 
 <label for="sponsor">Sponsor</label>
 <select id="sponsor" name="sponsor">
-    <option value="">Any sponsor</option>
+    <option value="">Any Sponsor</option>
     {% for sponsor_id, sponsor_name in sponsors.items %}
     <option value="{{ sponsor_id }}" {% if sponsor_id == form.sponsor %} selected {% endif %}>
         {{ sponsor_name }}

@@ -49,7 +49,6 @@
 {% if bills.paginator.count %}
 <section>    
 <h2 class="heading--medium">Bills</h2>
-
             <table class="hover">
                 <thead>
                     <tr>
@@ -127,7 +126,8 @@
               <h2 class="heading--medium">Filter Bills</h2>
               <form>
                 <input type="hidden" name="query" value="{{ query }}" /> 
-                <input type="hidden" name="state" value="{{ state }}" />  
+                <input type="hidden" name="state" value="{{ state }}" />
+                <input type="hidden" name="filter_form" value="true">  
                 {% include 'public/components/search-options-form.html' %}
               </form>
             </div>
