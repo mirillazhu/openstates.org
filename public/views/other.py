@@ -151,47 +151,52 @@ def site_search(request):
 
     if query:
         if state:
-
             # bill search (call BillList methods)
             bills, form = bills_view.get_bills(request, state)
             paginator, page_num = bills_view.paginate_bills(request, bills)
             sort_context = bills_view.get_sort_context(request)
 
             # compute/retrieve/set filter options
-            available_classifications = None
-            available_subjects = None
-            available_sponsors = None
+            is_initial_query = True  # initial query is true iff request is not made through search options form
+            is_initial_query = not request.GET.get("filter_form")
 
-            initial_query = True
-            initial_query = not request.GET.get(
-                "filter_form"
-            )  # treat as initial query if request is not made through search options form
+            if is_initial_query:  # if bills haven't been filtered yet
 
-            if (
-                initial_query
-            ):  # if initial query (i.e. hasn't been filtered yet), compute and set available classifications, subjects, sponsors from bills
-                (
-                    filter_options,
-                    available_classifications,
-                    available_subjects,
-                    available_sponsors,
-                ) = bills_view.get_filter_options(state, base_bills=bills)
-                request.session["available_classifications"] = available_classifications
-                request.session["available_subjects"] = available_subjects
-                request.session["available_sponsors"] = available_sponsors
-            else:  # if not initial query, retrieve previously computed classifications, subjects, sponsors
-                available_classifications = request.session.get(
-                    "available_classifications"
-                )
-                available_subjects = request.session.get("available_subjects")
-                available_sponsors = request.session.get("available_sponsors")
-                filter_options, *_ = bills_view.get_filter_options(
-                    state,
-                    base_bills=bills,
-                    available_classifications=available_classifications,
-                    available_subjects=available_subjects,
-                    available_sponsors=available_sponsors,
-                )  # include bills as fallback for computation in case session variables fail, but shouldn't need to be used
+                base_bills_exist = bills.exists()
+                request.session["base_bills_exist"] = base_bills_exist
+
+                if (
+                    base_bills_exist
+                ):  # only compute filter options if there is a nonzero number of base bills
+                    (
+                        filter_options,
+                        available_classifications,
+                        available_subjects,
+                        available_sponsors,
+                    ) = bills_view.get_filter_options(state, base_bills=bills)
+                    request.session[
+                        "available_classifications"
+                    ] = available_classifications
+                    request.session["available_subjects"] = available_subjects
+                    request.session["available_sponsors"] = available_sponsors
+
+            else:  # if not initial query and base bills exist, retrieve previously computed classifications, subjects, sponsors
+
+                base_bills_exist = request.session.get("base_bills_exist")
+
+                if base_bills_exist:
+                    available_classifications = request.session.get(
+                        "available_classifications"
+                    )
+                    available_subjects = request.session.get("available_subjects")
+                    available_sponsors = request.session.get("available_sponsors")
+                    filter_options, *_ = bills_view.get_filter_options(
+                        state,
+                        base_bills=bills,
+                        available_classifications=available_classifications,
+                        available_subjects=available_subjects,
+                        available_sponsors=available_sponsors,
+                    )  # include bills as fallback for computation in case session variables fail, but shouldn't need to be used
 
             # people search
             people = []
@@ -206,9 +211,12 @@ def site_search(request):
                     "people": people,
                     "form": form,
                     **sort_context,
+                    "base_bills_exist": base_bills_exist,
                 }
             )
-            context.update(filter_options)
+
+            if base_bills_exist:  # only display search options form if base bills exist
+                context.update(filter_options)
 
         else:  # no state provided (placeholder, can streamline later)
 

@@ -77,8 +77,8 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    # if there is no query (filtering from all bills, as in bills.html) or the query is the initial one (for search.html,
-    # i.e. hasn't been filtered yet), compute list of classifications, sponsors, and subjects from all available bills.
+    # if classifications, subjects, and sponsors haven't been computed (i.e. if there is no query, as in bills.html,
+    # or the query is the initial one, for search.html), compute these lists from all available bills.
     # otherwise, use saved lists of classifications, sponsors, and subjects previously computed.
     def get_filter_options(
         self,
