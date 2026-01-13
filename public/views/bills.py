@@ -1,4 +1,5 @@
 from collections import defaultdict
+from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Func, Prefetch
 from django.http import HttpResponse, Http404
@@ -77,9 +78,6 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    # if classifications, subjects, and sponsors haven't been computed (i.e. if there is no query, as in bills.html,
-    # or the query is the initial one, for search.html), compute these lists from all available bills.
-    # otherwise, use saved lists of classifications, sponsors, and subjects previously computed.
     def get_filter_options(
         self,
         state,
@@ -88,19 +86,26 @@ class BillList(View):
         available_subjects=None,
         available_sponsors=None,
     ):
+        # common setup for search.html and bills.html
         options = {}
         jid = abbr_to_jid(state)
         chambers = get_chambers_from_abbr(state)
         options["chambers"] = {c.classification: c.name for c in chambers}
         options["sessions"] = {s.identifier: s.name for s in sessions_with_bills(jid)}
 
-        if (
-            base_bills is None
-        ):  # compute filters from all bills in jurisdiction (for bills.html)
+        # for bills.html: get filter options from cache or compute from all bills if none cached
+        is_bills_page = base_bills is None
+        if is_bills_page:
+            cache_key = f"filter_options_{state}"
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return cached_data
+
             base_bills = Bill.objects.all().filter(
                 legislative_session__jurisdiction_id=jid
             )
 
+        # compute filter options if not using cache (bills.html) or session variables (search.html)
         if available_classifications is None:
             available_classifications = base_bills.annotate(
                 type=Unnest("classification", distinct=True)
@@ -131,12 +136,17 @@ class BillList(View):
             available_sponsors = sorted(set(available_sponsors))
         options["sponsor_names"] = available_sponsors
 
-        return (
+        result = (
             options,
             available_classifications,
             available_subjects,
             available_sponsors,
         )
+
+        if is_bills_page:  # for bills.html: cache result for 12 hours
+            cache.set(cache_key, result, 60 * 60 * 12)
+
+        return result
 
     def get_bills(self, request, state):
         # query parameter filtering
