@@ -108,7 +108,7 @@ def district_maybe(district):
 @register.filter()
 def party_color(party_name):
     if "Democratic" in party_name and "Republican" in party_name:  # just in case
-        return "#ffffc5"
+        return "#fff3cd"
     elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
         return "#cfe5f4"
     elif "Republican" in party_name:
