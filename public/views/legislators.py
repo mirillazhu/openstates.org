@@ -171,7 +171,11 @@ def person(request, person_id):
     votes = (
         person.votes.all()
         .select_related("vote_event", "vote_event__bill")
-        .order_by("-vote_event__start__date")[:RECENT_VOTES_TO_SHOW]
+        .order_by(
+            "-vote_event__start_date",
+            "vote_event__bill__identifier",
+            "vote_event__motion_text",
+        )[:RECENT_VOTES_TO_SHOW]
     )
     person.vote_events = []
     for vote in votes:

@@ -8,7 +8,6 @@ from django.views import View
 from django.utils.safestring import mark_safe
 from django.contrib import messages
 from openstates.data.models import (
-    Membership,
     Bill,
     BillActionRelatedEntity,
     VoteEvent,
@@ -432,7 +431,13 @@ def vote(request, vote_id):
     )
     state = jid_to_abbr(vote.organization.jurisdiction_id)
     vote_counts = sorted(vote.counts.all(), key=_vote_sort_key)
-    person_votes = sorted(vote.votes.all().select_related("voter"), key=_vote_sort_key)
+    person_votes = sorted(
+        vote.votes.all().select_related("voter"),
+        key=lambda pv: (
+            _vote_sort_key(pv),
+            pv.voter.name if pv.voter else pv.voter_name,
+        ),
+    )
 
     # add percentages to vote_counts
     total = sum(vc.value for vc in vote_counts)
@@ -440,15 +445,8 @@ def vote(request, vote_id):
         for vc in vote_counts:
             vc.percent = vc.value / total * 100
 
-    # aggregate voter ids into one query
-    voter_ids_to_query = [pv.voter_id for pv in person_votes if pv.voter_id]
-    voter_parties = defaultdict(list)
     # party -> option -> value
     party_votes = defaultdict(lambda: defaultdict(int))
-    for membership in Membership.objects.filter(
-        person_id__in=voter_ids_to_query, organization__classification="party"
-    ).select_related("organization"):
-        voter_parties[membership.person_id].append(membership.organization.name)
 
     # attach party to people & calculate party-option crosstab
     for pv in person_votes:
@@ -458,17 +456,23 @@ def vote(request, vote_id):
         else:
             option = pv.option
 
-        if pv.voter_id:
-            pv.party = voter_parties[pv.voter_id][0]
+        if pv.voter and pv.voter.primary_party:
+            pv.party = pv.voter.primary_party
             party_votes[pv.party][option] += 1
         else:
             party_votes["Unknown"][option] += 1
 
     # only show party breakdown if most people are matched
-    if not person_votes or (len(voter_parties) / len(person_votes) < 0.8):
+    votes_with_party = len(
+        [pv for pv in person_votes if pv.voter and pv.voter.primary_party]
+    )
+    if not person_votes or (votes_with_party / len(person_votes) < 0.8):
         party_votes = None
     else:
         party_votes = sorted(dict(party_votes).items())
+
+    # determine whether to display parties field in roll call header
+    has_voter_parties = any(hasattr(pv, "party") and pv.party for pv in person_votes)
 
     return render(
         request,
@@ -480,5 +484,6 @@ def vote(request, vote_id):
             "vote_counts": vote_counts,
             "person_votes": person_votes,
             "party_votes": party_votes,
+            "has_voter_parties": has_voter_parties,
         },
     )
