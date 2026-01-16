@@ -165,38 +165,21 @@ def site_search(request):
                 base_bills_exist = bills.exists()
                 request.session["base_bills_exist"] = base_bills_exist
 
-                if (
-                    base_bills_exist
-                ):  # only compute filter options if there is a nonzero number of base bills
-                    (
-                        filter_options,
-                        available_classifications,
-                        available_subjects,
-                        available_sponsors,
-                    ) = bills_view.get_filter_options(state, base_bills=bills)
-                    request.session[
-                        "available_classifications"
-                    ] = available_classifications
-                    request.session["available_subjects"] = available_subjects
-                    request.session["available_sponsors"] = available_sponsors
+                if base_bills_exist:
+                    filter_options = bills_view.get_filter_options(state, bills)
+                    request.session["filter_options"] = filter_options
 
-            else:  # if not initial query and base bills exist, retrieve previously computed classifications, subjects, sponsors
-
+            else:  # if not initial query and base bills exist, retrieve previously computed filter options from session
                 base_bills_exist = request.session.get("base_bills_exist")
+                if base_bills_exist is None:  # fallback for lost session data
+                    base_bills_exist = bills.exists()
+                    request.session["base_bills_exist"] = base_bills_exist
 
                 if base_bills_exist:
-                    available_classifications = request.session.get(
-                        "available_classifications"
-                    )
-                    available_subjects = request.session.get("available_subjects")
-                    available_sponsors = request.session.get("available_sponsors")
-                    filter_options, *_ = bills_view.get_filter_options(
-                        state,
-                        base_bills=bills,
-                        available_classifications=available_classifications,
-                        available_subjects=available_subjects,
-                        available_sponsors=available_sponsors,
-                    )  # include bills as fallback for computation in case session variables fail, but shouldn't need to be used
+                    filter_options = request.session.get("filter_options")
+                    if filter_options is None:  # fallback for lost session data
+                        filter_options = bills_view.get_filter_options(state, bills)
+                        request.session["filter_options"] = filter_options
 
             # people search
             people = []

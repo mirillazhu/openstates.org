@@ -78,75 +78,38 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    def get_filter_options(
-        self,
-        state,
-        base_bills=None,
-        available_classifications=None,
-        available_subjects=None,
-        available_sponsors=None,
-    ):
-        # common setup for search.html and bills.html
+    def get_filter_options(self, state, base_bills):
         options = {}
         jid = abbr_to_jid(state)
         chambers = get_chambers_from_abbr(state)
         options["chambers"] = {c.classification: c.name for c in chambers}
         options["sessions"] = {s.identifier: s.name for s in sessions_with_bills(jid)}
 
-        # for bills.html: get filter options from cache or compute from all bills if none cached
-        is_bills_page = base_bills is None
-        if is_bills_page:
-            cache_key = f"filter_options_{state}"
-            cached_data = cache.get(cache_key)
-            if cached_data is not None:
-                return cached_data
+        classifications = base_bills.annotate(
+            type=Unnest("classification", distinct=True)
+        ).values_list("type", flat=True)
+        options["classifications"] = sorted(set(classifications))
 
-            base_bills = Bill.objects.all().filter(
-                legislative_session__jurisdiction_id=jid
+        subjects = base_bills.annotate(
+            sub=Unnest("subject", distinct=True)
+        ).values_list("sub", flat=True)
+        options["subjects"] = sorted(set(subjects))
+
+        sponsor_ids = base_bills.values_list(
+            "sponsorships__person_id", flat=True
+        ).distinct()
+        sponsor_names = {
+            p.name
+            for p in Person.objects.filter(
+                id__in=sponsor_ids,
+                memberships__organization__jurisdiction_id=jid,
             )
+            .order_by("name")
+            .distinct()
+        }
+        options["sponsor_names"] = sorted(set(sponsor_names))
 
-        # compute filter options if not using cache (bills.html) or session variables (search.html)
-        if available_classifications is None:
-            available_classifications = base_bills.annotate(
-                type=Unnest("classification", distinct=True)
-            ).values_list("type", flat=True)
-            available_classifications = sorted(set(available_classifications))
-        options["classifications"] = available_classifications
-
-        if available_subjects is None:
-            available_subjects = base_bills.annotate(
-                sub=Unnest("subject", distinct=True)
-            ).values_list("sub", flat=True)
-            available_subjects = sorted(set(available_subjects))
-        options["subjects"] = available_subjects
-
-        if available_sponsors is None:
-            sponsor_ids = base_bills.values_list(
-                "sponsorships__person_id", flat=True
-            ).distinct()
-            available_sponsors = {
-                p.name
-                for p in Person.objects.filter(
-                    id__in=sponsor_ids,
-                    memberships__organization__jurisdiction_id=jid,
-                )
-                .order_by("name")
-                .distinct()
-            }
-            available_sponsors = sorted(set(available_sponsors))
-        options["sponsor_names"] = available_sponsors
-
-        result = (
-            options,
-            available_classifications,
-            available_subjects,
-            available_sponsors,
-        )
-
-        if is_bills_page:  # for bills.html: cache result for 12 hours
-            cache.set(cache_key, result, 60 * 60 * 12)
-
-        return result
+        return options
 
     def get_bills(self, request, state):
         # query parameter filtering
@@ -247,9 +210,21 @@ class BillList(View):
         bills, form = self.get_bills(request, state)
         paginator, page_num = self.paginate_bills(request, bills)
         sort_context = self.get_sort_context(request)
-        filter_options, *_ = self.get_filter_options(
-            state
-        )  # for bills view, set available classifications, sponsors, and subjects to None so they are computed from set of all bills
+
+        # filter options: try to retrieve from cache or compute if none cached
+        cache_key = f"filter_options_{state}"
+        cached_filter_options = cache.get(cache_key)
+
+        if cached_filter_options is not None:
+            filter_options = cached_filter_options
+        else:
+            jid = abbr_to_jid(state)
+            base_bills = Bill.objects.all().filter(
+                legislative_session__jurisdiction_id=jid
+            )  # compute filter options from all bills in state
+
+            filter_options = self.get_filter_options(state, base_bills)
+            cache.set(cache_key, filter_options, 60 * 60 * 12)  # cache for 12 hours
 
         context = {
             "state": state,
