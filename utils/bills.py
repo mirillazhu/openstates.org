@@ -64,10 +64,16 @@ def search_bills(
             actions__organization__classification="lower",
         )
     elif "passed-upper-chamber" in status:
-        bills = bills.filter(
-            actions__classification__contains=["passage"],
-            actions__organization__classification="upper",
-        )
+        if state == "dc" or state == "ne":  # unicameral
+            bills = bills.filter(
+                actions__classification__contains=["passage"],
+                actions__organization__classification="legislature",
+            )
+        else:
+            bills = bills.filter(
+                actions__classification__contains=["passage"],
+                actions__organization__classification="upper",
+            )
     elif "signed" in status:
         bills = bills.filter(actions__classification__contains=["executive-signature"])
 

@@ -273,7 +273,47 @@ def _document_sort_key(doc):
     return (100, doc.media_type)
 
 
-def compute_bill_stages(actions, first_chamber, second_chamber):
+# returns first_chamber, second_chamber
+def get_bill_chambers(bill):
+    # unicameral logic
+    # include special case where bill may originate in house or senate, but all bill actions are from organization with legislature/executive classification
+    if (bill.from_organization.classification == "legislature") or (
+        not bill.actions.exclude(
+            organization__classification__in=["legislature", "executive"]
+        ).exists()
+    ):
+        return "Legislature", None
+
+    # bicameral logic
+    first_chamber = bill.from_organization.name
+    # get second chamber name (if exists)
+    second_chamber = None
+    state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
+    if len(chambers) > 1:
+        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
+            bill.from_organization.classification
+        ]
+
+    return first_chamber, second_chamber
+
+
+# helper function to set stage for compute_bill_stages, returns index of latest stage (by bill action order)
+def set_stage(stages, stage_index, date, text, current_latest_stage):
+    if stages[stage_index]["date"] is None:
+        stages[stage_index]["date"] = date
+        stages[stage_index]["text"] = text
+        return (
+            current_latest_stage
+            if current_latest_stage is not None
+            else stages[stage_index]
+        )
+    return current_latest_stage
+
+
+# returns stages, latest_stage (for bill dashboard)
+# assumes bill actions are sorted in descending order (most recent action first)
+def compute_bill_stages(actions, first_chamber, second_chamber, state):
     """
     return a structure with four entries like
         stage: Introduced
@@ -284,40 +324,95 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
         text: None
         date: None
     """
+    EXECUTIVE_TITLES = {
+        "us": "President",
+        "dc": "Mayor",
+        # default: Governor (for all states and Puerto Rico)
+    }
+
+    executive_title = EXECUTIVE_TITLES.get(state, "Governor")
+
     stages = [
         {"stage": "Introduced", "text": None, "date": None},
         {"stage": first_chamber, "text": None, "date": None},
         {"stage": second_chamber, "text": None, "date": None},
-        {"stage": "Governor", "text": None, "date": None},
+        {"stage": executive_title, "text": None, "date": None},
     ]
 
+    latest_stage = None
+
     for action in actions:
-        if "introduction" in action.classification and stages[0]["date"] is None:
-            stages[0]["date"] = action.date
-            stages[0]["text"] = f"Introduced in {first_chamber}"
-        elif "passage" in action.classification:
-            if action.organization.name == first_chamber:
-                stages[1]["date"] = action.date
-                stages[1]["text"] = f"Passed {first_chamber}"
-            elif action.organization.name == second_chamber:
-                stages[2]["date"] = action.date
-                stages[2]["text"] = f"Passed {second_chamber}"
+        if "introduction" in action.classification:
+            text = f"Introduced in {first_chamber}"
+            latest_stage = set_stage(stages, 0, action.date, text, latest_stage)
+
+        # for passage and failure, latest action takes precedence
+        # exclude override passage/failures, since these are handled below
         elif (
-            "executive-signature" in action.classification and stages[3]["date"] is None
+            "passage" in action.classification
+            and "veto-override-passage" not in action.classification
         ):
-            stages[3]["date"] = action.date
-            stages[3]["text"] = "Signed by Governor"
-        elif "became-law" in action.classification and stages[3]["date"] is None:
-            stages[3]["date"] = action.date
-            stages[3]["text"] = "Became Law"
-        # TODO: veto, failure, etc?
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Passed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Passed {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+        elif (
+            "failure" in action.classification
+            and "veto-override-failure" not in action.classification
+        ):
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Failed in {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Failed in {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+
+        elif "executive-signature" in action.classification:
+            text = f"Signed by {executive_title}"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+        elif "became-law" in action.classification:
+            text = "Became Law"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+        elif "executive-veto" in action.classification:
+            text = f"Vetoed by {executive_title}"
+            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+
+        # successful override does not necessarily mean bill became law because override needs to pass in both chambers
+        elif "veto-override-passage" in action.classification:
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Override Passed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Override Passed {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+        elif "veto-override-failure" in action.classification:
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Override Failed {first_chamber}"
+                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Override Failed {second_chamber}"
+                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:
         stages.pop(2)
         stages[1]["stage"] = "Legislature"
 
-    return stages
+    return stages, latest_stage
 
 
 def bill(request, state, session, bill_id):
@@ -375,15 +470,13 @@ def bill(request, state, session, bill_id):
         bill.votes.all().select_related("organization")
     )  # .prefetch_related('counts')
 
-    # stage calculation
-    # get other chamber name
-    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
-    second_chamber = None
-    if len(chambers) > 1 and bill.from_organization.classification != "legislature":
-        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-            bill.from_organization.classification
-        ]
-    stages = compute_bill_stages(actions, bill.from_organization.name, second_chamber)
+    # stage calculation and determination of whether bill is unicameral
+    first_chamber, second_chamber = get_bill_chambers(bill)
+    stages, _ = compute_bill_stages(actions, first_chamber, second_chamber, state)
+
+    unicameral = False
+    if first_chamber == "Legislature" and second_chamber is None:
+        unicameral = True
 
     versions = list(bill.versions.order_by("-date").prefetch_related("links"))
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
@@ -415,7 +508,7 @@ def bill(request, state, session, bill_id):
         {
             "state": state,
             "state_nav": "bills",
-            "unicameral": state in ("dc", "ne"),
+            "unicameral": unicameral,
             "bill": bill,
             "sponsorships": sponsorships,
             "actions": actions,
@@ -432,11 +525,13 @@ def bill(request, state, session, bill_id):
 @never_cache
 def bill_dashboard(request):
 
+    # get state for state dropdown
     state = request.session.get("selected_state", "")
 
     # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
     cache.delete(f"unread_bills_{request.user.id}")
 
+    # get all active bill subscriptions
     bill_subscriptions = (
         request.user.subscriptions.filter(
             bill_id__isnull=False,
@@ -462,27 +557,20 @@ def bill_dashboard(request):
         )
 
         # determine bill status
-        # get second chamber name
-        chambers = {
-            c.classification: c.name for c in get_chambers_from_abbr(bill_state_abbr)
-        }
-        second_chamber = None
-        if len(chambers) > 1 and bill.from_organization.classification != "legislature":
-            second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-                bill.from_organization.classification
-            ]
-        # get bill stages
-        stages = compute_bill_stages(
-            actions, bill.from_organization.name, second_chamber
+        first_chamber, second_chamber = get_bill_chambers(bill)
+        bill_state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+        _, latest_stage = compute_bill_stages(
+            actions, first_chamber, second_chamber, bill_state
         )
-        # get last stage
-        bill.status = (
-            "Introduced in " + bill.from_organization.name
-        )  # fallback for bills with no stages
-        for stage in reversed(stages):
-            if stage["text"] is not None:
-                bill.status = stage["text"]
-                break
+
+        if latest_stage:
+            bill.status = latest_stage["text"]
+            if "Override" in bill.status:
+                bill.status = "Veto " + bill.status  # add for clarity
+        else:
+            bill.status = (
+                "Introduced in " + bill.from_organization.name
+            )  # fallback for bills with no stages
 
         # determine if there has been a bill update since user last viewed bill
         latest_action = actions[0] if actions else None
