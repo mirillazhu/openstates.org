@@ -33,8 +33,17 @@ context ~a little differently~.
                         {% if not state %}
                             <option value="">Select a state</option>
                         {% endif %}
+
                         {% for st in states %}
-                            <option value="{{ st.abbr|lower }}" {% if st.abbr|lower == state %}selected{% endif %}>{{ st.name }}</option>
+                            {% if st.abbr != 'US' %}
+                                <option value="{{ st.abbr|lower }}" {% if st.abbr|lower == state %}selected{% endif %}>{{ st.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for st in states %}
+                            {% if st.abbr == 'US' %}
+                                <option value="{{ st.abbr|lower }}" {% if st.abbr|lower == state %}selected{% endif %}>{{ "US Congress" }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
