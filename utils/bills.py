@@ -48,7 +48,7 @@ def search_bills(
     if sponsor:
         bills = bills.filter(sponsorships__person_id=sponsor)
     if sponsor_name:
-        bills = bills.filter(sponsorships__name=sponsor_name)
+        bills = bills.filter(sponsorships__person__name=sponsor_name)
     if classification:
         bills = bills.filter(classification__contains=[classification])
     elif exclude_classifications:

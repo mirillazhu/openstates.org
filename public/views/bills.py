@@ -87,31 +87,37 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    def get_filter_options(self, state):
+    def get_filter_options(self, state, base_bills):
         options = {}
         jid = abbr_to_jid(state)
-        bills = Bill.objects.all().filter(legislative_session__jurisdiction_id=jid)
         chambers = get_chambers_from_abbr(state)
         options["chambers"] = {c.classification: c.name for c in chambers}
         options["sessions"] = {s.identifier: s.name for s in sessions_with_bills(jid)}
-        options["sponsors"] = {
-            p.id: p.name
+
+        classifications = base_bills.annotate(
+            type=Unnest("classification", distinct=True)
+        ).values_list("type", flat=True)
+        options["classifications"] = sorted(set(classifications))
+
+        subjects = base_bills.annotate(
+            sub=Unnest("subject", distinct=True)
+        ).values_list("sub", flat=True)
+        options["subjects"] = sorted(set(subjects))
+
+        sponsor_ids = base_bills.values_list(
+            "sponsorships__person_id", flat=True
+        ).distinct()
+        sponsor_names = {
+            p.name
             for p in Person.objects.filter(
-                memberships__organization__jurisdiction_id=jid
+                id__in=sponsor_ids,
+                memberships__organization__jurisdiction_id=jid,
             )
             .order_by("name")
             .distinct()
         }
-        options["classifications"] = sorted(
-            bills.annotate(type=Unnest("classification", distinct=True))
-            .values_list("type", flat=True)
-            .distinct()
-        )
-        options["subjects"] = sorted(
-            bills.annotate(sub=Unnest("subject", distinct=True))
-            .values_list("sub", flat=True)
-            .distinct()
-        )
+        options["sponsor_names"] = sorted(set(sponsor_names))
+
         return options
 
     def get_bills(self, request, state):
@@ -214,6 +220,21 @@ class BillList(View):
         paginator, page_num = self.paginate_bills(request, bills)
         sort_context = self.get_sort_context(request)
 
+        # filter options: try to retrieve from cache or compute if none cached
+        cache_key = f"filter_options_{state}"
+        cached_filter_options = cache.get(cache_key)
+
+        if cached_filter_options is not None:
+            filter_options = cached_filter_options
+        else:
+            jid = abbr_to_jid(state)
+            base_bills = Bill.objects.all().filter(
+                legislative_session__jurisdiction_id=jid
+            )  # compute filter options from all bills in state
+
+            filter_options = self.get_filter_options(state, base_bills)
+            cache.set(cache_key, filter_options, 60 * 60 * 12)  # cache for 12 hours
+
         context = {
             "state": state,
             "state_nav": "bills",
@@ -221,7 +242,7 @@ class BillList(View):
             "form": form,
             **sort_context,
         }
-        context.update(self.get_filter_options(state))
+        context.update(filter_options)
 
         return render(request, "public/views/bills.html", context)
 
@@ -299,7 +320,7 @@ def get_bill_chambers(bill):
 
 
 # helper function to set stage for compute_bill_stages, returns index of latest stage (by bill action order)
-def set_stage(stages, stage_index, date, text, current_latest_stage):
+def _set_stage(stages, stage_index, date, text, current_latest_stage):
     if stages[stage_index]["date"] is None:
         stages[stage_index]["date"] = date
         stages[stage_index]["text"] = text
@@ -344,7 +365,7 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
     for action in actions:
         if "introduction" in action.classification:
             text = f"Introduced in {first_chamber}"
-            latest_stage = set_stage(stages, 0, action.date, text, latest_stage)
+            latest_stage = _set_stage(stages, 0, action.date, text, latest_stage)
 
         # for passage and failure, latest action takes precedence
         # exclude override passage/failures, since these are handled below
@@ -357,10 +378,10 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 or first_chamber == "Legislature"  # unicameral
             ):
                 text = f"Passed {first_chamber}"
-                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
                 text = f"Passed {second_chamber}"
-                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
         elif (
             "failure" in action.classification
             and "veto-override-failure" not in action.classification
@@ -370,20 +391,20 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 or first_chamber == "Legislature"  # unicameral
             ):
                 text = f"Failed in {first_chamber}"
-                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
                 text = f"Failed in {second_chamber}"
-                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
 
         elif "executive-signature" in action.classification:
             text = f"Signed by {executive_title}"
-            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
         elif "became-law" in action.classification:
             text = "Became Law"
-            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
         elif "executive-veto" in action.classification:
             text = f"Vetoed by {executive_title}"
-            latest_stage = set_stage(stages, 3, action.date, text, latest_stage)
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
 
         # successful override does not necessarily mean bill became law because override needs to pass in both chambers
         elif "veto-override-passage" in action.classification:
@@ -392,20 +413,20 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
                 or first_chamber == "Legislature"  # unicameral
             ):
                 text = f"Override Passed {first_chamber}"
-                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
                 text = f"Override Passed {second_chamber}"
-                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
         elif "veto-override-failure" in action.classification:
             if (
                 action.organization.name == first_chamber
                 or first_chamber == "Legislature"  # unicameral
             ):
                 text = f"Override Failed {first_chamber}"
-                latest_stage = set_stage(stages, 1, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
             elif action.organization.name == second_chamber:
                 text = f"Override Failed {second_chamber}"
-                latest_stage = set_stage(stages, 2, action.date, text, latest_stage)
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:

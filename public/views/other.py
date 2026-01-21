@@ -154,11 +154,35 @@ def site_search(request):
 
     if query:
         if state:
-
             # bill search (call BillList methods)
             bills, form = bills_view.get_bills(request, state)
             paginator, page_num = bills_view.paginate_bills(request, bills)
             sort_context = bills_view.get_sort_context(request)
+
+            # compute/retrieve/set filter options
+            is_initial_query = True  # initial query is true iff request is not made through search options form
+            is_initial_query = not request.GET.get("filter_form")
+
+            if is_initial_query:  # if bills haven't been filtered yet
+
+                base_bills_exist = bills.exists()
+                request.session["base_bills_exist"] = base_bills_exist
+
+                if base_bills_exist:
+                    filter_options = bills_view.get_filter_options(state, bills)
+                    request.session["filter_options"] = filter_options
+
+            else:  # if not initial query and base bills exist, retrieve previously computed filter options from session
+                base_bills_exist = request.session.get("base_bills_exist")
+                if base_bills_exist is None:  # fallback for lost session data
+                    base_bills_exist = bills.exists()
+                    request.session["base_bills_exist"] = base_bills_exist
+
+                if base_bills_exist:
+                    filter_options = request.session.get("filter_options")
+                    if filter_options is None:  # fallback for lost session data
+                        filter_options = bills_view.get_filter_options(state, bills)
+                        request.session["filter_options"] = filter_options
 
             # people search
             people = []
@@ -173,9 +197,12 @@ def site_search(request):
                     "people": people,
                     "form": form,
                     **sort_context,
+                    "base_bills_exist": base_bills_exist,
                 }
             )
-            context.update(bills_view.get_filter_options(state))
+
+            if base_bills_exist:  # only display search options form if base bills exist
+                context.update(filter_options)
 
         else:  # no state provided (placeholder, can streamline later)
 
