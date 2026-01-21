@@ -113,14 +113,16 @@ def district_maybe(district):
 
 @register.filter()
 def party_color(party_name):
-    if party_name == "Democratic":
-        return "#00abff"
-    elif party_name == "Republican":
-        return "#9e0e44"
+    if "Democratic" in party_name and "Republican" in party_name:  # just in case
+        return "#fff3cd"
+    elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
+        return "#cfe5f4"
+    elif "Republican" in party_name:
+        return "#f5d7db"
     elif party_name == "Unknown":
-        return "#dbe6f1"
+        return "#edf3f8"
     else:
-        return "#ffd03f"
+        return "#fff3cd"
 
 
 @register.filter()
@@ -130,6 +132,43 @@ def titlecase_caps(title):
         # handle apostrophes correctly
         title = re.sub(r"’", "'", title)
         title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
+    return title
+
+
+@register.filter()
+def titlecase_caps_for_votes(title):
+    title = title.title()
+
+    # uppercase bill abbreviations with vowels
+    bill_abbreviations_with_vowels = {
+        "AB",
+        "ACR",
+        "HRES",
+        "SRES",
+        "AJR",
+        "AR",
+        "CA",
+        "HJRES",
+    }
+    pattern = r"\b(" + "|".join(bill_abbreviations_with_vowels) + r")(?=\s|\d|$)"
+    title = re.sub(pattern, lambda m: m.group(1).upper(), title, flags=re.IGNORECASE)
+
+    # uppercase bill abbreviations (or any words) with no vowels or y's
+    title = re.sub(
+        r"\b[a-zA-Z]+(?=\s|\d|$)",
+        lambda m: m.group(0).upper()
+        if not re.search(r"[aeiouyAEIOUY]", m.group(0))
+        else m.group(0),
+        title,
+    )
+
+    # lowercase letters after digits (e.g. 3rd)
+    title = re.sub(r"(\d)([A-Z])", lambda m: m.group(1) + m.group(2).lower(), title)
+
+    # fix apostrophes
+    title = re.sub(r"’", "'", title)
+    title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
+
     return title
 
 
