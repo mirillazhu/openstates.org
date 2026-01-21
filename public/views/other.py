@@ -6,6 +6,7 @@ from django.db.models import Sum
 from django.http import Http404
 from django.shortcuts import render
 from openstates.data.models import Bill, Organization, Person
+from public.views.bills import BillList
 from utils.common import abbr_to_jid, states, sessions_with_bills, jid_to_abbr
 from utils.bills import search_bills, EXCLUDED_CLASSIFICATIONS
 from utils.people import person_as_dict
@@ -137,39 +138,77 @@ def state(request, state):
 def site_search(request):
     query = request.GET.get("query")
     state = request.GET.get("state")
-
     request.session["selected_state"] = state
+    
+    bills_view = BillList()
 
     bills = []
     people = []
+
+    context = {
+        "query": query,
+        "state": state,
+        "bills": bills,
+        "people": people,
+    }
+
     if query:
-        bills = search_bills(
-            state=state,
-            query=query,
-            sort="-latest_action",
-            exclude_classifications=EXCLUDED_CLASSIFICATIONS,
-        )
+        if state:
 
-        # pagination
-        try:
-            page_num = int(request.GET.get("page", 1))
-        except ValueError:
-            raise Http404()
-        bills_paginator = Paginator(bills, 20)
-        try:
-            bills = bills_paginator.page(page_num)
-        except EmptyPage:
-            raise Http404()
+            # bill search (call BillList methods)
+            bills, form = bills_view.get_bills(request, state)
+            paginator, page_num = bills_view.paginate_bills(request, bills)
+            sort_context = bills_view.get_sort_context(request)
 
-        # people search
-        people = []
-        for p in Person.objects.search(query, state=state):
-            pd = person_as_dict(p)
-            pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
-            people.append(pd)
+            # people search
+            people = []
+            for p in Person.objects.search(query, state=state):
+                pd = person_as_dict(p)
+                pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
+                people.append(pd)
 
-    return render(
-        request,
-        "public/views/search.html",
-        {"query": query, "state": state, "bills": bills, "people": people},
-    )
+            context.update(
+                {
+                    "bills": paginator.page(page_num),
+                    "people": people,
+                    "form": form,
+                    **sort_context,
+                }
+            )
+            context.update(bills_view.get_filter_options(state))
+
+        else:  # no state provided (placeholder, can streamline later)
+
+            bills = search_bills(
+                state=None,
+                query=query,
+                sort="-latest_action",
+                exclude_classifications=EXCLUDED_CLASSIFICATIONS,
+            )
+
+            # pagination
+            try:
+                page_num = int(request.GET.get("page", 1))
+            except ValueError:
+                raise Http404()
+            bills_paginator = Paginator(bills, 20)
+            try:
+                bills = bills_paginator.page(page_num)
+            except EmptyPage:
+                raise Http404()
+
+            # people search
+            people = []
+            for p in Person.objects.search(query, state=None):
+                pd = person_as_dict(p)
+                pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
+                people.append(pd)
+
+            context.update(
+                {
+                    "bills": bills,
+                    "people": people,
+                }
+            )
+
+    return render(request, "public/views/search.html", context)
