@@ -7,7 +7,22 @@ from openstates.data.models import Person
 from openstates.data.models import Bill, VoteEvent, LegislativeSession
 
 # Metadata for states that are available in the platform
-states = sorted(us.STATES + [us.states.PR, us.states.DC], key=lambda s: s.name)
+states = sorted(
+    us.STATES + [us.states.PR, us.states.DC, us.unitedstatesofamerica],
+    key=lambda s: s.name,
+)
+
+
+def get_state_abbr(state):
+    state_lookup = us.states.lookup(state)
+    if state == "United States":
+        return "FED"
+    elif state == "District of Columbia":
+        return "DC"
+    elif state_lookup:
+        return state_lookup.abbr
+    else:
+        return ""
 
 
 def jid_to_abbr(j):

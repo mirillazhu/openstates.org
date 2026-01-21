@@ -1,0 +1,53 @@
+{% extends "../components/base.html" %}
+{% load custom_tags %}
+
+{% block title %} Bill Dashboard - Open States {% endblock %}
+{% block og_title %} Bill Dashboard - Open States {% endblock %}
+{% block description %} View all bills you're following in one place'. {% endblock %}
+
+{% block content %}
+<section class="section">
+    <h1 class="heading--large">Bills I'm Following</h1>
+
+    <div class="grid-x grid-margin-x">
+        <div class="cell medium-12">
+
+            <table class="hover">
+                <thead>
+                    <tr>
+                        <th width="200">Bill ID</th>
+                        <th width="250">Bill Title</th>
+                        <th width="250">Bill Status</th>
+                        <th width="150">Session</th>
+                        <th width="150">Introduced</th>
+                        <th width="150">Latest Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in tracked_bills %}
+                        <tr class="row--align-top {% if bill.has_unread_action %} bill-unread-action {% endif %}">
+                            <td>
+                                <a href="{% canonical_url bill %}">
+                                <strong>{{ bill.identifier_with_state }}</strong>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="td-truncate">
+                                    {{ bill.title|titlecase_caps }}
+                                </div>
+                            </td>
+                            <td>{{ bill.status }}</td>
+                            <td>{{ bill.legislative_session.name }}</td>
+                            <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
+                            <td>{{ bill.latest_action_date|fdate:"%b %d %Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <p>Showing {{ tracked_bills.start_index }} to {{ tracked_bills.end_index }} of {{ tracked_bills.paginator.count }} bills</p>
+            {% pagination tracked_bills request.GET %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

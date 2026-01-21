@@ -99,6 +99,9 @@ class Subscription(models.Model):
         blank=True,
     )
 
+    # for keeping track of unread bill actions
+    last_viewed_bill_action_id = models.UUIDField(null=True, blank=True)
+
     @property
     def subscription_type(self):
         if self.bill_id:

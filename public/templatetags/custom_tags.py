@@ -25,6 +25,7 @@ def header(context):
         "state": context.get("state"),
         "state_nav": context.get("state_nav"),
         "messages": context.get("messages"),
+        "unread_bills_count": context.get("unread_bills_count"),
         "states": states,
     }
 
@@ -75,7 +76,12 @@ def state_name(state_abbr):
     state = us.states.lookup(state_abbr or "")
     if state:
         return state.name
-    return ""
+    elif state_abbr.lower() == "dc":
+        return "District of Columbia"
+    elif state_abbr.lower() == "us":
+        return "Federal"
+    else:
+        return ""
 
 
 @register.filter()
