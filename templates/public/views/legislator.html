@@ -44,11 +44,9 @@
                 <a href="mailto:{{ person.email }}">{{ person.email }}</a>
               </p>
               {% endif %}
-              {% if person.all_links %}
+              {% if person.selected_link %}
               <span class="contact__label">Website</span>
-              {% for link in person.all_links %}
-                <a href="{{ link.url }}">{{ link.url }} {{ link.note }}</a>
-              {% endfor %}
+                <a href="{{ person.selected_link.url }}">{{ person.selected_link.url }}</a>
               {% endif %}
 
             </div>
