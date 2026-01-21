@@ -34,6 +34,11 @@ tr.bill-unread-action {
     font-weight: bold;
 }
 
+tr.row-with-buttons {
+  display: grid;
+  grid-template-columns: 9fr 2fr;
+}
+
 .td-link, .td-link:hover, .td-link:visited {
   color: inherit;
 }
