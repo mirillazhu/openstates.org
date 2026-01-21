@@ -1,10 +1,12 @@
 from collections import defaultdict
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
-from django.db.models import Func, Prefetch
+from django.db.models import F, Func, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, reverse, redirect
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views import View
+from django.views.decorators.cache import never_cache
 from openstates.data.models import (
     Membership,
     Bill,
@@ -13,7 +15,13 @@ from openstates.data.models import (
     Person,
 )
 from openstates.utils.transformers import fix_bill_id
-from utils.common import abbr_to_jid, jid_to_abbr, pretty_url, sessions_with_bills
+from utils.common import (
+    get_state_abbr,
+    abbr_to_jid,
+    jid_to_abbr,
+    pretty_url,
+    sessions_with_bills,
+)
 from utils.orgs import get_chambers_from_abbr
 from utils.bills import search_bills, EXCLUDED_CLASSIFICATIONS
 from .fallback import fallback
@@ -311,6 +319,9 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
 
 
 def bill(request, state, session, bill_id):
+
+    request.session["selected_state"] = state
+
     # canonicalize without space
     if " " in bill_id:
         return redirect(
@@ -399,6 +410,62 @@ def bill(request, state, session, bill_id):
     )
 
 
+@login_required
+@never_cache
+def bill_dashboard(request):
+
+    state = request.session.get("selected_state", "")
+
+    bill_subscriptions = (
+        request.user.subscriptions.filter(
+            bill_id__isnull=False,
+            active=True,
+        )
+        .select_related("bill")
+        .order_by(F("bill__latest_action_date").desc(nulls_last=True))
+    )
+
+    tracked_bills = [subscription.bill for subscription in bill_subscriptions]
+
+    for bill in tracked_bills:
+
+        bill_state_abbr = get_state_abbr(bill.legislative_session.jurisdiction.name)
+        bill.identifier_with_state = f"{bill_state_abbr} {bill.identifier}"
+
+        # determine bill status
+        actions = list(bill.actions.all().select_related("organization"))
+        # get second chamber name
+        chambers = {
+            c.classification: c.name for c in get_chambers_from_abbr(bill_state_abbr)
+        }
+        second_chamber = None
+        if len(chambers) > 1 and bill.from_organization.classification != "legislature":
+            second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
+                bill.from_organization.classification
+            ]
+        # get bill stages
+        stages = compute_bill_stages(
+            actions, bill.from_organization.name, second_chamber
+        )
+        # get last stage
+        bill.status = (
+            "Introduced in " + bill.from_organization.name
+        )  # fallback for bills with no stages
+        for stage in reversed(stages):
+            if stage["text"] is not None:
+                bill.status = stage["text"]
+                break
+
+    return render(
+        request,
+        "public/views/bill_dashboard.html",
+        {
+            "tracked_bills": tracked_bills,
+            "state": state,
+        },
+    )
+
+
 def _vote_sort_key(v):
     if v.option == "yes":
         return (1, v.option)
@@ -420,7 +487,10 @@ def vote(request, vote_id):
         ),
         pk="ocd-vote/" + vote_id,
     )
+
     state = jid_to_abbr(vote.organization.jurisdiction_id)
+    request.session["selected_state"] = state
+
     vote_counts = sorted(vote.counts.all(), key=_vote_sort_key)
     person_votes = sorted(vote.votes.all().select_related("voter"), key=_vote_sort_key)
 

@@ -33,3 +33,14 @@ tr.row--align-top {
 .td-link, .td-link:hover, .td-link:visited {
   color: inherit;
 }
+
+// Truncate content in cells to maximum of 3 rows
+.td-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5em;
+    max-height: 4.5em;
+}

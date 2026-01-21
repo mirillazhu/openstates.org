@@ -13,6 +13,18 @@ states = sorted(
 )
 
 
+def get_state_abbr(state):
+    state_lookup = us.states.lookup(state)
+    if state == "United States":
+        return "FED"
+    elif state == "District of Columbia":
+        return "DC"
+    elif state_lookup:
+        return state_lookup.abbr
+    else:
+        return ""
+
+
 def jid_to_abbr(j):
     return j.split(":")[-1].split("/")[0]
 
