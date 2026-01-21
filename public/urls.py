@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from .views.other import styleguide, home, state, site_search
 from .views.legislators import legislators, person, find_your_legislator
-from .views.bills import BillList, BillListFeed, bill, vote
+from .views.bills import BillList, BillListFeed, bill, bill_dashboard, vote
 from .views.fallback import fallback, legislator_fallback
 from utils.common import states
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path("styleguide", styleguide, name="styleguide"),
     # top level views
     path("", home, name="home"),
+    path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
     path("find_your_legislator/", find_your_legislator, name="find_your_legislator"),
     path("search/", site_search, name="search"),
     re_path(r"^(?P<state>{})/$".format(state_abbr_pattern), state, name="state"),

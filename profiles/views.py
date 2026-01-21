@@ -113,8 +113,16 @@ def activate_subscription(**kwargs):
     # check if it already existed and was deactivated
     if not created and not sub.active:
         sub.active = True
-        sub.save()
         created = True
+
+    # set last_viewed_bill_action_id if bill subscription
+    if sub.bill_id:
+        latest_action = sub.bill.actions.order_by("-date", "-order").first()
+        if latest_action:
+            sub.last_viewed_bill_action_id = latest_action.id
+
+    sub.save()
+
     return sub, created
 
 

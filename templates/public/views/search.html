@@ -28,6 +28,9 @@
       Try searching for something:
     </h2>
     <form>
+      {% if state %}
+        <input type="hidden" name="state" value="{{ state }}">
+      {% endif %}
       <div class="input-group">
           <input class="input-group-field" type="search" placeholder="HB 21, Cannabis, Maria" name="query">
           <div class="input-group-button">
@@ -42,18 +45,23 @@
 
     <div class="grid-x grid-margin-x">
         <div class="cell medium-9">
-
-{% if bills.paginator.count %}
-<section>    
-<h2 class="heading--medium">Bills</h2>
-      <p>Showing {{ bills.start_index }} to {{ bills.end_index }} of {{ bills.paginator.count }} bills</p>
-
+        {% if bills.paginator.count %}
+        <section>    
+        <h2 class="heading--medium">Bills</h2>
             <table class="hover">
                 <thead>
                     <tr>
                         <th>Bill Title</th>
-                        <th width="100">Introduced</th>
-                        <th width="250">Latest Action</th>
+                        <th width="100">
+                          <a href="{{ first_action_sort_url }}">
+                            Introduced{{ first_action_arrow }}
+                          </a>
+                        </th>
+                        <th width="250">
+                          <a href="{{ latest_action_sort_url }}">
+                            Latest Action{{ latest_action_arrow }}
+                          </a>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,38 +86,51 @@
 
             <p>Showing {{ bills.start_index }} to {{ bills.end_index }} of {{ bills.paginator.count }} bills</p>
             {% pagination bills request.GET %}</p>
-</section>
-{% endif %}
+        </section>
+        {% endif %}
 
-{% if people %}
-<section>
-  <h2 class="heading--medium">Active Legislators</h2>
+        {% if people %}
+        <section>
+          <h2 class="heading--medium">Active Legislators</h2>
 
-  <table class="hover">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Name</th>
-        <th>Party</th>
-        <th>State</th>
-        <th>District</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in people %}
-      <tr>
-        <td><a href="{% canonical_url p %}"><div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div></a></td>
-        <td><a href="{% canonical_url p %}">{{ p.name }}</a></td>
-        <td>{{ p.primary_party }}</td>
-        <td>{{ p.current_state }}</td>
-        <td>{{ p.current_role.district }}</td>
-      </tr>
-      {% endfor p %}
-    </tbody>
-  </table>
-</section>
-{% endif %}
+          <table class="hover">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Party</th>
+                <th>State</th>
+                <th>District</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in people %}
+              <tr>
+                <td><a href="{% canonical_url p %}"><div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div></a></td>
+                <td><a href="{% canonical_url p %}">{{ p.name }}</a></td>
+                <td>{{ p.primary_party }}</td>
+                <td>{{ p.current_state }}</td>
+                <td>{{ p.current_role.district }}</td>
+              </tr>
+              {% endfor p %}
+            </tbody>
+          </table>
+        </section>
+        {% endif %}
 
+        </div>
+        <div class="cell medium-3">
+          {% if query and state and base_bills_exist %} 
+            <div class="sidebar">
+              <h2 class="heading--medium">Filter Bills</h2>
+              <form onsubmit="cleanUrl(this)">
+                <input type="hidden" name="query" value="{{ query }}" /> 
+                <input type="hidden" name="state" value="{{ state }}" />
+                <input type="hidden" name="filter_form" value="true">  
+                {% include 'public/components/search-options-form.html' %}
+              </form>
+            </div>
+          {% endif %}
         </div>
     </div>
 </section>

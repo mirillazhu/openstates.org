@@ -2,12 +2,27 @@ import us
 import uuid
 import base62
 from django.utils.text import slugify
-from django.db.models import Count
+from django.db.models import Exists, OuterRef
 from openstates.data.models import Person
 from openstates.data.models import Bill, VoteEvent, LegislativeSession
 
 # Metadata for states that are available in the platform
-states = sorted(us.STATES + [us.states.PR, us.states.DC], key=lambda s: s.name)
+states = sorted(
+    us.STATES + [us.states.PR, us.states.DC, us.unitedstatesofamerica],
+    key=lambda s: s.name,
+)
+
+
+def get_state_abbr(state):
+    state_lookup = us.states.lookup(state)
+    if state == "United States":
+        return "FED"
+    elif state == "District of Columbia":
+        return "DC"
+    elif state_lookup:
+        return state_lookup.abbr
+    else:
+        return ""
 
 
 def jid_to_abbr(j):
@@ -54,9 +69,11 @@ def pretty_url(obj):
 
 
 def sessions_with_bills(jid):
+    has_bills = Bill.objects.filter(legislative_session=OuterRef("pk"))
+
     return (
         LegislativeSession.objects.filter(jurisdiction_id=jid)
-        .annotate(bill_count=Count("bills"))
-        .filter(bill_count__gt=0)
+        .annotate(has_bills=Exists(has_bills))
+        .filter(has_bills=True)
         .order_by("-start_date", "-identifier")
     )

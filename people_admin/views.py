@@ -1,5 +1,4 @@
 import json
-import us
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count
 from openstates.data.models import LegislativeSession, Person
@@ -62,7 +61,7 @@ def jurisdiction_list(request):
         .annotate(number=Count("id"))
     )
 
-    for state in states + [us.unitedstatesofamerica]:
+    for state in states:
         jid = abbr_to_jid(state.abbr)
         current_people = [
             person_data(p)

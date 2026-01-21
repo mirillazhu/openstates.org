@@ -30,11 +30,26 @@ tr.row--align-top {
     vertical-align: top;
 }
 
+tr.bill-unread-action {
+    font-weight: bold;
+}
+
+tr.row-with-buttons {
+  display: grid;
+  grid-template-columns: 9fr 2fr;
+}
+
 .td-link, .td-link:hover, .td-link:visited {
   color: inherit;
 }
 
-.row-with-buttons {
-  display: grid;
-  grid-template-columns: 9fr 2fr;
+// Truncate content in cells to maximum of 3 rows
+.td-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5em;
+    max-height: 4.5em;
 }

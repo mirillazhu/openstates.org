@@ -48,7 +48,7 @@ def search_bills(
     if sponsor:
         bills = bills.filter(sponsorships__person_id=sponsor)
     if sponsor_name:
-        bills = bills.filter(sponsorships__name=sponsor_name)
+        bills = bills.filter(sponsorships__person__name=sponsor_name)
     if classification:
         bills = bills.filter(classification__contains=[classification])
     elif exclude_classifications:
@@ -64,10 +64,16 @@ def search_bills(
             actions__organization__classification="lower",
         )
     elif "passed-upper-chamber" in status:
-        bills = bills.filter(
-            actions__classification__contains=["passage"],
-            actions__organization__classification="upper",
-        )
+        if state == "dc" or state == "ne":  # unicameral
+            bills = bills.filter(
+                actions__classification__contains=["passage"],
+                actions__organization__classification="legislature",
+            )
+        else:
+            bills = bills.filter(
+                actions__classification__contains=["passage"],
+                actions__organization__classification="upper",
+            )
     elif "signed" in status:
         bills = bills.filter(actions__classification__contains=["executive-signature"])
 

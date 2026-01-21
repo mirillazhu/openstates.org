@@ -1,21 +1,28 @@
 from collections import defaultdict
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage
-from django.db.models import Func, Prefetch
+from django.db.models import F, Func, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, reverse, redirect
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views import View
-from django.utils.safestring import mark_safe
-from django.contrib import messages
+from django.views.decorators.cache import never_cache
 from openstates.data.models import (
-    Membership,
     Bill,
     BillActionRelatedEntity,
     VoteEvent,
     Person,
 )
 from openstates.utils.transformers import fix_bill_id
-from utils.common import abbr_to_jid, jid_to_abbr, pretty_url, sessions_with_bills
+from utils.common import (
+    get_state_abbr,
+    abbr_to_jid,
+    jid_to_abbr,
+    pretty_url,
+    sessions_with_bills,
+)
+from profiles.models import Subscription
 from utils.orgs import get_chambers_from_abbr
 from utils.bills import search_bills, EXCLUDED_CLASSIFICATIONS
 from .fallback import fallback
@@ -52,8 +59,6 @@ class BillList(View):
             if form["session"] not in sessions:
                 raise Http404()
             summary.append("from " + sessions[form["session"]])
-        if form["query"]:
-            summary.append(f"matching term '{form['query']}'")
         if form["sponsor"]:
             # there are ways this can happen that are legit, so just warn about it
             if form["sponsor"] not in sponsors:
@@ -81,31 +86,37 @@ class BillList(View):
 
         return ", ".join(summary)
 
-    def get_filter_options(self, state):
+    def get_filter_options(self, state, base_bills):
         options = {}
         jid = abbr_to_jid(state)
-        bills = Bill.objects.all().filter(legislative_session__jurisdiction_id=jid)
         chambers = get_chambers_from_abbr(state)
         options["chambers"] = {c.classification: c.name for c in chambers}
         options["sessions"] = {s.identifier: s.name for s in sessions_with_bills(jid)}
-        options["sponsors"] = {
-            p.id: p.name
+
+        classifications = base_bills.annotate(
+            type=Unnest("classification", distinct=True)
+        ).values_list("type", flat=True)
+        options["classifications"] = sorted(set(classifications))
+
+        subjects = base_bills.annotate(
+            sub=Unnest("subject", distinct=True)
+        ).values_list("sub", flat=True)
+        options["subjects"] = sorted(set(subjects))
+
+        sponsor_ids = base_bills.values_list(
+            "sponsorships__person_id", flat=True
+        ).distinct()
+        sponsor_names = {
+            p.name
             for p in Person.objects.filter(
-                memberships__organization__jurisdiction_id=jid
+                id__in=sponsor_ids,
+                memberships__organization__jurisdiction_id=jid,
             )
             .order_by("name")
             .distinct()
         }
-        options["classifications"] = sorted(
-            bills.annotate(type=Unnest("classification", distinct=True))
-            .values_list("type", flat=True)
-            .distinct()
-        )
-        options["subjects"] = sorted(
-            bills.annotate(sub=Unnest("subject", distinct=True))
-            .values_list("sub", flat=True)
-            .distinct()
-        )
+        options["sponsor_names"] = sorted(set(sponsor_names))
+
         return options
 
     def get_bills(self, request, state):
@@ -121,7 +132,6 @@ class BillList(View):
         sort = request.GET.get("sort", "-latest_action")
 
         form = {
-            "query": query,
             "chamber": chamber,
             "session": session,
             "sponsor": sponsor,
@@ -147,20 +157,8 @@ class BillList(View):
 
         return bills, form
 
-    def get(self, request, state):
-        """
-        form values:
-            query
-            chamber: lower|upper
-            session
-            status: passed-lower-chamber|passed-upper-chamber|signed
-            sponsor (ocd-person ID)
-            classification
-            subjects
-        """
-        bills, form = self.get_bills(request, state)
-
-        # pagination
+    def paginate_bills(self, request, bills):
+        # handle pagination for bills queryset
         try:
             page_num = int(request.GET.get("page", 1))
         except ValueError:
@@ -171,7 +169,10 @@ class BillList(View):
         except EmptyPage:
             raise Http404()
 
-        # get sort urls & arrow
+        return paginator, page_num
+
+    def get_sort_context(self, request):
+        # get sort urls & arrows
         sort = request.GET.get("sort", "-latest_action")
         latest_action_arrow = first_action_arrow = ""
         if sort == "-latest_action":
@@ -197,31 +198,50 @@ class BillList(View):
             if sort == "first_action":
                 first_action_arrow = "\u2191"  # up
 
-        context = {
-            "state": state,
-            "state_nav": "bills",
-            "bills": paginator.page(page_num),
-            "form": form,
+        return {
             "latest_action_sort_url": latest_action_sort_url,
             "first_action_sort_url": first_action_sort_url,
             "latest_action_arrow": latest_action_arrow,
             "first_action_arrow": first_action_arrow,
         }
-        context.update(self.get_filter_options(state))
-        context["search_summary"] = self.get_search_summary(
-            context["form"],
-            context["sessions"],
-            context["chambers"],
-            context["sponsors"],
-        )
 
-        if request.user.is_anonymous:
-            messages.success(
-                request,
-                mark_safe(
-                    '<a href="/accounts/signup/">Sign up</a> today to track legislation for free!'
-                ),
-            )
+    def get(self, request, state):
+        """
+        form values:
+            chamber: lower|upper
+            session
+            status: passed-lower-chamber|passed-upper-chamber|signed
+            sponsor (ocd-person ID)
+            classification
+            subjects
+        """
+        bills, form = self.get_bills(request, state)
+        paginator, page_num = self.paginate_bills(request, bills)
+        sort_context = self.get_sort_context(request)
+
+        # filter options: try to retrieve from cache or compute if none cached
+        cache_key = f"filter_options_{state}"
+        cached_filter_options = cache.get(cache_key)
+
+        if cached_filter_options is not None:
+            filter_options = cached_filter_options
+        else:
+            jid = abbr_to_jid(state)
+            base_bills = Bill.objects.all().filter(
+                legislative_session__jurisdiction_id=jid
+            )  # compute filter options from all bills in state
+
+            filter_options = self.get_filter_options(state, base_bills)
+            cache.set(cache_key, filter_options, 60 * 60 * 12)  # cache for 12 hours
+
+        context = {
+            "state": state,
+            "state_nav": "bills",
+            "bills": paginator.page(page_num),
+            "form": form,
+            **sort_context,
+        }
+        context.update(filter_options)
 
         return render(request, "public/views/bills.html", context)
 
@@ -273,7 +293,47 @@ def _document_sort_key(doc):
     return (100, doc.media_type)
 
 
-def compute_bill_stages(actions, first_chamber, second_chamber):
+# returns first_chamber, second_chamber
+def get_bill_chambers(bill):
+    # unicameral logic
+    # include special case where bill may originate in house or senate, but all bill actions are from organization with legislature/executive classification
+    if (bill.from_organization.classification == "legislature") or (
+        not bill.actions.exclude(
+            organization__classification__in=["legislature", "executive"]
+        ).exists()
+    ):
+        return "Legislature", None
+
+    # bicameral logic
+    first_chamber = bill.from_organization.name
+    # get second chamber name (if exists)
+    second_chamber = None
+    state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
+    if len(chambers) > 1:
+        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
+            bill.from_organization.classification
+        ]
+
+    return first_chamber, second_chamber
+
+
+# helper function to set stage for compute_bill_stages, returns index of latest stage (by bill action order)
+def _set_stage(stages, stage_index, date, text, current_latest_stage):
+    if stages[stage_index]["date"] is None:
+        stages[stage_index]["date"] = date
+        stages[stage_index]["text"] = text
+        return (
+            current_latest_stage
+            if current_latest_stage is not None
+            else stages[stage_index]
+        )
+    return current_latest_stage
+
+
+# returns stages, latest_stage (for bill dashboard)
+# assumes bill actions are sorted in descending order (most recent action first)
+def compute_bill_stages(actions, first_chamber, second_chamber, state):
     """
     return a structure with four entries like
         stage: Introduced
@@ -284,43 +344,101 @@ def compute_bill_stages(actions, first_chamber, second_chamber):
         text: None
         date: None
     """
+    EXECUTIVE_TITLES = {
+        "us": "President",
+        "dc": "Mayor",
+        # default: Governor (for all states and Puerto Rico)
+    }
+
+    executive_title = EXECUTIVE_TITLES.get(state, "Governor")
+
     stages = [
         {"stage": "Introduced", "text": None, "date": None},
         {"stage": first_chamber, "text": None, "date": None},
         {"stage": second_chamber, "text": None, "date": None},
-        {"stage": "Governor", "text": None, "date": None},
+        {"stage": executive_title, "text": None, "date": None},
     ]
 
+    latest_stage = None
+
     for action in actions:
-        if "introduction" in action.classification and stages[0]["date"] is None:
-            stages[0]["date"] = action.date
-            stages[0]["text"] = f"Introduced in {first_chamber}"
-        elif "passage" in action.classification:
-            if action.organization.name == first_chamber:
-                stages[1]["date"] = action.date
-                stages[1]["text"] = f"Passed {first_chamber}"
-            elif action.organization.name == second_chamber:
-                stages[2]["date"] = action.date
-                stages[2]["text"] = f"Passed {second_chamber}"
+        if "introduction" in action.classification:
+            text = f"Introduced in {first_chamber}"
+            latest_stage = _set_stage(stages, 0, action.date, text, latest_stage)
+
+        # for passage and failure, latest action takes precedence
+        # exclude override passage/failures, since these are handled below
         elif (
-            "executive-signature" in action.classification and stages[3]["date"] is None
+            "passage" in action.classification
+            and "veto-override-passage" not in action.classification
         ):
-            stages[3]["date"] = action.date
-            stages[3]["text"] = "Signed by Governor"
-        elif "became-law" in action.classification and stages[3]["date"] is None:
-            stages[3]["date"] = action.date
-            stages[3]["text"] = "Became Law"
-        # TODO: veto, failure, etc?
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Passed {first_chamber}"
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Passed {second_chamber}"
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
+        elif (
+            "failure" in action.classification
+            and "veto-override-failure" not in action.classification
+        ):
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Failed in {first_chamber}"
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Failed in {second_chamber}"
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
+
+        elif "executive-signature" in action.classification:
+            text = f"Signed by {executive_title}"
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
+        elif "became-law" in action.classification:
+            text = "Became Law"
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
+        elif "executive-veto" in action.classification:
+            text = f"Vetoed by {executive_title}"
+            latest_stage = _set_stage(stages, 3, action.date, text, latest_stage)
+
+        # successful override does not necessarily mean bill became law because override needs to pass in both chambers
+        elif "veto-override-passage" in action.classification:
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Override Passed {first_chamber}"
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Override Passed {second_chamber}"
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
+        elif "veto-override-failure" in action.classification:
+            if (
+                action.organization.name == first_chamber
+                or first_chamber == "Legislature"  # unicameral
+            ):
+                text = f"Override Failed {first_chamber}"
+                latest_stage = _set_stage(stages, 1, action.date, text, latest_stage)
+            elif action.organization.name == second_chamber:
+                text = f"Override Failed {second_chamber}"
+                latest_stage = _set_stage(stages, 2, action.date, text, latest_stage)
 
     # if we're unicameral, remove second stage and make first stage name simpler
     if second_chamber is None:
         stages.pop(2)
         stages[1]["stage"] = "Legislature"
 
-    return stages
+    return stages, latest_stage
 
 
 def bill(request, state, session, bill_id):
+
+    request.session["selected_state"] = state
+
     # canonicalize without space
     if " " in bill_id:
         return redirect(
@@ -366,21 +484,19 @@ def bill(request, state, session, bill_id):
         bill.actions.all()
         .select_related("organization")
         .prefetch_related(related_entities)
-        .order_by("-date")
+        .order_by("-date", "-order")
     )
     votes = list(
         bill.votes.all().select_related("organization")
     )  # .prefetch_related('counts')
 
-    # stage calculation
-    # get other chamber name
-    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
-    second_chamber = None
-    if len(chambers) > 1 and bill.from_organization.classification != "legislature":
-        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-            bill.from_organization.classification
-        ]
-    stages = compute_bill_stages(actions, bill.from_organization.name, second_chamber)
+    # stage calculation and determination of whether bill is unicameral
+    first_chamber, second_chamber = get_bill_chambers(bill)
+    stages, _ = compute_bill_stages(actions, first_chamber, second_chamber, state)
+
+    unicameral = False
+    if first_chamber == "Legislature" and second_chamber is None:
+        unicameral = True
 
     versions = list(bill.versions.order_by("-date").prefetch_related("links"))
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
@@ -390,13 +506,29 @@ def bill(request, state, session, bill_id):
     except IndexError:
         read_link = None
 
+    # update last viewed bill action for dashboard read/unread logic
+    latest_action = actions[0] if actions else None
+
+    if request.user.is_authenticated and latest_action:
+
+        # update last viewed bill action if active subscription
+        updated = Subscription.objects.filter(
+            user=request.user,
+            bill=bill,
+            active=True,
+        ).update(last_viewed_bill_action_id=latest_action.id)
+
+        # if there is an update to last viewed bill action, clear cache item that tracks number of unread bills (context_preprocessors.py)
+        if updated > 0:
+            cache.delete(f"unread_bills_{request.user.id}")
+
     return render(
         request,
         "public/views/bill.html",
         {
             "state": state,
             "state_nav": "bills",
-            "unicameral": state in ("dc", "ne"),
+            "unicameral": unicameral,
             "bill": bill,
             "sponsorships": sponsorships,
             "actions": actions,
@@ -405,6 +537,84 @@ def bill(request, state, session, bill_id):
             "versions": versions,
             "documents": documents,
             "read_link": read_link,
+        },
+    )
+
+
+@login_required
+@never_cache
+def bill_dashboard(request):
+
+    # get state for state dropdown
+    state = request.session.get("selected_state", "")
+
+    # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
+    cache.delete(f"unread_bills_{request.user.id}")
+
+    # get all active bill subscriptions
+    bill_subscriptions = (
+        request.user.subscriptions.filter(
+            bill_id__isnull=False,
+            active=True,
+        )
+        .select_related("bill")
+        .order_by(F("bill__latest_action_date").desc(nulls_last=True), "bill_id")
+    )
+
+    tracked_bills = []
+
+    for subscription in bill_subscriptions:
+        bill = subscription.bill
+
+        bill_state_abbr = get_state_abbr(bill.legislative_session.jurisdiction.name)
+        bill.identifier_with_state = f"{bill_state_abbr} {bill.identifier}"
+
+        # get bills actions for determining (a) bill status and (2) whether the latest bill action is unread
+        actions = list(
+            bill.actions.all()
+            .select_related("organization")
+            .order_by("-date", "-order")
+        )
+
+        # determine bill status
+        first_chamber, second_chamber = get_bill_chambers(bill)
+        bill_state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+        _, latest_stage = compute_bill_stages(
+            actions, first_chamber, second_chamber, bill_state
+        )
+
+        if latest_stage:
+            bill.status = latest_stage["text"]
+            if "Override" in bill.status:
+                bill.status = "Veto " + bill.status  # add for clarity
+        else:
+            bill.status = (
+                "Introduced in " + bill.from_organization.name
+            )  # fallback for bills with no stages
+
+        # determine if there has been a bill update since user last viewed bill
+        latest_action = actions[0] if actions else None
+
+        if subscription.last_viewed_bill_action_id and latest_action:
+            if (
+                subscription.last_viewed_bill_action_id != latest_action.id
+            ):  # there is a new bill action
+                bill.has_unread_action = True
+            else:  # no new bill action; latest_action id is same as last viewed
+                bill.has_unread_action = False
+        elif latest_action:  # never viewed but has actions
+            bill.has_unread_action = True
+        else:  # bill has no actions
+            bill.has_unread_action = False
+
+        tracked_bills.append(bill)
+
+    return render(
+        request,
+        "public/views/bill_dashboard.html",
+        {
+            "tracked_bills": tracked_bills,
+            "state": state,
         },
     )
 
@@ -430,9 +640,18 @@ def vote(request, vote_id):
         ),
         pk="ocd-vote/" + vote_id,
     )
+
     state = jid_to_abbr(vote.organization.jurisdiction_id)
+    request.session["selected_state"] = state
+
     vote_counts = sorted(vote.counts.all(), key=_vote_sort_key)
-    person_votes = sorted(vote.votes.all().select_related("voter"), key=_vote_sort_key)
+    person_votes = sorted(
+        vote.votes.all().select_related("voter"),
+        key=lambda pv: (
+            _vote_sort_key(pv),
+            pv.voter.name if pv.voter else pv.voter_name,
+        ),
+    )
 
     # add percentages to vote_counts
     total = sum(vc.value for vc in vote_counts)
@@ -440,15 +659,8 @@ def vote(request, vote_id):
         for vc in vote_counts:
             vc.percent = vc.value / total * 100
 
-    # aggregate voter ids into one query
-    voter_ids_to_query = [pv.voter_id for pv in person_votes if pv.voter_id]
-    voter_parties = defaultdict(list)
     # party -> option -> value
     party_votes = defaultdict(lambda: defaultdict(int))
-    for membership in Membership.objects.filter(
-        person_id__in=voter_ids_to_query, organization__classification="party"
-    ).select_related("organization"):
-        voter_parties[membership.person_id].append(membership.organization.name)
 
     # attach party to people & calculate party-option crosstab
     for pv in person_votes:
@@ -458,17 +670,23 @@ def vote(request, vote_id):
         else:
             option = pv.option
 
-        if pv.voter_id:
-            pv.party = voter_parties[pv.voter_id][0]
+        if pv.voter and pv.voter.primary_party:
+            pv.party = pv.voter.primary_party
             party_votes[pv.party][option] += 1
         else:
             party_votes["Unknown"][option] += 1
 
     # only show party breakdown if most people are matched
-    if not person_votes or (len(voter_parties) / len(person_votes) < 0.8):
+    votes_with_party = len(
+        [pv for pv in person_votes if pv.voter and pv.voter.primary_party]
+    )
+    if not person_votes or (votes_with_party / len(person_votes) < 0.8):
         party_votes = None
     else:
         party_votes = sorted(dict(party_votes).items())
+
+    # determine whether to display parties field in roll call header
+    has_voter_parties = any(hasattr(pv, "party") and pv.party for pv in person_votes)
 
     return render(
         request,
@@ -480,5 +698,6 @@ def vote(request, vote_id):
             "vote_counts": vote_counts,
             "person_votes": person_votes,
             "party_votes": party_votes,
+            "has_voter_parties": has_voter_parties,
         },
     )
