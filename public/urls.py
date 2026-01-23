@@ -16,9 +16,14 @@ urlpatterns = [
     # top level views
     path("", home, name="home"),
     path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
-    path("find_your_legislator/", find_your_legislator, name="find_your_legislator"),
     path("search/", site_search, name="search"),
     re_path(r"^(?P<state>{})/$".format(state_abbr_pattern), state, name="state"),
+    # find your legislator
+    re_path(
+        r"^(?P<state>{})/find_your_legislator/$".format(state_abbr_pattern),
+        find_your_legislator,
+        name="find_your_legislator",
+    ),
     # people
     re_path(
         r"^(?P<state>{})/legislators/$".format(state_abbr_pattern),

@@ -15,6 +15,7 @@ def _people_from_lat_lon(lat, lon):
             id
             image
             name
+            primaryParty
             currentMemberships(classification: ["upper", "lower", "legislature", "party"]) {
               post {
                 label
@@ -39,38 +40,41 @@ def _people_from_lat_lon(lat, lon):
             "name": node["name"],
             "id": node["id"],
             "image": node["image"],
+            "party": node["primaryParty"],
             "pretty_url": pretty_url(node),
         }
         for m in node["currentMemberships"]:
-            if m["organization"]["classification"] == "party":
-                person["party"] = m["organization"]["name"]
-            else:
-                person["chamber"] = m["organization"]["classification"]
-                person["district"] = m["post"]["label"]
-                person["division_id"] = m["post"]["division"]["id"]
-                person["jurisdiction_id"] = m["organization"]["jurisdictionId"]
-                person["level"] = (
-                    "federal"
-                    if m["organization"]["jurisdictionId"]
-                    == "ocd-jurisdiction/country:us/government"
-                    else "state"
-                )
+            person["chamber"] = m["organization"]["classification"]
+            person["district"] = m["post"]["label"]
+            person["division_id"] = m["post"]["division"]["id"]
+            person["jurisdiction_id"] = m["organization"]["jurisdictionId"]
+            person["level"] = (
+                "federal"
+                if m["organization"]["jurisdictionId"]
+                == "ocd-jurisdiction/country:us/government"
+                else "state"
+            )
         people.append(person)
 
     return people
 
 
-def find_your_legislator(request):
+def find_your_legislator(request, state):
     lat = request.GET.get("lat")
     lon = request.GET.get("lon")
     json = request.GET.get("json")
+    request.session["selected_state"] = state
 
     if json and lat and lon:
         # got a passed lat/lon. Let's build off it.
         people = _people_from_lat_lon(lat, lon)
         return JsonResponse({"legislators": people})
 
-    return render(request, "public/views/find_your_legislator.html", {})
+    return render(
+        request,
+        "public/views/find_your_legislator.html",
+        {"state": state},
+    )
 
 
 def legislators(request, state):

@@ -2,42 +2,24 @@
 {% load custom_tags %}
 {% load static %}
 
-{% block title %}Find Your State Legislators - Open States{% endblock %}
-{% block og_title %}Find Your State Legislators - Open States{% endblock %}
-{% block description %}Find out who represents you in your state legislature with Open States.{% endblock %}
+{% block title %}Find Your Legislators - Open States{% endblock %}
+{% block og_title %}Find Your Legislators - Open States{% endblock %}
+{% block description %}Find out who represents you in state and federal legislatures with Open States.{% endblock %}
 {% block link %}<link rel="canonical" href="https://pluralpolicy.com/find-your-legislator" />{% endblock %}
 {% block scripts %}
     <script src="{% static "bundles/fyl.js" %}"></script>
 {% endblock %}
 
 {% block content %}
+<section class="section"></section>
+
+    
     <h1 class="heading--large">Find Your Legislators</h1>
     <h2 class="mb2 heading--medium">Look your legislators up by address or use your current location.</h2>
-    <hr>
-    <div style="padding: .75rem 1.25rem; border: 1px solid #ffeeba; background-color: #fff3cd; margin-bottom: 1rem;">
-        Open States is now Plural! The Open States website is now available at <a>open.pluralpolicy.com</a>.<br>
-        You are welcome to continue using these tools while we prepare a migration process to help you adopt our new tools.<br>
-        You can try out an account using those new and improved tools now, at <a>https://pluralpolicy.com/get-started/</a>
-    </div>
-    <p>
-      Data here now has been updated to reflect the 2020-2022 redistricting process. Results here now
-      show who currently represents you, under the new maps.
-    </p>
-    <p>
-      <strong>Known exceptions</strong>: Montana has not finalized redistricting, so results in Montana
-      will reflect the pre-redistricting (2022) districts.
-    </p>
     <hr>
 
     <div data-hook="find-your-legislator"></div>
     <noscript>This page requires JavaScript enabled.</noscript>
 
-    <div class="mapbox-credit">
-        Post-redistricting geographic data graciously provided by
-        <a href="https://redistrictingdatahub.org/">Redistricting Data Hub</a>
-    </div>
-    <div class="mapbox-credit">Geolocation and map view powered by <img
-        src="{% static "images/logos/mapbox-logo-black.png" %}" alt="Mapbox" />.
-    </div>
-
+</section>
 {% endblock %}
