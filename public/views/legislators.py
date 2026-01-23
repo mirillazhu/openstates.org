@@ -60,10 +60,11 @@ def _people_from_lat_lon(lat, lon):
 
 
 def find_your_legislator(request, state):
+    request.session["selected_state"] = state
+
     lat = request.GET.get("lat")
     lon = request.GET.get("lon")
     json = request.GET.get("json")
-    request.session["selected_state"] = state
 
     if json and lat and lon:
         # got a passed lat/lon. Let's build off it.

@@ -141,7 +141,7 @@ export default class FindYourLegislator extends React.Component {
             geocodedState = stateContext.short_code.replace('US-', '').toLowerCase();
             if (geocodedState !== component.state.stateAbbr) {
               component.setError(
-                "Unable to geolocate your address within " + component.state.stateAbbr.toUpperCase() + ". Try adding more information, or to find legislators for a different state, use the Find Your Legislators tool on the homepage for that state."
+                "Unable to geolocate your address within " + component.state.stateAbbr.toUpperCase() + ". Try adding more information, or to find legislators for a different state, please use the Find Your Legislators tool on the homepage for that state."
               );
               return;
             }
@@ -284,19 +284,20 @@ export default class FindYourLegislator extends React.Component {
 
   render() {
     const legTables = this.renderLegislators(this.state.stateLegislators);
-
-    console.log("RENDER - State:", this.state.stateAbbr);
-
+    const stateAbbrForPlaceholder = this.state.stateAbbr ? this.state.stateAbbr.toUpperCase() : 'CT';
     return (
       <div className="find-your-legislator">
         <div>
+          <h2 class="heading--small">
+             Find out who represents you by entering your address below:
+          </h2>
           <div className="input-group">
             <input
               className="input-group-field"
               type="search"
               id="fyl-address"
               name="address"
-              placeholder="Enter Your Address"
+              placeholder={`Ex: 111 River Road, Storrs, ${stateAbbrForPlaceholder} 12345`}
               value={this.state.address}
               onChange={this.handleAddressChange}
             />
@@ -311,6 +312,10 @@ export default class FindYourLegislator extends React.Component {
             </div>
           </div>
 
+          <div className="mapbox-credit">
+              In most cases, this should be your pre-incarceration address. Learn more here.
+          </div>
+
           {this.state.error ? ( 
             // if error message 
             <div className="mapbox-credit">
@@ -320,7 +325,7 @@ export default class FindYourLegislator extends React.Component {
             // if geocoding successful
             this.state.geocodedAddress ? ( 
               <div className="mapbox-credit">
-                <strong>Location:</strong> {this.state.geocodedAddress}
+                <strong>Located Address:</strong> {this.state.geocodedAddress}
                 {this.state.relevance < 1.0 && " (Partial match)"}
               </div>
             ) : null
