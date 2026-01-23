@@ -135,11 +135,10 @@ def state(request, state):
     )
 
 
-def site_search(request):
+def site_search(request, state=None):
     query = request.GET.get("query")
-    state = request.GET.get("state")
     request.session["selected_state"] = state
-    
+
     bills_view = BillList()
 
     bills = []

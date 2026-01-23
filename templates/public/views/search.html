@@ -17,7 +17,7 @@
     <h1 class="heading--large">
       Search Results for "{{query}}"
       {% if state %}
-      in {{ state|upper  }}
+        in {{ state|upper }}
       {% endif %}
     </h1>
 
@@ -123,9 +123,8 @@
           {% if query and state and base_bills_exist %} 
             <div class="sidebar">
               <h2 class="heading--medium">Filter Bills</h2>
-              <form onsubmit="cleanUrl(this)">
+              <form onsubmit="cleanUrl(this)">  <!-- function defined in search-options-form.html -->
                 <input type="hidden" name="query" value="{{ query }}" /> 
-                <input type="hidden" name="state" value="{{ state }}" />
                 <input type="hidden" name="filter_form" value="true">  
                 {% include 'public/components/search-options-form.html' %}
               </form>
