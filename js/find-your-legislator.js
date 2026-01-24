@@ -112,9 +112,8 @@ export default class FindYourLegislator extends React.Component {
       .then(response => response.json())
       .then(function(json) {
 
+        // return error message if relevance (geocoding accuracy) is below threshold
         const relevance = json.features[0].relevance
-
-        // return error message if relevance is below threshold
         const RELEVANCE_THRESHOLD = 0.7;
         
         if (relevance < RELEVANCE_THRESHOLD) {
