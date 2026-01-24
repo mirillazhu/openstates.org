@@ -33,20 +33,24 @@
                     {% for bill in bills %}
                         <tr class="row--align-top">
                             <td>
-                                <a href="{% canonical_url bill %}">
-                                <strong>{{ bill.identifier }}</strong>
-                                </a>
-                                <a href="{% canonical_url bill %}" class="td-link">
-                                  <span class="u-color--gray">({{ bill.legislative_session.name }})</span>
-                                  <br>
-                                  <span>{{ bill.title|titlecase_caps }}</span>
-                                </a>
+                                <div class="td-truncate td-truncate-long"> 
+                                    <a href="{% canonical_url bill %}">
+                                    <strong>{{ bill.identifier }}</strong>
+                                    </a>
+                                    <a href="{% canonical_url bill %}" class="td-link">
+                                    <span class="u-color--gray">({{ bill.legislative_session.name }})</span>
+                                    <br>
+                                    <span>{{ bill.title|titlecase_caps }}</span>
+                                    </a>
+                                </div>
                             </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
                             <td>
-                                <span>{{ bill.latest_action_description|title }}</span>
-                                <br>
-                                <span class="u-color--gray">{{ bill.latest_action_date|fdate:"%b %d %Y" }}</span>
+                                <div class="td-truncate td-truncate-long">
+                                    <span>{{ bill.latest_action_description|title }}</span>
+                                    <br>
+                                    <span class="u-color--gray">{{ bill.latest_action_date|fdate:"%b %d %Y" }}</span>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

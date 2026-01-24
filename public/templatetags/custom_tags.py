@@ -129,14 +129,14 @@ def party_color(party_name):
 def titlecase_caps(title):
     if title.isupper():
         title = title.title()
-        # handle apostrophes correctly
+        # handle letters after apostrophes correctly
         title = re.sub(r"’", "'", title)
         title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
     return title
 
 
 @register.filter()
-def titlecase_caps_for_votes(title):
+def titlecase_votes(title):
     title = title.title()
 
     # uppercase bill abbreviations with vowels
@@ -165,7 +165,7 @@ def titlecase_caps_for_votes(title):
     # lowercase letters after digits (e.g. 3rd)
     title = re.sub(r"(\d)([A-Z])", lambda m: m.group(1) + m.group(2).lower(), title)
 
-    # fix apostrophes
+    # handle letters after apostrophes correctly
     title = re.sub(r"’", "'", title)
     title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
 
