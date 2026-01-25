@@ -139,7 +139,7 @@ def site_search(request):
     query = request.GET.get("query")
     state = request.GET.get("state")
     request.session["selected_state"] = state
-    
+
     bills_view = BillList()
 
     bills = []
@@ -156,7 +156,7 @@ def site_search(request):
         if state:
             # bill search (call BillList methods)
             bills, form = bills_view.get_bills(request, state)
-            paginator, page_num = bills_view.paginate_bills(request, bills)
+            paginator, page_num = bills_view.paginate_bills(request, bills, 20)
             sort_context = bills_view.get_sort_context(request)
 
             # compute/retrieve/set filter options

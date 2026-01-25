@@ -53,3 +53,9 @@ tr.row-with-buttons {
     line-height: 1.5em;
     max-height: 4.5em;
 }
+
+.hide-mobile {
+    @include breakpoint(small only) {
+        display: none;
+    }
+}

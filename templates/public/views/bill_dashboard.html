@@ -15,13 +15,36 @@
             <table class="hover">
                 <thead>
                     <tr>
-                        <th width="200">Bill ID</th>
-                        <th width="250">Bill Title</th>
-                        <th width="250">Bill Status</th>
-                        <th width="150">Session</th>
-                        <th width="150">Introduced</th>
-                        <th width="150">Latest Action</th>
-                    </tr>
+                        <th width="200">
+                          <a href="{{ bill_id_sort_url }}">
+                            Bill ID{{ bill_id_arrow }}
+                          </a>
+                        </th>
+                        <th width="250">
+                          <a href="{{ bill_title_sort_url }}">
+                            Bill Title{{ bill_title_arrow }}
+                          </a>
+                        </th>
+                        <th class="hide-mobile" width="250">
+                          <a href="{{ bill_status_sort_url }}">
+                            Bill Status{{ bill_status_arrow }}
+                          </a>
+                        </th>
+                        <th class="hide-mobile" width="150">
+                          <a href="{{ session_sort_url }}">
+                            Session{{ session_arrow }}
+                          </a>
+                        </th>
+                        <th width="150">
+                          <a href="{{ first_action_sort_url }}">
+                            Introduced{{ first_action_arrow }}
+                          </a>
+                        </th>
+                        <th width="150">
+                          <a href="{{ latest_action_sort_url }}">
+                            Latest Action{{ latest_action_arrow }}
+                          </a>
+                        </th>
                 </thead>
                 <tbody>
                     {% for bill in tracked_bills %}
@@ -36,17 +59,24 @@
                                     {{ bill.title|titlecase_caps }}
                                 </div>
                             </td>
-                            <td>{{ bill.status }}</td>
-                            <td>{{ bill.legislative_session.name }}</td>
+                            <td class="hide-mobile">
+                                <div class="td-truncate">
+                                    {{ bill.status }}
+                                </div>
+                            </td>
+                            <td class="hide-mobile">
+                                <div class="td-truncate">
+                                    {{ bill.legislative_session.name }}
+                                </div>
+                            </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
                             <td>{{ bill.latest_action_date|fdate:"%b %d %Y" }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            <p>Showing {{ tracked_bills.start_index }} to {{ tracked_bills.end_index }} of {{ tracked_bills.paginator.count }} bills</p>
-            {% pagination tracked_bills request.GET %}</p>
+            {% pagination tracked_bills request.GET %}
+            </div>
         </div>
     </div>
 </section>
