@@ -1,113 +1,39 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import ReactMapboxGl, {
-  Source,
-  GeoJSONLayer,
-  Layer,
-  Marker,
-  Feature,
-} from "react-mapbox-gl";
 import stateBounds from "./state-bounds";
 import LegislatorImage from "./legislator-image";
 import config from "./config";
 
-function multipolyToPath(coordinates) {
-  return coordinates.map(polygon =>
-    polygon[0].map(point => ({ lat: point[1], lng: point[0] }))
-  );
-}
-
-function chamberColor(leg) {
-  return leg.chamber === "lower"
-    ? config.LOWER_CHAMBER_COLOR
-    : config.UPPER_CHAMBER_COLOR;
-}
-
-const Map = ReactMapboxGl({
-  accessToken: config.MAPBOX_ACCESS_TOKEN,
-});
-
-class ResultMap extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    var shapes = [];
-    for (var leg of this.props.legislators) {
-      const districtFilter = ["==", "ocdid", leg.division_id];
-      const color = chamberColor(leg);
-      shapes.push(
-        <Layer
-          id={config.MAP_DISTRICTS_STROKE.id + leg.division_id}
-          type={config.MAP_DISTRICTS_STROKE.type}
-          sourceId="sld"
-          sourceLayer="sld"
-          paint={config.MAP_DISTRICTS_STROKE.paint}
-          filter={districtFilter}
-        />
-      );
-      shapes.push(
-        <Layer
-          id={config.MAP_DISTRICTS_FILL.id + leg.division_id}
-          type={config.MAP_DISTRICTS_FILL.type}
-          sourceId="sld"
-          sourceLayer="sld"
-          paint={{ "fill-color": color, "fill-opacity": 0.2 }}
-          filter={districtFilter}
-        />
-      );
-    }
-    return (
-      <div id="fyl-map-container">
-        <Map
-          style={config.MAP_BASE_STYLE}
-          minZoom={2}
-          maxZoom={13}
-          interactive={true}
-          attributionControl={true}
-          center={[this.props.lon, this.props.lat]}
-        >
-          <Source
-            id="sld"
-            tileJsonSource={{ type: "vector", url: config.MAP_SLD_SOURCE }}
-          />
-          {shapes}
-          <Layer
-            type="symbol"
-            id="marker"
-            layout={{
-              "icon-image": "marker-15",
-              "icon-anchor": "bottom",
-              "icon-size": 2,
-            }}
-          >
-            <Feature
-              coordinates={[this.props.lon, this.props.lat]}
-              draggable={true}
-              onDragEnd={this.props.handleDrag}
-            />
-          </Layer>
-        </Map>
-      </div>
-    );
-  }
-}
 
 export default class FindYourLegislator extends React.Component {
   constructor(props) {
     super(props);
     const queryParams = new URLSearchParams(window.location.search);
+
+    // extract state from path if state is not US
+    const pathParts = window.location.pathname.split('/').filter(part => part);
+    const stateAbbr = pathParts.length > 0 && pathParts[0] !== 'us' 
+      ? pathParts[0] 
+      : ""; 
+
     this.state = {
       address: queryParams.get("address") || "",
       lat: queryParams.get("lat") || 0,
       lon: queryParams.get("lon") || 0,
-      stateAbbr: queryParams.get("state") || "",
+      geocodedAddress: null,
+      relevance: null,
+      stateAbbr: stateAbbr,
       legislators: [],
       stateLegislators:[],
       federalLegislators:[],
       error: "",
     };
+
+     // clear url parameters after reading them
+    if (window.location.search) {
+      history.replaceState({}, '', window.location.pathname);
+    }
+
     this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.geocode = this.geocode.bind(this);
@@ -124,7 +50,7 @@ export default class FindYourLegislator extends React.Component {
   }
 
   handleAddressChange(event) {
-    this.setState({ address: event.target.value, stateLegislators:[], federalLegislators:[] });
+    this.setState({ address: event.target.value });
   }
 
   handleDrag(event) {
@@ -139,7 +65,8 @@ export default class FindYourLegislator extends React.Component {
     this.setState({
       error: message,
       legislators: [],
-      showMap: false,
+      geocodedAddress: null,
+      relevance: null,
     });
   }
 
@@ -169,7 +96,8 @@ export default class FindYourLegislator extends React.Component {
 
   geocode() {
     const component = this;
-    // if a state was passed in, limit geocoding to bounding box
+
+    // if stateAbbr, limit geocoding to bounding box
     const bb = this.state.stateAbbr ? stateBounds[this.state.stateAbbr] : null;
     const bbStr = this.state.stateAbbr
       ? `&bbox=${bb[0][0]},${bb[0][1]},${bb[1][0]},${bb[1][1]}`
@@ -183,9 +111,47 @@ export default class FindYourLegislator extends React.Component {
     fetch(url)
       .then(response => response.json())
       .then(function(json) {
+
+        // return error message if relevance (geocoding accuracy) is below threshold
+        const relevance = json.features[0].relevance
+        const RELEVANCE_THRESHOLD = 0.7;
+        
+        if (relevance < RELEVANCE_THRESHOLD) {
+          component.setError(
+            "Unable to geolocate your address, try adding more information."
+          );
+          return;
+        }
+
+        // if stateAbbr, return error message if state for geocoded address is different than inital state 
+        // (this can happen because state bounding boxes are not exact)
+        if (component.state.stateAbbr) {
+          const context = json.features[0].context;
+          let stateContext = null;
+          let geocodedState = null;
+
+          if (context) {
+            stateContext = context.find(function(c) {
+              return c.id.startsWith('region');
+            });
+          }
+
+          if (stateContext && stateContext.short_code) {
+            geocodedState = stateContext.short_code.replace('US-', '').toLowerCase();
+            if (geocodedState !== component.state.stateAbbr) {
+              component.setError(
+                "Unable to geolocate your address within " + component.state.stateAbbr.toUpperCase() + ". Try adding more information, or to find legislators for a different state, please use the Find Your Legislators tool on the homepage for that state."
+              );
+              return;
+            }
+          }
+        }
+
         component.setState({
           lat: json.features[0].center[1],
           lon: json.features[0].center[0],
+          geocodedAddress: json.features[0].place_name,  
+          relevance: json.features[0].relevance,
         });
         component.updateLegislators();
       })
@@ -199,15 +165,15 @@ export default class FindYourLegislator extends React.Component {
 
   updateLegislators() {
     if (!this.state.lat || !this.state.lon) {
-      this.setState({ legislators: [], showMap: false, stateLegislators:[], federalLegislators:[] });
+      this.setState({ legislators: [], stateLegislators:[], federalLegislators:[] });
     } else {
       const component = this;
-      const llUrl = `/find_your_legislator/?lat=${this.state.lat}&lon=${this.state.lon}&address=${this.state.address}&state=${this.state.stateAbbr}`;
-      history.pushState(llUrl, "", llUrl);
+      const statePrefix = this.state.stateAbbr ? this.state.stateAbbr : 'us';
+      const llUrl = `/${statePrefix}/find_your_legislator/?lat=${this.state.lat}&lon=${this.state.lon}&address=${this.state.address}`;
       fetch(llUrl + "&json=json")
         .then(response => response.json())
         .then(function(json) {
-          component.setState({ legislators: json.legislators, showMap: true, error: null });
+          component.setState({ legislators: json.legislators, error: null });
           component.splitLegislators();
         });
     }
@@ -226,6 +192,9 @@ export default class FindYourLegislator extends React.Component {
   }
 
   renderLegislators(legislators) {
+    // sort in reverse alphabetical order by chamber (upper first)
+    legislators.sort((a, b) => b.chamber.localeCompare(a.chamber)); 
+
     const rows = legislators.map(leg => (
       <tr key={leg.name}>
         <td>
@@ -236,7 +205,7 @@ export default class FindYourLegislator extends React.Component {
         </td>
         <td>{leg.party}</td>
         <td>{leg.district}</td>
-        <td style={{ backgroundColor: chamberColor(leg) }}>{leg.chamber}</td>
+        <td>{leg.chamber.charAt(0).toUpperCase() + leg.chamber.slice(1)}</td>
       </tr>
     ));
     let table;
@@ -314,61 +283,69 @@ export default class FindYourLegislator extends React.Component {
 
   render() {
     const legTables = this.renderLegislators(this.state.stateLegislators);
-
-    let map;
-    if (this.state.showMap) {
-      map = (
-        <ResultMap
-          zoom={11}
-          lat={this.state.lat}
-          lon={this.state.lon}
-          legislators={this.state.stateLegislators}
-          handleDrag={this.handleDrag}
-        />
-      );
-    }
-
-    let error;
-    if (this.state.error) {
-      error = <div className="fyl-error">{this.state.error}</div>;
-    }
-
+    const stateAbbrForPlaceholder = this.state.stateAbbr ? this.state.stateAbbr.toUpperCase() : 'CT';
     return (
       <div className="find-your-legislator">
-        <div className="input-group">
-          <input
-            className="input-group-field"
-            type="search"
-            id="fyl-address"
-            name="address"
-            placeholder="Enter Your Address"
-            value={this.state.address}
-            onChange={this.handleAddressChange}
-          />
-          <div className="input-group-button">
-            <button
-              id="address-lookup"
-              className="button button--primary"
-              onClick={this.geocode}
-            >
-              Search by Address
-            </button>
+        <div>
+          <h2 class="heading--small">
+             Find out who represents you by entering your address below:
+          </h2>
+          <div className="input-group">
+            <input
+              className="input-group-field"
+              type="search"
+              id="fyl-address"
+              name="address"
+              placeholder={`Ex: 111 River Road, Storrs, ${stateAbbrForPlaceholder} 12345`}
+              value={this.state.address}
+              onChange={this.handleAddressChange}
+            />
+            <div className="input-group-button">
+              <button
+                id="address-lookup"
+                className="button button--primary"
+                onClick={this.geocode}
+              >
+                Search by Address
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="fyl-locate">
-          <button
-            id="locate"
-            className="button button--primary"
-            onClick={this.geolocate}
-          >
-            Use Current Location
-          </button>
-        </div>
+          <div className="mapbox-credit">
+              In most cases, this should be your pre-incarceration address. Learn more here.
+          </div>
 
-        {error}
-        {legTables}
-        {map}
+          {this.state.error ? ( 
+            // if error message 
+            <div className="mapbox-credit">
+              <div className="fyl-error">{this.state.error}</div>
+            </div>
+          ) : ( 
+            // if geocoding successful
+            this.state.geocodedAddress ? ( 
+              <div className="mapbox-credit">
+                <strong>Located Address:</strong> {this.state.geocodedAddress}
+                {this.state.relevance < 1.0 && " (Partial match)"}
+              </div>
+            ) : null
+          )}
+
+          <div className="mapbox-credit">
+              Post-redistricting geographic data graciously provided by 
+              <a href="https://redistrictingdatahub.org/"> Redistricting Data Hub</a>.
+          </div>
+          
+          <div className="mapbox-credit">Geolocation powered by <img
+              src="/static/images/logos/mapbox-logo-black.png" alt="Mapbox" />.
+          </div>
+
+        </div>
+        
+        <div>
+          
+          {legTables}
+
+        </div>
       </div>
     );
   }
