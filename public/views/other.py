@@ -160,7 +160,7 @@ def site_search(request, state=None):
 
             # compute/retrieve/set filter options
             is_initial_query = True  # initial query is true iff request is not made through search options form
-            is_initial_query = not request.GET.get("filter_form")
+            is_initial_query = not request.GET.get("is_filter_form")
 
             if is_initial_query:  # if bills haven't been filtered yet
 

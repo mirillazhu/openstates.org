@@ -127,7 +127,7 @@
           {% if query and state and base_bills_exist %} 
             <div class="sidebar">
               <h2 class="heading--medium">Filter Bills</h2>
-              {% include 'public/components/search-options-form.html' with search_html_hidden_vars=True %} <!-- Pass query and filter_form as hidden vars to form -->
+              {% include 'public/components/search-options-form.html' with search_html_hidden_vars=True %} <!-- Pass query and is_filter_form as hidden vars to form -->
             </div>
           {% endif %}
         </div>
