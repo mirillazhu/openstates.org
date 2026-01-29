@@ -16,6 +16,7 @@ urlpatterns = [
     # top level views
     path("", home, name="home"),
     path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
+    # non state-specific search (placeholder)
     path("search/", site_search, name="search"),
     re_path(r"^(?P<state>{})/$".format(state_abbr_pattern), state, name="state"),
     # find your legislator
@@ -31,6 +32,12 @@ urlpatterns = [
         name="legislators",
     ),
     re_path(r"^person/.*\-(?P<person_id>[0-9A-Za-z]+)/$", person, name="person-detail"),
+    # state-specific search
+    re_path(
+        r"^(?P<state>{})/search/$".format(state_abbr_pattern),
+        site_search,
+        name="state_search",
+    ),
     # bills
     re_path(
         r"^(?P<state>{})/bills/$".format(state_abbr_pattern),

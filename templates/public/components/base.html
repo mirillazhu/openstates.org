@@ -39,11 +39,11 @@
         {% endblock %}
     </head>
 
-    <body>
+    <body style="display: flex; flex-direction: column; min-height: 100vh; margin: 0;">
         {% header %}
 
-        <div class="grid-container">
-            <div class="grid-x grid-padding-x">
+        <div class="grid-container" style="flex: 1; width: 100%;">
+            <div class="grid-x grid-padding-x" style="width: 100%;">
                 <div class="cell medium-12 mt1">
                     {% block content %}{% endblock %}
                 </div>
