@@ -17,7 +17,7 @@
     <h1 class="heading--large">
       Search Results for "{{query}}"
       {% if state %}
-      in {{ state|upper  }}
+        in {{ state|upper }}
       {% endif %}
     </h1>
 
@@ -68,16 +68,20 @@
                     {% for bill in bills %}
                         <tr class="row--align-top">
                             <td>
+                              <div class="td-truncate td-truncate-long">
                                 <strong><a href="{% canonical_url bill %}">{{ bill.identifier }}</a></strong>
                                 <span class="u-color--gray">(<strong>{{ bill.legislative_session.jurisdiction }}</strong> - {{ bill.legislative_session.name }})</span>
                                 <br>
                                 <span>{{ bill.title|titlecase_caps }}</span>
+                              </div>
                             </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
                             <td>
+                              <div class="td-truncate td-truncate-long">
                                 <span>{{ bill.latest_action_description|title }}</span>
                                 <br>
                                 <span class="u-color--gray">{{ bill.latest_action_date|fdate:"%b %d %Y" }}</span>
+                              </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -123,12 +127,7 @@
           {% if query and state and base_bills_exist %} 
             <div class="sidebar">
               <h2 class="heading--medium">Filter Bills</h2>
-              <form onsubmit="cleanUrl(this)">
-                <input type="hidden" name="query" value="{{ query }}" /> 
-                <input type="hidden" name="state" value="{{ state }}" />
-                <input type="hidden" name="filter_form" value="true">  
-                {% include 'public/components/search-options-form.html' %}
-              </form>
+              {% include 'public/components/search-options-form.html' with search_html_hidden_vars=True %} <!-- Pass query and is_filter_form as hidden vars to form -->
             </div>
           {% endif %}
         </div>

@@ -46,7 +46,7 @@ context ~a little differently~.
 
                         {% for st in states %}
                             {% if st.abbr == 'US' %}
-                                <option value="{{ st.abbr|lower }}" {% if st.abbr|lower == state %}selected{% endif %}>{{ "US Congress" }}</option>
+                                <option value="{{ st.abbr|lower }}" {% if st.abbr|lower == state %}selected{% endif %}>{{ "US Congress (Federal)" }}</option>
                             {% endif %}
                         {% endfor %}
                     </select>
@@ -60,12 +60,15 @@ context ~a little differently~.
                 {% endif %}
                 </ul>
 
-                <form action="/search/" id="header__search">
+                <form action="
+                    {% if state %}
+                        {% url 'state_search' state=state %}
+                    {% else %}
+                        {% url 'search' %}
+                    {% endif %}
+                " id="header__search">
                 <div class="input-group">
                     <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query">
-                    {% if state %}
-                    <input type="hidden" name="state" value="{{ state }}">
-                    {% endif %}
                     <div class="input-group-button">
                         <button type="submit" class="button button--secondary">
                           Search

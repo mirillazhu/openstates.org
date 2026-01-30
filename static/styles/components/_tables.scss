@@ -43,15 +43,22 @@ tr.row-with-buttons {
   color: inherit;
 }
 
-// Truncate content in cells to maximum of 3 rows
 .td-truncate {
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.5em;
+}
+
+.td-truncate-short {
+    -webkit-line-clamp: 3;
     max-height: 4.5em;
+}
+
+.td-truncate-long {
+    -webkit-line-clamp: 11;
+    max-height: 16.5em;
 }
 
 .hide-mobile {
@@ -59,3 +66,4 @@ tr.row-with-buttons {
         display: none;
     }
 }
+

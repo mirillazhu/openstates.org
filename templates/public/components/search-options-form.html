@@ -1,103 +1,111 @@
 {% load custom_tags %}
 
-<label for="session">Session</label>
-<select id="session" name="session">
-    <option value="">All Available Sessions</option>
-    {% for identifier, name in sessions.items %}
-    <option value="{{ identifier }}"
-        {% if identifier == form.session %}selected{% endif %}
-        {% if not identifier and forloop.first %}selected{% endif %}>
-        {{ name }}
-    </option>
-    {% endfor %}
-</select>
+<form onsubmit="cleanUrl(this)"> 
 
-{% if chambers|length > 1 %}
-<fieldset class="mb1">
-    <legend>Chamber of Origin</legend>
-
-    <input type="radio" name="chamber" id="either-chamber" value=""
-    {% if form.chamber == "" %} checked {% endif %} />
-    <label for="either-chamber">Either Chamber</label>
-    <br>
-
-    <input type="radio" name="chamber" id="lower-chamber" value="lower"
-    {% if form.chamber == "lower" %} checked {% endif %} />
-    <label for="lower-chamber">{{ chambers.lower }}</label>
-    <br>
-
-    <input type="radio" name="chamber" id="upper-chamber" value="upper"
-    {% if form.chamber == "upper" %} checked {% endif %} />
-    <label for="upper-chamber">{{ chambers.upper }}</label>
-</fieldset>
-{% endif %}
-
-<label for="classification">Type</label>
-<select id="classification" name="classification">
-    <option value="">All</option>
-    {% for classification in classifications %}
-        <option value="{{ classification }}" {% if classification == form.classification %} selected {% endif %}>
-        {{ classification|title }}</option>
-    {% endfor %}
-</select>
-
-<fieldset class="mb1">
-    <legend>Status</legend>
-    {% if chambers|length > 1 %}
-    <input type="checkbox" name="status" id="passed-lower-chamber" value="passed-lower-chamber"
-    {% if "passed-lower-chamber" in form.status %} checked {% endif %}
-    />
-    <label for="passed-lower-chamber">Passed {{ chambers.lower }}</label>
-    <br>
-    
-    <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
-    {% if "passed-upper-chamber" in form.status %} checked {% endif %}
-    />
-    <label for="passed-upper-chamber">Passed {{ chambers.upper }}</label>
-    <br>
-
-    {% else %}
-    <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
-    {% if "passed-upper-chamber" in form.status %} checked {% endif %}
-    />
-    <label for="passed-upper-chamber">Passed {{ chambers.legislature }}</label>
-    <br>
+    {% if search_html_hidden_vars %}
+        <input type="hidden" name="query" value="{{ query }}" /> 
+        <input type="hidden" name="is_filter_form" value="true">
     {% endif %}
 
-    <input type="checkbox" name="status" id="signed" value="signed"
-    {% if "signed" in form.status %} checked {% endif %}
-    />
-    <label for="signed">Signed into Law</label>
-</fieldset>
+    <label for="session">Session</label>
+    <select id="session" name="session">
+        <option value="">All Available Sessions</option>
+        {% for identifier, name in sessions.items %}
+        <option value="{{ identifier }}"
+            {% if identifier == form.session %}selected{% endif %}
+            {% if not identifier and forloop.first %}selected{% endif %}>
+            {{ name }}
+        </option>
+        {% endfor %}
+    </select>
 
-<label for="sponsor_name">Sponsor</label>
-<select id="sponsor_name" name="sponsor_name">
-    <option value="">Any Sponsor</option>
-    {% for sponsor_name in sponsor_names %}
-    <option value="{{ sponsor_name }}" {% if sponsor_name == form.sponsor_name %} selected {% endif %}>
-        {{ sponsor_name }}
-    </option>
-    {% endfor %}
-</select>
+    {% if chambers|length > 1 %}
+    <fieldset class="mb1">
+        <legend>Chamber of Origin</legend>
 
-{% if subjects %}
-<label for="subjects">Subjects</label>
-<select id="subjects" name="subjects" multiple>
-    {% for subject in subjects %}
-        <option value="{{ subject }}" {% if subject in form.subjects %} selected {% endif %}>
-        {{ subject }}</option>
-    {% endfor %}
-</select>
-{% endif %}
+        <input type="radio" name="chamber" id="either-chamber" value=""
+        {% if form.chamber == "" %} checked {% endif %} />
+        <label for="either-chamber">Either Chamber</label>
+        <br>
 
-<button type="submit" class="button button--primary">Apply Filters</button>
+        <input type="radio" name="chamber" id="lower-chamber" value="lower"
+        {% if form.chamber == "lower" %} checked {% endif %} />
+        <label for="lower-chamber">{{ chambers.lower }}</label>
+        <br>
 
-<button type="button" 
-        class="button button--primary" 
-        style="background-color: #dbe6f1; border-color: #dbe6f1; color: #015f5d;"
-        onclick="resetFilters(this.form)">
-    Clear Filters&nbsp;
-</button>
+        <input type="radio" name="chamber" id="upper-chamber" value="upper"
+        {% if form.chamber == "upper" %} checked {% endif %} />
+        <label for="upper-chamber">{{ chambers.upper }}</label>
+    </fieldset>
+    {% endif %}
+
+    <label for="classification">Type</label>
+    <select id="classification" name="classification">
+        <option value="">All</option>
+        {% for classification in classifications %}
+            <option value="{{ classification }}" {% if classification == form.classification %} selected {% endif %}>
+            {{ classification|title }}</option>
+        {% endfor %}
+    </select>
+
+    <fieldset class="mb1">
+        <legend>Status</legend>
+        {% if chambers|length > 1 %}
+        <input type="checkbox" name="status" id="passed-lower-chamber" value="passed-lower-chamber"
+        {% if "passed-lower-chamber" in form.status %} checked {% endif %}
+        />
+        <label for="passed-lower-chamber">Passed {{ chambers.lower }}</label>
+        <br>
+        
+        <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
+        {% if "passed-upper-chamber" in form.status %} checked {% endif %}
+        />
+        <label for="passed-upper-chamber">Passed {{ chambers.upper }}</label>
+        <br>
+
+        {% else %}
+        <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
+        {% if "passed-upper-chamber" in form.status %} checked {% endif %}
+        />
+        <label for="passed-upper-chamber">Passed {{ chambers.legislature }}</label>
+        <br>
+        {% endif %}
+
+        <input type="checkbox" name="status" id="signed" value="signed"
+        {% if "signed" in form.status %} checked {% endif %}
+        />
+        <label for="signed">Signed into Law</label>
+    </fieldset>
+
+    <label for="sponsor_name">Sponsor</label>
+    <select id="sponsor_name" name="sponsor_name">
+        <option value="">Any Sponsor</option>
+        {% for sponsor_name in sponsor_names %}
+        <option value="{{ sponsor_name }}" {% if sponsor_name == form.sponsor_name %} selected {% endif %}>
+            {{ sponsor_name }}
+        </option>
+        {% endfor %}
+    </select>
+
+    {% if subjects %}
+    <label for="subjects">Subjects</label>
+    <select id="subjects" name="subjects" multiple>
+        {% for subject in subjects %}
+            <option value="{{ subject }}" {% if subject in form.subjects %} selected {% endif %}>
+            {{ subject }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+
+    <button type="submit" class="button button--primary">Apply Filters</button>
+
+    <button type="button" 
+            class="button button--primary" 
+            style="background-color: #dbe6f1; border-color: #dbe6f1; color: #015f5d;"
+            onclick="resetFilters(this.form)">
+        Clear Filters&nbsp;
+    </button>
+</form>
 
 <script>
     function cleanUrl(form) {
