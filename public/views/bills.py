@@ -203,7 +203,7 @@ class BillList(View):
                     sort_url = replace_query_params(request, sort=col_name, page=1)
                     if sort == f"-{col_name}":
                         arrow = "\u2193"  # down
-            else:
+            else:  # descending sort
                 if sort == f"-{col_name}":
                     sort_url = replace_query_params(request, sort=col_name, page=1)
                     arrow = "\u2193"  # down
