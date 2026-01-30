@@ -60,3 +60,10 @@ tr.row-with-buttons {
     -webkit-line-clamp: 11;
     max-height: 16.5em;
 }
+
+.hide-mobile {
+    @include breakpoint(small only) {
+        display: none;
+    }
+}
+

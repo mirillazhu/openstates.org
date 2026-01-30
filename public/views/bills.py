@@ -2,7 +2,7 @@ from collections import defaultdict
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage
-from django.db.models import F, Func, Prefetch
+from django.db.models import Func, Prefetch
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, reverse, redirect
 from django.utils.feedgenerator import Rss201rev2Feed
@@ -157,13 +157,13 @@ class BillList(View):
 
         return bills, form
 
-    def paginate_bills(self, request, bills):
+    def paginate_bills(self, request, bills, page_size):
         # handle pagination for bills queryset
         try:
             page_num = int(request.GET.get("page", 1))
         except ValueError:
             raise Http404()  # invalid pages not found
-        paginator = Paginator(bills, 20)
+        paginator = Paginator(bills, page_size)
         try:
             bills = paginator.page(page_num)
         except EmptyPage:
@@ -171,39 +171,53 @@ class BillList(View):
 
         return paginator, page_num
 
-    def get_sort_context(self, request):
+    def get_sort_context(self, request, is_bill_dashboard=False):
         # get sort urls & arrows
         sort = request.GET.get("sort", "-latest_action")
-        latest_action_arrow = first_action_arrow = ""
-        if sort == "-latest_action":
-            latest_action_sort_url = replace_query_params(
-                request, sort="latest_action", page=1
-            )
-            latest_action_arrow = "\u2193"  # down
-        else:
-            latest_action_sort_url = replace_query_params(
-                request, sort="-latest_action", page=1
-            )
-            if sort == "latest_action":
-                latest_action_arrow = "\u2191"  # up
-        if sort == "-first_action":
-            first_action_sort_url = replace_query_params(
-                request, sort="first_action", page=1
-            )
-            first_action_arrow = "\u2193"  # down
-        else:
-            first_action_sort_url = replace_query_params(
-                request, sort="-first_action", page=1
-            )
-            if sort == "first_action":
-                first_action_arrow = "\u2191"  # up
 
-        return {
-            "latest_action_sort_url": latest_action_sort_url,
-            "first_action_sort_url": first_action_sort_url,
-            "latest_action_arrow": latest_action_arrow,
-            "first_action_arrow": first_action_arrow,
-        }
+        if is_bill_dashboard:
+            sortable_columns = [
+                "bill_id",
+                "bill_title",
+                "bill_status",
+                "session",
+                "first_action",
+                "latest_action",
+            ]
+            sort_ascending = ["bill_id", "bill_title", "bill_status"]
+        else:  # search or bill list
+            sortable_columns = ["first_action", "latest_action"]
+            sort_ascending = []
+
+        context = {}
+        for col_name in sortable_columns:
+            arrow = ""
+
+            if col_name in sort_ascending:
+                if sort == col_name:
+                    sort_url = replace_query_params(
+                        request, sort=f"-{col_name}", page=1
+                    )
+                    arrow = "\u2191"  # up
+                else:
+                    sort_url = replace_query_params(request, sort=col_name, page=1)
+                    if sort == f"-{col_name}":
+                        arrow = "\u2193"  # down
+            else:  # descending sort
+                if sort == f"-{col_name}":
+                    sort_url = replace_query_params(request, sort=col_name, page=1)
+                    arrow = "\u2193"  # down
+                else:
+                    sort_url = replace_query_params(
+                        request, sort=f"-{col_name}", page=1
+                    )
+                    if sort == col_name:
+                        arrow = "\u2191"  # up
+
+            context[f"{col_name}_sort_url"] = sort_url
+            context[f"{col_name}_arrow"] = arrow
+
+        return context
 
     def get(self, request, state):
         """
@@ -216,7 +230,7 @@ class BillList(View):
             subjects
         """
         bills, form = self.get_bills(request, state)
-        paginator, page_num = self.paginate_bills(request, bills)
+        paginator, page_num = self.paginate_bills(request, bills, 20)
         sort_context = self.get_sort_context(request)
 
         # filter options: try to retrieve from cache or compute if none cached
@@ -558,7 +572,7 @@ def bill_dashboard(request):
             active=True,
         )
         .select_related("bill")
-        .order_by(F("bill__latest_action_date").desc(nulls_last=True), "bill_id")
+        .order_by("bill_id")
     )
 
     tracked_bills = []
@@ -569,7 +583,7 @@ def bill_dashboard(request):
         bill_state_abbr = get_state_abbr(bill.legislative_session.jurisdiction.name)
         bill.identifier_with_state = f"{bill_state_abbr} {bill.identifier}"
 
-        # get bills actions for determining (a) bill status and (2) whether the latest bill action is unread
+        # get bill actions for determining (a) bill status and (2) whether the latest bill action is unread
         actions = list(
             bill.actions.all()
             .select_related("organization")
@@ -609,13 +623,31 @@ def bill_dashboard(request):
 
         tracked_bills.append(bill)
 
+    # sort tracked bills before paginating
+    sort = request.GET.get("sort", "-latest_action")
+
+    sort_key_mapping = {
+        "bill_id": lambda b: b.identifier_with_state,
+        "bill_title": lambda b: b.title.lower(),  # to ensure sort is independent of capitalization
+        "bill_status": lambda b: b.status,
+        "session": lambda b: b.legislative_session.name,
+        "first_action": lambda b: b.first_action_date or "",
+        "latest_action": lambda b: b.latest_action_date or "",
+    }
+
+    field = sort.lstrip("-")
+    if field in sort_key_mapping:
+        tracked_bills.sort(key=sort_key_mapping[field], reverse=sort.startswith("-"))
+
+    # paginate and get sort context
+    tracked_bills_view = BillList()
+    paginator, page_num = tracked_bills_view.paginate_bills(request, tracked_bills, 8)
+    sort_context = tracked_bills_view.get_sort_context(request, is_bill_dashboard=True)
+
     return render(
         request,
         "public/views/bill_dashboard.html",
-        {
-            "tracked_bills": tracked_bills,
-            "state": state,
-        },
+        {"tracked_bills": paginator.page(page_num), "state": state, **sort_context},
     )
 
 
