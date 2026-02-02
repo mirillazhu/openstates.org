@@ -171,29 +171,15 @@ class BillList(View):
 
         return paginator, page_num
 
-    def get_sort_context(self, request, is_bill_dashboard=False):
+    def get_sort_context(self, request, sortable_columns, ascending_by_default):
         # get sort urls & arrows
         sort = request.GET.get("sort", "-latest_action")
-
-        if is_bill_dashboard:
-            sortable_columns = [
-                "bill_id",
-                "bill_title",
-                "bill_status",
-                "session",
-                "first_action",
-                "latest_action",
-            ]
-            sort_ascending = ["bill_id", "bill_title", "bill_status"]
-        else:  # search or bill list
-            sortable_columns = ["first_action", "latest_action"]
-            sort_ascending = []
 
         context = {}
         for col_name in sortable_columns:
             arrow = ""
 
-            if col_name in sort_ascending:
+            if col_name in ascending_by_default:
                 if sort == col_name:
                     sort_url = replace_query_params(
                         request, sort=f"-{col_name}", page=1
@@ -231,7 +217,9 @@ class BillList(View):
         """
         bills, form = self.get_bills(request, state)
         paginator, page_num = self.paginate_bills(request, bills, 20)
-        sort_context = self.get_sort_context(request)
+        sort_context = self.get_sort_context(
+            request, ["first_action", "latest_action"], []
+        )
 
         # filter options: try to retrieve from cache or compute if none cached
         cache_key = f"filter_options_{state}"
@@ -642,7 +630,23 @@ def bill_dashboard(request):
     # paginate and get sort context
     tracked_bills_view = BillList()
     paginator, page_num = tracked_bills_view.paginate_bills(request, tracked_bills, 8)
-    sort_context = tracked_bills_view.get_sort_context(request, is_bill_dashboard=True)
+
+    sortable_columns = [
+        "bill_id",
+        "bill_title",
+        "bill_status",
+        "session",
+        "first_action",
+        "latest_action",
+    ]
+    ascending_by_default = [
+        "bill_id",
+        "bill_title",
+        "bill_status",
+    ]
+    sort_context = tracked_bills_view.get_sort_context(
+        request, sortable_columns, ascending_by_default
+    )
 
     return render(
         request,

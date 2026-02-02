@@ -156,7 +156,9 @@ def site_search(request, state=None):
             # bill search (call BillList methods)
             bills, form = bills_view.get_bills(request, state)
             paginator, page_num = bills_view.paginate_bills(request, bills, 20)
-            sort_context = bills_view.get_sort_context(request)
+            sort_context = bills_view.get_sort_context(
+                request, ["first_action", "latest_action"], []
+            )
 
             # compute/retrieve/set filter options
             is_initial_query = True  # initial query is true iff request is not made through search options form
