@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from .views.other import styleguide, home, state, site_search
 from .views.legislators import legislators, person, find_your_legislator
-from .views.bills import BillList, BillListFeed, bill, bill_dashboard, vote
+from .views.bills import bill, bill_list, bill_feed, bill_dashboard, vote
 from .views.fallback import fallback, legislator_fallback
 from utils.common import states
 
@@ -41,13 +41,13 @@ urlpatterns = [
     # bills
     re_path(
         r"^(?P<state>{})/bills/$".format(state_abbr_pattern),
-        BillList.as_view(),
+        bill_list,
         name="bills",
     ),
     # has trailing slash for consistency
     re_path(
         r"^(?P<state>{})/bills/feed/$".format(state_abbr_pattern),
-        BillListFeed.as_view(),
+        bill_feed,
         name="bills_feed",
     ),
     re_path(
