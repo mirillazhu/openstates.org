@@ -6,7 +6,7 @@ def get_bill_chambers(bill, actions):
     """
     returns first_chamber, second_chamber for bicameral bills, or "Legislature", None for unicameral bills.
 
-    chambers used as inputs for compute_bill_stages.
+    chambers used as parameters for compute_bill_stages.
     """
 
     # check if bill is unicameral: bill (a) originates from legislature or (b) may originate from house or senate, but all bill actions are from organization with legislature/executive classification

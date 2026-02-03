@@ -25,7 +25,7 @@ from utils.bill_stages import get_bill_chambers, compute_bill_stages
 from .fallback import fallback
 
 
-def bill_list(request, state):
+def bills(request, state):
     """
     form values:
         chamber: lower|upper
@@ -68,7 +68,7 @@ def bill_list(request, state):
     return render(request, "public/views/bills.html", context)
 
 
-def bill_feed(request, state):
+def bills_feed(request, state):
     bills, form = get_bills(request, state)
     host = request.get_host()
     link = "https://{}{}?{}".format(
