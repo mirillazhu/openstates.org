@@ -35,6 +35,8 @@ def bill_list(request, state):
         classification
         subjects
     """
+    request.session["selected_state"] = state
+
     bills, form = get_bills(request, state)
     paginator, page_num = paginate_bills(request, bills, 20)
     sort_context = get_sort_context(request, ["first_action", "latest_action"], [])
