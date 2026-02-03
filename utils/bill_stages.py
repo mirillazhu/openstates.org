@@ -4,7 +4,9 @@ from .orgs import get_chambers_from_abbr
 
 def get_bill_chambers(bill, actions):
     """
-    returns first_chamber, second_chamber for bicameral bills, or "Legislature", None for unicameral bills
+    returns first_chamber, second_chamber for bicameral bills, or "Legislature", None for unicameral bills.
+
+    chambers used as inputs for compute_bill_stages.
     """
 
     # check if bill is unicameral: bill (a) originates from legislature or (b) may originate from house or senate, but all bill actions are from organization with legislature/executive classification
@@ -37,9 +39,9 @@ def get_bill_chambers(bill, actions):
 
 def _set_stage(stages, stage_index, date, text, current_latest_stage):
     """
-    helper function to set stage for compute_bill_stages and keep track of latest stage
+    helper function to set stage for compute_bill_stages and keep track of latest stage.
 
-    returns index of latest stage by bill action order, where stage is as defined in compute_bill_stages
+    returns index of latest stage by bill action order, where stage is as defined in compute_bill_stages.
     """
     if stages[stage_index]["date"] is None:
         stages[stage_index]["date"] = date
@@ -68,7 +70,7 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
         text: None
         date: None
 
-    and latest_stage is the latest stage a bill has reached (by bill action order)
+    and latest_stage is the latest stage a bill has reached (by bill action order, must be computed concurrently with stages).
     """
     EXECUTIVE_TITLES = {
         "us": "President",
