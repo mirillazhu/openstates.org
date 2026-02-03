@@ -141,7 +141,7 @@ def bill_dashboard(request):
         )
 
         # determine bill status
-        first_chamber, second_chamber = get_bill_chambers(bill)
+        first_chamber, second_chamber = get_bill_chambers(bill, actions)
         bill_state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
         _, latest_stage = compute_bill_stages(
             actions, first_chamber, second_chamber, bill_state
@@ -173,7 +173,7 @@ def bill_dashboard(request):
 
         tracked_bills.append(bill)
 
-    # sort tracked bills and paginate
+    # sort tracked bills
     sort = request.GET.get("sort", "-latest_action")
 
     sort_key_mapping = {
@@ -189,23 +189,17 @@ def bill_dashboard(request):
     if field in sort_key_mapping:
         tracked_bills.sort(key=sort_key_mapping[field], reverse=sort.startswith("-"))
 
-    paginator, page_num = paginate_bills(request, tracked_bills, 8)
-
     # get sort context
-    sortable_columns = [
-        "bill_id",
-        "bill_title",
-        "bill_status",
-        "session",
-        "first_action",
-        "latest_action",
-    ]
+    sortable_columns = list(sort_key_mapping.keys())
     ascending_by_default = [
         "bill_id",
         "bill_title",
         "bill_status",
     ]
     sort_context = get_sort_context(request, sortable_columns, ascending_by_default)
+
+    # paginate
+    paginator, page_num = paginate_bills(request, tracked_bills, 8)
 
     return render(
         request,
@@ -277,7 +271,7 @@ def bill(request, state, session, bill_id):
     )  # .prefetch_related('counts')
 
     # stage calculation and determination of whether bill is unicameral
-    first_chamber, second_chamber = get_bill_chambers(bill)
+    first_chamber, second_chamber = get_bill_chambers(bill, actions)
     stages, _ = compute_bill_stages(actions, first_chamber, second_chamber, state)
 
     unicameral = False

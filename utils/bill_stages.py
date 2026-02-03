@@ -2,33 +2,45 @@ from .common import jid_to_abbr
 from .orgs import get_chambers_from_abbr
 
 
-# returns first_chamber, second_chamber
-def get_bill_chambers(bill):
-    # unicameral logic
-    # include special case where bill may originate in house or senate, but all bill actions are from organization with legislature/executive classification
-    if (bill.from_organization.classification == "legislature") or (
-        not bill.actions.exclude(
-            organization__classification__in=["legislature", "executive"]
-        ).exists()
-    ):
-        return "Legislature", None
+def get_bill_chambers(bill, actions):
+    """
+    returns first_chamber, second_chamber for bicameral bills, or "Legislature", None for unicameral bills
+    """
 
-    # bicameral logic
-    first_chamber = bill.from_organization.name
-    # get second chamber name (if exists)
-    second_chamber = None
-    state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
-    chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
-    if len(chambers) > 1:
-        second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
-            bill.from_organization.classification
-        ]
+    # check if bill is unicameral: bill (a) originates from legislature or (b) may originate from house or senate, but all bill actions are from organization with legislature/executive classification
+    has_non_leg_exec_action = any(
+        action.organization.classification not in ["legislature", "executive"]
+        for action in actions
+    )
+    is_unicameral = (
+        bill.from_organization.classification == "legislature"
+        or not has_non_leg_exec_action
+    )
+
+    if is_unicameral:
+        first_chamber = "Legislature"
+        second_chamber = None
+
+    else:  # bicameral
+        first_chamber = bill.from_organization.name
+        # get second chamber name (if exists)
+        second_chamber = None
+        state = jid_to_abbr(bill.legislative_session.jurisdiction.id)
+        chambers = {c.classification: c.name for c in get_chambers_from_abbr(state)}
+        if len(chambers) > 1:
+            second_chamber = {"upper": chambers["lower"], "lower": chambers["upper"]}[
+                bill.from_organization.classification
+            ]
 
     return first_chamber, second_chamber
 
 
-# helper function to set stage for compute_bill_stages, returns index of latest stage (by bill action order)
 def _set_stage(stages, stage_index, date, text, current_latest_stage):
+    """
+    helper function to set stage for compute_bill_stages and keep track of latest stage
+
+    returns index of latest stage by bill action order, where stage is as defined in compute_bill_stages
+    """
     if stages[stage_index]["date"] is None:
         stages[stage_index]["date"] = date
         stages[stage_index]["text"] = text
@@ -40,11 +52,14 @@ def _set_stage(stages, stage_index, date, text, current_latest_stage):
     return current_latest_stage
 
 
-# returns stages, latest_stage (for bill dashboard)
-# assumes bill actions are sorted in descending order (most recent action first)
 def compute_bill_stages(actions, first_chamber, second_chamber, state):
     """
-    return a structure with four entries like
+    computes bill stages from bill actions sorted in descending order (most recent action first);
+    actions must be sorted in this way for stages to be computed correctly.
+
+    returns stages, latest_stage
+
+    where stages is a structure with four entries which are each like
         stage: Introduced
         text: Introduced in House
         date: 2018-01-01
@@ -52,6 +67,8 @@ def compute_bill_stages(actions, first_chamber, second_chamber, state):
         stage: Senate
         text: None
         date: None
+
+    and latest_stage is the latest stage a bill has reached (by bill action order)
     """
     EXECUTIVE_TITLES = {
         "us": "President",

@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from .views.other import styleguide, home, state, site_search
 from .views.legislators import legislators, person, find_your_legislator
-from .views.bills import bill, bill_list, bill_feed, bill_dashboard, vote
+from .views.bills import bill_list, bill_feed, bill_dashboard, bill, vote
 from .views.fallback import fallback, legislator_fallback
 from utils.common import states
 
