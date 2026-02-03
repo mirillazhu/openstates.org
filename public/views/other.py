@@ -1,14 +1,18 @@
 import feedparser
 from collections import Counter
 from django.core.cache import cache
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Sum
-from django.http import Http404
 from django.shortcuts import render
 from openstates.data.models import Bill, Organization, Person
-from public.views.bills import BillList
 from utils.common import abbr_to_jid, states, sessions_with_bills, jid_to_abbr
-from utils.bills import search_bills, EXCLUDED_CLASSIFICATIONS
+from utils.bills import (
+    search_bills,
+    EXCLUDED_CLASSIFICATIONS,
+    get_bills,
+    paginate_bills,
+    get_sort_context,
+    get_filter_options,
+)
 from utils.people import person_as_dict
 
 
@@ -139,8 +143,6 @@ def site_search(request, state=None):
     query = request.GET.get("query")
     request.session["selected_state"] = state
 
-    bills_view = BillList()
-
     bills = []
     people = []
 
@@ -153,10 +155,12 @@ def site_search(request, state=None):
 
     if query:
         if state:
-            # bill search (call BillList methods)
-            bills, form = bills_view.get_bills(request, state)
-            paginator, page_num = bills_view.paginate_bills(request, bills, 20)
-            sort_context = bills_view.get_sort_context(request)
+            # bill search
+            bills, form = get_bills(request, state)
+            paginator, page_num = paginate_bills(request, bills, 20)
+            sort_context = get_sort_context(
+                request, ["first_action", "latest_action"], []
+            )
 
             # compute/retrieve/set filter options
             is_initial_query = True  # initial query is true iff request is not made through search options form
@@ -168,7 +172,7 @@ def site_search(request, state=None):
                 request.session["base_bills_exist"] = base_bills_exist
 
                 if base_bills_exist:
-                    filter_options = bills_view.get_filter_options(state, bills)
+                    filter_options = get_filter_options(state, bills)
                     request.session["filter_options"] = filter_options
 
             else:  # if not initial query and base bills exist, retrieve previously computed filter options from session
@@ -180,7 +184,7 @@ def site_search(request, state=None):
                 if base_bills_exist:
                     filter_options = request.session.get("filter_options")
                     if filter_options is None:  # fallback for lost session data
-                        filter_options = bills_view.get_filter_options(state, bills)
+                        filter_options = get_filter_options(state, bills)
                         request.session["filter_options"] = filter_options
 
             # people search
@@ -211,17 +215,7 @@ def site_search(request, state=None):
                 sort="-latest_action",
                 exclude_classifications=EXCLUDED_CLASSIFICATIONS,
             )
-
-            # pagination
-            try:
-                page_num = int(request.GET.get("page", 1))
-            except ValueError:
-                raise Http404()
-            bills_paginator = Paginator(bills, 20)
-            try:
-                bills = bills_paginator.page(page_num)
-            except EmptyPage:
-                raise Http404()
+            paginator, page_num = paginate_bills(request, bills, 20)
 
             # people search
             people = []
@@ -232,7 +226,7 @@ def site_search(request, state=None):
 
             context.update(
                 {
-                    "bills": bills,
+                    "bills": paginator.page(page_num),
                     "people": people,
                 }
             )
