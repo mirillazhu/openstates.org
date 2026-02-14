@@ -107,9 +107,9 @@ def search_bills(
     return bills
 
 
-def get_bills(request, state):
+def get_bills(request, state, allow_query=True):
     # query parameter filtering
-    query = request.GET.get("query", "")
+    query = request.GET.get("query", "") if allow_query else ""
     chamber = request.GET.get("chamber")
     session = request.GET.get("session")
     sponsor = request.GET.get("sponsor")

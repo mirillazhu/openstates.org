@@ -37,7 +37,7 @@ def bills(request, state):
     """
     request.session["selected_state"] = state
 
-    bills, form = get_bills(request, state)
+    bills, form = get_bills(request, state, allow_query=False)
     paginator, page_num = paginate_bills(request, bills, 20)
     sort_context = get_sort_context(request, ["first_action", "latest_action"], [])
 
@@ -69,7 +69,7 @@ def bills(request, state):
 
 
 def bills_feed(request, state):
-    bills, form = get_bills(request, state)
+    bills, form = get_bills(request, state, allow_query=True)
     host = request.get_host()
     link = "https://{}{}?{}".format(
         host,
