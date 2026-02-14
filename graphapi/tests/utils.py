@@ -49,7 +49,8 @@ def make_random_bill(name):
 
 def make_person(name, state, chamber, district, party, person_links=None):
     org = Organization.objects.get(jurisdiction__name=state, classification=chamber)
-    party, _ = Organization.objects.get_or_create(classification="party", name=party)
+    # not currently using memberships table for party
+    # party, _ = Organization.objects.get_or_create(classification="party", name=party)
     jurisdiction = Jurisdiction.objects.get(name=state)
     chamber_letter = chamber[0]
     if state == "Alaska":
@@ -76,7 +77,7 @@ def make_person(name, state, chamber, district, party, person_links=None):
         pass
     p = Person.objects.create(
         name=name,
-        primary_party=party.name,
+        primary_party=party,
         current_jurisdiction=jurisdiction,
         current_role={
             "org_classification": chamber,
@@ -86,7 +87,8 @@ def make_person(name, state, chamber, district, party, person_links=None):
         },
     )
     p.memberships.create(post=post, organization=org)
-    p.memberships.create(organization=party)
+    # not currently using memberships table for party
+    # p.memberships.create(organization=party)
     if person_links:
         for link in person_links:
             p.links.create(url=link["url"], note=link.get("note", ""))
