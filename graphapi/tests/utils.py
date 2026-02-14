@@ -47,7 +47,7 @@ def make_random_bill(name):
     return b
 
 
-def make_person(name, state, chamber, district, party):
+def make_person(name, state, chamber, district, party, person_links=None):
     org = Organization.objects.get(jurisdiction__name=state, classification=chamber)
     party, _ = Organization.objects.get_or_create(classification="party", name=party)
     jurisdiction = Jurisdiction.objects.get(name=state)
@@ -87,6 +87,9 @@ def make_person(name, state, chamber, district, party):
     )
     p.memberships.create(post=post, organization=org)
     p.memberships.create(organization=party)
+    if person_links:
+        for link in person_links:
+            p.links.create(url=link["url"], note=link.get("note", ""))
     return p
 
 
@@ -121,7 +124,14 @@ def populate_db():
     house = alaska.organizations.get(classification="lower")
 
     # AK House
-    amanda = make_person("Amanda Adams", "Alaska", "lower", "1", "Republican")
+    amanda_links = [
+        {"url": "https://amandaadamsforstaterep.com", "note": "campaign website"},
+        {"url": "https://linkedin.com/adams", "note": "linkedin page"},
+        {"url": "https://alaskalegislature.gov/amanda-adams/bio", "note": ""},
+    ]
+    amanda = make_person(
+        "Amanda Adams", "Alaska", "lower", "1", "Republican", amanda_links
+    )
     birch = make_person("Bob Birch", "Alaska", "lower", "2", "Republican")
     carrie = make_person("Carrie Carr", "Alaska", "lower", "3", "Democratic")
     don = make_person("Don Dingle", "Alaska", "lower", "4", "Republican")
