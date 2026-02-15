@@ -76,3 +76,38 @@ def test_search(client, django_assert_num_queries):
         resp = client.get("/search/?query=amanda")
     assert len(resp.context["bills"]) == 0
     assert len(resp.context["people"]) == 1
+
+
+@pytest.mark.django_db
+def test_state_specific_search(client):
+    # test title search works
+    resp = client.get("/ak/search/?query=moose")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+    assert len(resp.context["people"]) == 0
+
+    # test search in bill text works
+    resp = client.get("/ak/search/?query=gorgonzola")
+    assert len(resp.context["bills"]) == 1
+    assert len(resp.context["people"]) == 0
+
+    resp = client.get("/ak/search/?query=HB 1")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+
+    resp = client.get("/ak/search/?query=hb 1")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+
+    resp = client.get("/ak/search/?query=amanda")
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 1
+
+    resp = client.get("/al/search/?query=moose")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 0
+
+    resp = client.get("/al/search/?query=amanda")
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 0

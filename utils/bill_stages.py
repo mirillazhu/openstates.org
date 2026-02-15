@@ -41,7 +41,7 @@ def _set_stage(stages, stage_index, date, text, current_latest_stage):
     """
     helper function to set stage for compute_bill_stages and keep track of latest stage.
 
-    returns index of latest stage by bill action order, where stage is as defined in compute_bill_stages.
+    returns latest stage by bill action order, where stage is as defined in compute_bill_stages.
     """
     if stages[stage_index]["date"] is None:
         stages[stage_index]["date"] = date
