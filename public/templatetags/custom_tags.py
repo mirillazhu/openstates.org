@@ -112,8 +112,10 @@ def district_maybe(district):
 
 
 @register.filter()
-def party_color(party_name):
-    if "Democratic" in party_name and "Republican" in party_name:  # just in case
+def party_color_bg(party_name):
+    if not party_name:
+        return "#ffffff"
+    elif "Democratic" in party_name and "Republican" in party_name:  # just in case
         return "#fff3cd"
     elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
         return "#cfe5f4"
@@ -123,6 +125,20 @@ def party_color(party_name):
         return "#edf3f8"
     else:
         return "#fff3cd"
+
+
+@register.filter()
+def party_abbr(party_name):
+    if not party_name:
+        return ""
+    elif "Democratic" in party_name and "Republican" in party_name:  # just in case
+        return ""
+    elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
+        return "(D)"
+    elif "Republican" in party_name:
+        return "(R)"
+    else:
+        return ""
 
 
 @register.filter()
@@ -170,6 +186,14 @@ def titlecase_votes(title):
     title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
 
     return title
+
+
+@register.filter()
+def voter_display_name(legislator_vote):
+    if legislator_vote.voter:
+        return legislator_vote.voter.family_name
+    else:
+        return legislator_vote.voter_name
 
 
 @register.filter()

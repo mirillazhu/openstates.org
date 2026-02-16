@@ -77,7 +77,7 @@
                     <tbody>
                         {% for party, counts in party_votes %}
                             <tr>
-                                <td style="background-color: {{ party|party_color }}">{{ party }}</td>
+                                <td style="background-color: {{ party|party_color_bg }}">{{ party }}</td>
                                 <td>{{ counts.yes }}</td>
                                 <td>{{ counts.no }}</td>
                                 <td>{{ counts.other }}</td>
@@ -108,7 +108,7 @@
             <tr>
                 {% if pv.voter %}
                     <td><a href="{% canonical_url pv.voter %}">{{ pv.voter.name }}</a></td>
-                    <td style="white-space: nowrap; background-color: {{ pv.party|party_color }}">{{ pv.party }}</td>
+                    <td style="white-space: nowrap; background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
                 {% else %}
                     <td>{{ pv.voter_name }}</td>
                     <td></td>

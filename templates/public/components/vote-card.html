@@ -2,7 +2,7 @@
 
 {% if vote.legislator_vote %}
     <p>
-        {{ vote.legislator_vote.voter_name }} voted
+        {{ vote.legislator_vote|voter_display_name }} voted  
         <strong class="
             {% if vote.legislator_vote.option == 'yes' %}
                 u-color--green
@@ -18,7 +18,7 @@
 <a href="{% canonical_url vote %}">
 <div class="card">
     <div>
-        <div class="flex-container align-justify">
+        <div class="flex-container align-justify" style="align-items: flex-start;">
             <h3 class="heading--small">
                     {% if vote.legislator_vote %}
                     {{ vote.bill.identifier }}
