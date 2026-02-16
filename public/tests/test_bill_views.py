@@ -1,5 +1,6 @@
 import pytest
-from graphapi.tests.utils import populate_db
+from django.core.cache import cache
+from graphapi.tests.utils import populate_db, populate_unicam
 from openstates.data.models import Person, VoteEvent
 from testutils.factories import create_test_bill
 
@@ -29,7 +30,7 @@ def sortable_bills(kansas):
 
 
 BILLS_QUERY_COUNT = 7
-ALASKA_BILLS = 12
+ALASKA_BILLS = 13
 
 
 @pytest.mark.django_db
@@ -106,6 +107,11 @@ def test_bills_view_sponsor(client):
 
 
 @pytest.mark.django_db
+def test_bills_view_sponsor_name(client):
+    assert len(client.get("/ak/bills/?sponsor_name=Amanda+Adams").context["bills"]) == 2
+
+
+@pytest.mark.django_db
 def test_bills_view_classification(client):
     bills = len(client.get("/ak/bills/?classification=bill").context["bills"])
     resolutions = len(
@@ -124,13 +130,24 @@ def test_bills_view_classification(client):
 
 @pytest.mark.django_db
 def test_bills_view_subject(client):
-    assert len(client.get("/ak/bills/?subjects=nature").context["bills"]) == 2
+    assert len(client.get("/ak/bills/?subjects=nature").context["bills"]) == 3
 
 
 @pytest.mark.django_db
 def test_bills_view_status(client):
     assert (
         len(client.get("/ak/bills/?status=passed-lower-chamber").context["bills"]) == 1
+    )
+
+
+@pytest.mark.django_db
+def test_bills_view_status_unicameral(client):
+    populate_unicam()
+    assert (
+        len(client.get("/ne/bills/?status=passed-upper-chamber").context["bills"]) == 1
+    )  # legislature is considered upper chamber
+    assert (
+        len(client.get("/ne/bills/?status=passed-lower-chamber").context["bills"]) == 0
     )
 
 
@@ -186,6 +203,29 @@ def test_bills_view_sort_first_action(client, sortable_bills):
 def test_bills_view_bad_page(client):
     resp = client.get("/ak/bills/?page=A")
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_bills_view_caching(client, django_assert_num_queries):
+    state = "ak"
+    cache_key = f"filter_options_{state}"
+
+    cache.delete(cache_key)
+
+    # first request should set cache
+    with django_assert_num_queries(11):
+        client.get("/ak/bills/")
+
+    cached_value = cache.get(cache_key)
+    assert cached_value is not None
+    assert "subjects" in cached_value
+
+    # subsequent request should hit cache, have fewer DB calls
+    with django_assert_num_queries(6):
+        client.get("/ak/bills/")
+    assert cache.get(cache_key) == cached_value
+
+    cache.delete(cache_key)
 
 
 @pytest.mark.django_db

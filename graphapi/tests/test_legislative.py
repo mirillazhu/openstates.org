@@ -83,7 +83,7 @@ def test_bill_by_id(django_assert_num_queries):
     assert result.errors is None
     assert result.data["bill"]["title"] == "Moose Freedom Act"
     assert result.data["bill"]["classification"] == ["bill", "constitutional amendment"]
-    assert result.data["bill"]["subject"] == ["nature"]
+    assert result.data["bill"]["subject"] == ["nature", "moose not meese"]
     assert len(result.data["bill"]["abstracts"]) == 2
     assert len(result.data["bill"]["otherTitles"]) == 3
     assert len(result.data["bill"]["actions"]) == 3
@@ -216,8 +216,8 @@ def test_bills_by_jurisdiction(django_assert_num_queries):
         }"""
         )
     assert result.errors is None
-    # 26 total bills created
-    assert len(result.data["ak"]["edges"] + result.data["wy"]["edges"]) == 26
+    # 27 total bills created
+    assert len(result.data["ak"]["edges"] + result.data["wy"]["edges"]) == 27
 
 
 @pytest.mark.django_db
@@ -234,8 +234,8 @@ def test_bills_by_chamber(django_assert_num_queries):
         }"""
         )
     assert result.errors is None
-    # 26 total bills created
-    assert len(result.data["lower"]["edges"] + result.data["upper"]["edges"]) == 26
+    # 27 total bills created
+    assert len(result.data["lower"]["edges"] + result.data["upper"]["edges"]) == 27
 
 
 @pytest.mark.django_db
@@ -252,8 +252,8 @@ def test_bills_by_session(django_assert_num_queries):
         }"""
         )
     assert result.errors is None
-    # 26 total bills created
-    assert len(result.data["y2017"]["edges"] + result.data["y2018"]["edges"]) == 26
+    # 27 total bills created
+    assert len(result.data["y2017"]["edges"] + result.data["y2018"]["edges"]) == 27
 
 
 @pytest.mark.django_db
@@ -270,9 +270,9 @@ def test_bills_by_classification(django_assert_num_queries):
         }"""
         )
     assert result.errors is None
-    # 26 total bills created
+    # 27 total bills created
     assert (
-        len(result.data["bills"]["edges"] + result.data["resolutions"]["edges"]) == 26
+        len(result.data["bills"]["edges"] + result.data["resolutions"]["edges"]) == 27
     )
 
 
@@ -332,8 +332,8 @@ def test_bills_by_updated_since():
     )
 
     assert result.errors is None
-    assert len(result.data["all"]["edges"]) == 26
-    assert len(result.data["some"]["edges"]) == 6
+    assert len(result.data["all"]["edges"]) == 27
+    assert len(result.data["some"]["edges"]) == 7
     assert len(result.data["none"]["edges"]) == 0
 
 
@@ -409,7 +409,7 @@ def test_bills_queries(django_assert_num_queries):
         )
 
     assert result.errors is None
-    assert len(result.data["bills"]["edges"]) == 26
+    assert len(result.data["bills"]["edges"]) == 27
 
 
 @pytest.mark.django_db()
@@ -467,7 +467,7 @@ def test_bills_pagination_forward():
         bills += page
         assert len(page) <= 5
 
-    assert len(bills) == 26
+    assert len(bills) == 27
 
 
 @pytest.mark.django_db
@@ -499,7 +499,7 @@ def test_bills_pagination_backward():
         bills += page
         assert len(page) <= 5
 
-    assert len(bills) == 26
+    assert len(bills) == 27
 
 
 @pytest.mark.django_db
@@ -536,7 +536,7 @@ def test_bills_total_count(django_assert_num_queries):
             }
         }"""
         )
-    assert result.data["bills"]["totalCount"] == 26
+    assert result.data["bills"]["totalCount"] == 27
     assert len(result.data["bills"]["edges"]) == 5
 
 
@@ -596,9 +596,8 @@ def test_bills_by_action_since():
 
     assert result.errors is None
     # HB2 bill doesn't have any actions
-    assert len(result.data["all"]["edges"]) == 25
-    # only HB1 has data after Feb 2018
-    assert len(result.data["some"]["edges"]) == 1
+    assert len(result.data["all"]["edges"]) == 26
+    assert len(result.data["some"]["edges"]) == 2
     assert len(result.data["none"]["edges"]) == 0
 
 
@@ -660,7 +659,7 @@ def test_bills_order(django_assert_num_queries):
         }"""
         )
     assert result.errors is None
-    assert len(result.data["ak"]["edges"]) == 12
+    assert len(result.data["ak"]["edges"]) == 13
     # ensure updatedAt order is decreasing
     for i in range(11):
         assert (
@@ -722,7 +721,7 @@ query bills($jurisdiction: String, $session: String, $end_cursor: String, $updat
     with django_assert_num_queries(16):
         result = schema.execute(query, variables)
     assert result.errors is None
-    assert result.data["bills"]["totalCount"] == 26
+    assert result.data["bills"]["totalCount"] == 27
 
 
 @pytest.mark.django_db

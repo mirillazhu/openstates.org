@@ -171,7 +171,7 @@ def populate_db():
         legislative_session=session,
         from_organization=house,
         classification=["bill", "constitutional amendment"],
-        subject=["nature"],
+        subject=["nature", "moose not meese"],
     )
     b1.abstracts.create(abstract="Grants all moose equal rights under the law.")
     b1.abstracts.create(abstract="Ensure moose freedom.")

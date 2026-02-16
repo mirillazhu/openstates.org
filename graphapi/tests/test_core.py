@@ -61,7 +61,7 @@ def test_jurisdictions_num_queries(django_assert_num_queries):
     )
     assert (
         len(result.data["jurisdictions"]["edges"][0]["node"]["organizations"]["edges"])
-        == 3
+        == 4
     )
 
 

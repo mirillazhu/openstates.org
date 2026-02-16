@@ -35,7 +35,7 @@ def test_state_view(client, django_assert_max_num_queries):
 
     # bills
     assert len(resp.context["recently_introduced_bills"]) == 4
-    assert len(resp.context["recently_passed_bills"]) == 1
+    assert len(resp.context["recently_passed_bills"]) == 2
 
     # sessions
     assert resp.context["all_sessions"][0].identifier == "2018"
@@ -111,3 +111,41 @@ def test_state_specific_search(client):
     resp = client.get("/al/search/?query=amanda")
     assert len(resp.context["bills"]) == 0
     assert len(resp.context["people"]) == 0
+
+
+@pytest.mark.django_db
+def test_state_specific_search_sessioning(client, django_assert_num_queries):
+
+    session = client.session
+    session.clear()
+    session.save()
+
+    # inital query, base bills exist -- should call get filter options and store in session
+    with django_assert_num_queries(13):
+        client.get("/ak/search/?query=moose")
+
+    session = client.session
+    session.save()
+
+    assert "filter_options" in session
+    saved_filter_options = session["filter_options"]
+    assert "subjects" in saved_filter_options
+
+    # subsequent query with search options form -- should not call get filter options (fewer calls to DB)
+    with django_assert_num_queries(7):
+        client.get("/ak/search/?query=moose&is_filter_form=true")
+
+    session = client.session
+    session.save()
+
+    assert session["filter_options"] == saved_filter_options
+
+    session.clear()
+    session.save()
+
+    # initial query, base bills do not exist -- should not set filter options
+    client.get("/ak/search/?query=buffalo")
+    assert "filter_options" not in session
+
+    session.clear()
+    session.save()
