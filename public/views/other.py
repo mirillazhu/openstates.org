@@ -156,7 +156,7 @@ def site_search(request, state=None):
     if query:
         if state:
             # bill search
-            bills, form = get_bills(request, state)
+            bills, form = get_bills(request, state, allow_query=True)
             paginator, page_num = paginate_bills(request, bills, 20)
             sort_context = get_sort_context(
                 request, ["first_action", "latest_action"], []

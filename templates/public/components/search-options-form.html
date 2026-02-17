@@ -51,24 +51,24 @@
     <fieldset class="mb1">
         <legend>Status</legend>
         {% if chambers|length > 1 %}
-        <input type="checkbox" name="status" id="passed-lower-chamber" value="passed-lower-chamber"
-        {% if "passed-lower-chamber" in form.status %} checked {% endif %}
-        />
-        <label for="passed-lower-chamber">Passed {{ chambers.lower }}</label>
-        <br>
-        
-        <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
-        {% if "passed-upper-chamber" in form.status %} checked {% endif %}
-        />
-        <label for="passed-upper-chamber">Passed {{ chambers.upper }}</label>
-        <br>
+            <input type="checkbox" name="status" id="passed-lower-chamber" value="passed-lower-chamber"
+            {% if "passed-lower-chamber" in form.status %} checked {% endif %}
+            />
+            <label for="passed-lower-chamber">Passed {{ chambers.lower }}</label>
+            <br>
+            
+            <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
+            {% if "passed-upper-chamber" in form.status %} checked {% endif %}
+            />
+            <label for="passed-upper-chamber">Passed {{ chambers.upper }}</label>
+            <br>
 
         {% else %}
-        <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
-        {% if "passed-upper-chamber" in form.status %} checked {% endif %}
-        />
-        <label for="passed-upper-chamber">Passed {{ chambers.legislature }}</label>
-        <br>
+            <input type="checkbox" name="status" id="passed-upper-chamber" value="passed-upper-chamber"
+            {% if "passed-upper-chamber" in form.status %} checked {% endif %}
+            />
+            <label for="passed-upper-chamber">Passed Legislature</label>
+            <br>
         {% endif %}
 
         <input type="checkbox" name="status" id="signed" value="signed"

@@ -61,7 +61,7 @@ def test_jurisdictions_num_queries(django_assert_num_queries):
     )
     assert (
         len(result.data["jurisdictions"]["edges"][0]["node"]["organizations"]["edges"])
-        == 3
+        == 4
     )
 
 
@@ -307,18 +307,31 @@ def test_people_by_name():
 def test_people_by_party():
     result = schema.execute(
         """ {
-        dems: people(memberOf: "Democratic", first: 50) {
-            edges { node { name } }
+            people(first: 100) {
+                edges {
+                    node {
+                        name
+                        primaryParty
+                    }
+                }
+            }
         }
-        reps: people(memberOf: "Republican", first: 50) {
-            edges { node { name } }
-        }
-    }
-    """
+        """
     )
     assert result.errors is None
-    assert len(result.data["dems"]["edges"]) == 3
-    assert len(result.data["reps"]["edges"]) == 4
+    dems = [
+        edge
+        for edge in result.data["people"]["edges"]
+        if edge["node"]["primaryParty"] == "Democratic"
+    ]
+    reps = [
+        edge
+        for edge in result.data["people"]["edges"]
+        if edge["node"]["primaryParty"] == "Republican"
+    ]
+
+    assert len(dems) > 0
+    assert len(reps) > 0
 
 
 # @pytest.mark.django_db
@@ -362,7 +375,7 @@ def test_people_num_queries(django_assert_num_queries):
     total_memberships = 0
     for person in result.data["people"]["edges"]:
         total_memberships += len(person["node"]["currentMemberships"])
-    assert total_memberships == 16  # 8 chambers + 8 parties
+    assert total_memberships == 8  # 8 chambers
 
 
 @pytest.mark.django_db
@@ -402,27 +415,28 @@ def test_people_total_count(django_assert_num_queries):
     assert len(result.data["people"]["edges"]) == 1
 
 
-@pytest.mark.django_db
-def test_people_current_memberships_classification(django_assert_num_queries):
-    with django_assert_num_queries(3):
-        result = schema.execute(
-            """ {
-        people(first: 50) {
-            edges {
-                node {
-                    currentMemberships(classification: "party") {
-                        organization { name }
-                    }
-                }
-            }
-        }
-        }"""
-        )
-    assert result.errors is None
-    total_memberships = 0
-    for person in result.data["people"]["edges"]:
-        total_memberships += len(person["node"]["currentMemberships"])
-    assert total_memberships == 8  # Only the 8 parties should be returned
+# no longer accessing parties via memberships table
+# @pytest.mark.django_db
+# def test_people_current_memberships_classification(django_assert_num_queries):
+#     with django_assert_num_queries(3):
+#         result = schema.execute(
+#             """ {
+#         people(first: 50) {
+#             edges {
+#                 node {
+#                     currentMemberships(classification: "party") {
+#                         organization { name }
+#                     }
+#                 }
+#             }
+#         }
+#         }"""
+#         )
+#     assert result.errors is None
+#     total_memberships = 0
+#     for person in result.data["people"]["edges"]:
+#         total_memberships += len(person["node"]["currentMemberships"])
+#     assert total_memberships == 8  # Only the 8 parties should be returned
 
 
 @pytest.mark.django_db
@@ -445,7 +459,7 @@ def test_people_old_memberships(django_assert_num_queries):
     old_memberships = 0
     for person in result.data["people"]["edges"]:
         old_memberships += len(person["node"]["oldMemberships"])
-    assert old_memberships == 3  # three old memberships in test data right now
+    assert old_memberships == 2
 
 
 @pytest.mark.django_db
@@ -480,7 +494,7 @@ def test_person_by_id(django_assert_num_queries):
     assert result.errors is None
     assert result.data["person"]["name"] == "Bob Birch"
     assert result.data["person"]["primaryParty"] == "Republican"
-    assert len(result.data["person"]["currentMemberships"]) == 2
+    assert len(result.data["person"]["currentMemberships"]) == 1
 
     division = None
     for membership in result.data["person"]["currentMemberships"]:

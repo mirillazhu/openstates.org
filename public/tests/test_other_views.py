@@ -9,11 +9,13 @@ def setup():
 
 @pytest.mark.django_db
 def test_state_view(client, django_assert_max_num_queries):
-    # difficult to make this one exact, so settled for max of 13, fluctuates between 12-13
+    # difficult to make this one exact, so settled for max of 13,
+    # fluctuates between 12-13 (not including state sessioning)
     # expected: organization, person, membership, organization, post,
     #   bill, billsponsorship, person, bill, billsponsorship, person,
     #   legislativesession, organization
-    with django_assert_max_num_queries(13):
+    # then add 4 for state sessioning
+    with django_assert_max_num_queries(17):
         resp = client.get("/ak/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -33,14 +35,11 @@ def test_state_view(client, django_assert_max_num_queries):
 
     # bills
     assert len(resp.context["recently_introduced_bills"]) == 4
-    assert len(resp.context["recently_passed_bills"]) == 1
+    assert len(resp.context["recently_passed_bills"]) == 2
 
     # sessions
     assert resp.context["all_sessions"][0].identifier == "2018"
-    assert (
-        resp.context["all_sessions"][0].bill_count
-        + resp.context["all_sessions"][1].bill_count
-    ) == 12
+    assert len(resp.context["all_sessions"]) == 2
 
 
 @pytest.mark.django_db
@@ -61,19 +60,92 @@ def test_homepage(client, django_assert_num_queries):
     with django_assert_num_queries(0):
         resp = client.get("/")
     assert resp.status_code == 200
-    assert len(resp.context["states"]) == 52
+    assert len(resp.context["states"]) == 53
     assert len(resp.context["blog_updates"])
 
 
 @pytest.mark.django_db
 def test_search(client, django_assert_num_queries):
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(7):
         resp = client.get("/search/?query=moose")
     assert resp.status_code == 200
     assert len(resp.context["bills"]) == 1
     assert len(resp.context["people"]) == 0
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(6):
         resp = client.get("/search/?query=amanda")
     assert len(resp.context["bills"]) == 0
     assert len(resp.context["people"]) == 1
+
+
+@pytest.mark.django_db
+def test_state_specific_search(client):
+    # test title search works
+    resp = client.get("/ak/search/?query=moose")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+    assert len(resp.context["people"]) == 0
+
+    # test search in bill text works
+    resp = client.get("/ak/search/?query=gorgonzola")
+    assert len(resp.context["bills"]) == 1
+    assert len(resp.context["people"]) == 0
+
+    resp = client.get("/ak/search/?query=HB 1")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+
+    resp = client.get("/ak/search/?query=hb 1")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 1
+
+    resp = client.get("/ak/search/?query=amanda")
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 1
+
+    resp = client.get("/al/search/?query=moose")
+    assert resp.status_code == 200
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 0
+
+    resp = client.get("/al/search/?query=amanda")
+    assert len(resp.context["bills"]) == 0
+    assert len(resp.context["people"]) == 0
+
+
+@pytest.mark.django_db
+def test_state_specific_search_sessioning(client, django_assert_num_queries):
+
+    session = client.session
+    session.clear()
+    session.save()
+
+    # inital query, base bills exist -- should call get filter options and store in session
+    with django_assert_num_queries(13):
+        client.get("/ak/search/?query=moose")
+
+    session = client.session
+    session.save()
+
+    assert "filter_options" in session
+    saved_filter_options = session["filter_options"]
+    assert "subjects" in saved_filter_options
+
+    # subsequent query with search options form -- should not call get filter options (fewer calls to DB)
+    with django_assert_num_queries(7):
+        client.get("/ak/search/?query=moose&is_filter_form=true")
+
+    session = client.session
+    session.save()
+
+    assert session["filter_options"] == saved_filter_options
+
+    session.clear()
+    session.save()
+
+    # initial query, base bills do not exist -- should not set filter options
+    client.get("/ak/search/?query=buffalo")
+    assert "filter_options" not in session
+
+    session.clear()
+    session.save()

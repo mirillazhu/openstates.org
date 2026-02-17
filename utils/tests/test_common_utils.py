@@ -1,6 +1,7 @@
 import uuid
 import pytest
 from utils.common import (
+    get_state_abbr,
     jid_to_abbr,
     abbr_to_jid,
     encode_uuid,
@@ -8,6 +9,12 @@ from utils.common import (
     sessions_with_bills,
 )
 from openstates.data.models import Division, Jurisdiction, Bill
+
+
+def test_get_state_abbr():
+    assert get_state_abbr("United States") == "FED"
+    assert get_state_abbr("District of Columbia") == "DC"
+    assert get_state_abbr("Connecticut") == "CT"
 
 
 def test_jid_to_abbr():

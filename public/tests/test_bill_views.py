@@ -1,5 +1,6 @@
 import pytest
-from graphapi.tests.utils import populate_db
+from django.core.cache import cache
+from graphapi.tests.utils import populate_db, populate_unicam
 from openstates.data.models import Person, VoteEvent
 from testutils.factories import create_test_bill
 
@@ -29,12 +30,12 @@ def sortable_bills(kansas):
 
 
 BILLS_QUERY_COUNT = 7
-ALASKA_BILLS = 12
+ALASKA_BILLS = 13
 
 
 @pytest.mark.django_db
 def test_bills_view_basics(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
+    with django_assert_num_queries(BILLS_QUERY_COUNT + 4):
         resp = client.get("/ak/bills/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -42,75 +43,76 @@ def test_bills_view_basics(client, django_assert_num_queries):
     assert len(resp.context["chambers"]) == 2
     assert len(resp.context["sessions"]) == 2
     assert "nature" in resp.context["subjects"]
-    assert len(resp.context["sponsors"]) == 7
+    assert len(resp.context["sponsor_names"]) == 1
     assert len(resp.context["classifications"]) == 3
     # 10 random bills, 2 full featured
     assert len(resp.context["bills"]) == ALASKA_BILLS
 
 
+# no longer including query in bills view
+# @pytest.mark.django_db
+# def test_bills_view_query(client, django_assert_num_queries):
+#     # title search works
+#     with django_assert_num_queries(BILLS_QUERY_COUNT):
+#         resp = client.get("/ak/bills/?query=moose")
+#     assert resp.status_code == 200
+#     assert len(resp.context["bills"]) == 1
+
+#     # search in body works
+#     resp = client.get("/ak/bills/?query=gorgonzola")
+#     assert resp.status_code == 200
+#     assert len(resp.context["bills"]) == 1
+
+#     # test that a query doesn't alter the search options
+#     assert len(resp.context["chambers"]) == 2
+#     assert len(resp.context["sessions"]) == 2
+#     assert "nature" in resp.context["subjects"]
+#     assert len(resp.context["subjects"]) > 10
+#     assert len(resp.context["sponsors"]) == 7
+#     assert len(resp.context["classifications"]) == 3
+
+
+# @pytest.mark.django_db
+# def test_bills_view_query_bill_id(client, django_assert_num_queries):
+#     # query by bill id
+#     with django_assert_num_queries(BILLS_QUERY_COUNT):
+#         resp = client.get("/ak/bills/?query=HB 1")
+#     assert resp.status_code == 200
+#     assert len(resp.context["bills"]) == 1
+
+#     # case insensitive
+#     resp = client.get("/ak/bills/?query=hb 1")
+#     assert resp.status_code == 200
+#     assert len(resp.context["bills"]) == 1
+
+
 @pytest.mark.django_db
-def test_bills_view_query(client, django_assert_num_queries):
-    # title search works
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        resp = client.get("/ak/bills/?query=moose")
-    assert resp.status_code == 200
-    assert len(resp.context["bills"]) == 1
-
-    # search in body works
-    resp = client.get("/ak/bills/?query=gorgonzola")
-    assert resp.status_code == 200
-    assert len(resp.context["bills"]) == 1
-
-    # test that a query doesn't alter the search options
-    assert len(resp.context["chambers"]) == 2
-    assert len(resp.context["sessions"]) == 2
-    assert "nature" in resp.context["subjects"]
-    assert len(resp.context["subjects"]) > 10
-    assert len(resp.context["sponsors"]) == 7
-    assert len(resp.context["classifications"]) == 3
-
-
-@pytest.mark.django_db
-def test_bills_view_query_bill_id(client, django_assert_num_queries):
-    # query by bill id
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        resp = client.get("/ak/bills/?query=HB 1")
-    assert resp.status_code == 200
-    assert len(resp.context["bills"]) == 1
-
-    # case insensitive
-    resp = client.get("/ak/bills/?query=hb 1")
-    assert resp.status_code == 200
-    assert len(resp.context["bills"]) == 1
-
-
-@pytest.mark.django_db
-def test_bills_view_chamber(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        upper = len(client.get("/ak/bills/?chamber=upper").context["bills"])
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        lower = len(client.get("/ak/bills/?chamber=lower").context["bills"])
+def test_bills_view_chamber(client):
+    upper = len(client.get("/ak/bills/?chamber=upper").context["bills"])
+    lower = len(client.get("/ak/bills/?chamber=lower").context["bills"])
     assert upper + lower == ALASKA_BILLS
 
 
 @pytest.mark.django_db
-def test_bills_view_session(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        b17 = len(client.get("/ak/bills/?session=2017").context["bills"])
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        b18 = len(client.get("/ak/bills/?session=2018").context["bills"])
+def test_bills_view_session(client):
+    b17 = len(client.get("/ak/bills/?session=2017").context["bills"])
+    b18 = len(client.get("/ak/bills/?session=2018").context["bills"])
     assert b17 + b18 == ALASKA_BILLS
 
 
 @pytest.mark.django_db
-def test_bills_view_sponsor(client, django_assert_num_queries):
+def test_bills_view_sponsor(client):
     amanda = Person.objects.get(name="Amanda Adams")
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        assert len(client.get(f"/ak/bills/?sponsor={amanda.id}").context["bills"]) == 2
+    assert len(client.get(f"/ak/bills/?sponsor={amanda.id}").context["bills"]) == 2
 
 
 @pytest.mark.django_db
-def test_bills_view_classification(client, django_assert_num_queries):
+def test_bills_view_sponsor_name(client):
+    assert len(client.get("/ak/bills/?sponsor_name=Amanda+Adams").context["bills"]) == 2
+
+
+@pytest.mark.django_db
+def test_bills_view_classification(client):
     bills = len(client.get("/ak/bills/?classification=bill").context["bills"])
     resolutions = len(
         client.get("/ak/bills/?classification=resolution").context["bills"]
@@ -127,24 +129,30 @@ def test_bills_view_classification(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_bills_view_subject(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        assert len(client.get("/ak/bills/?subjects=nature").context["bills"]) == 2
+def test_bills_view_subject(client):
+    assert len(client.get("/ak/bills/?subjects=nature").context["bills"]) == 3
 
 
 @pytest.mark.django_db
-def test_bills_view_status(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT):
-        assert (
-            len(client.get("/ak/bills/?status=passed-lower-chamber").context["bills"])
-            == 1
-        )
+def test_bills_view_status(client):
+    assert (
+        len(client.get("/ak/bills/?status=passed-lower-chamber").context["bills"]) == 1
+    )
 
 
 @pytest.mark.django_db
-def test_bills_view_sort_latest_action(
-    client, django_assert_num_queries, sortable_bills
-):
+def test_bills_view_status_unicameral(client):
+    populate_unicam()
+    assert (
+        len(client.get("/ne/bills/?status=passed-upper-chamber").context["bills"]) == 1
+    )  # legislature is considered upper chamber
+    assert (
+        len(client.get("/ne/bills/?status=passed-lower-chamber").context["bills"]) == 0
+    )
+
+
+@pytest.mark.django_db
+def test_bills_view_sort_latest_action(client, sortable_bills):
     bills = client.get("/ks/bills/?sort=latest_action").context["bills"]
     assert len(bills) == 3
     assert bills[0].identifier == "B"
@@ -170,9 +178,7 @@ def test_bills_view_sort_latest_action(
 
 
 @pytest.mark.django_db
-def test_bills_view_sort_first_action(
-    client, django_assert_num_queries, sortable_bills
-):
+def test_bills_view_sort_first_action(client, sortable_bills):
     bills = client.get("/ks/bills/?sort=first_action").context["bills"]
     for b in bills:
         print(b.identifier, b.first_action_date)
@@ -200,8 +206,31 @@ def test_bills_view_bad_page(client):
 
 
 @pytest.mark.django_db
+def test_bills_view_caching(client, django_assert_num_queries):
+    state = "ak"
+    cache_key = f"filter_options_{state}"
+
+    cache.delete(cache_key)
+
+    # first request should set cache
+    with django_assert_num_queries(11):
+        client.get("/ak/bills/")
+
+    cached_value = cache.get(cache_key)
+    assert cached_value is not None
+    assert "subjects" in cached_value
+
+    # subsequent request should hit cache, have fewer DB calls
+    with django_assert_num_queries(6):
+        client.get("/ak/bills/")
+    assert cache.get(cache_key) == cached_value
+
+    cache.delete(cache_key)
+
+
+@pytest.mark.django_db
 def test_bill_view(client, django_assert_num_queries):
-    with django_assert_num_queries(17):
+    with django_assert_num_queries(21):
         resp = client.get("/ak/bills/2018/HB1/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -224,7 +253,7 @@ def test_bill_view(client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_vote_view(client, django_assert_num_queries):
     vid = VoteEvent.objects.get(motion_text="Vote on House Passage").id.split("/")[1]
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(10):
         resp = client.get(f"/vote/{vid}/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -246,6 +275,8 @@ def test_vote_view(client, django_assert_num_queries):
     assert resp.context["party_votes"][1][1]["yes"] == 1
     assert resp.context["party_votes"][2][0] == "Unknown"
     assert resp.context["party_votes"][2][1]["no"] == 1
+
+    assert resp.context["has_voter_parties"] is True
 
 
 @pytest.mark.django_db

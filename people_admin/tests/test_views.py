@@ -108,7 +108,7 @@ def test_apply_match_source_error(
 @pytest.mark.django_db
 def test_apply_match_404(client, django_assert_num_queries, admin_user):
     client.force_login(admin_user)
-    with django_assert_num_queries(5):
+    with django_assert_num_queries(6):
         match_data = {
             "match_data": {"unmatchedId": 9999, "button": "Match", "matchedId": "1"}
         }
@@ -130,7 +130,7 @@ def test_people_list(client, django_assert_num_queries, admin_user, kansas):
     create_test_person("Bosephorous Fogg", org=house, party="Republican", district="2")
     create_test_person("Cran Crumble", org=senate, party="Republican", district="A")
     client.force_login(admin_user)
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(8):
         resp = client.get("/admin/people/ks/")
     assert resp.status_code == 200
     people = resp.context["context"]["current_people"]

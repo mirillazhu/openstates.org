@@ -47,9 +47,10 @@ def make_random_bill(name):
     return b
 
 
-def make_person(name, state, chamber, district, party):
+def make_person(name, state, chamber, district, party, person_links=None):
     org = Organization.objects.get(jurisdiction__name=state, classification=chamber)
-    party, _ = Organization.objects.get_or_create(classification="party", name=party)
+    # not currently using memberships table for party
+    # party, _ = Organization.objects.get_or_create(classification="party", name=party)
     jurisdiction = Jurisdiction.objects.get(name=state)
     chamber_letter = chamber[0]
     if state == "Alaska":
@@ -76,7 +77,7 @@ def make_person(name, state, chamber, district, party):
         pass
     p = Person.objects.create(
         name=name,
-        primary_party=party.name,
+        primary_party=party,
         current_jurisdiction=jurisdiction,
         current_role={
             "org_classification": chamber,
@@ -86,7 +87,11 @@ def make_person(name, state, chamber, district, party):
         },
     )
     p.memberships.create(post=post, organization=org)
-    p.memberships.create(organization=party)
+    # not currently using memberships table for party
+    # p.memberships.create(organization=party)
+    if person_links:
+        for link in person_links:
+            p.links.create(url=link["url"], note=link.get("note", ""))
     return p
 
 
@@ -116,12 +121,26 @@ def populate_db():
         Organization.objects.create(
             jurisdiction=j, parent=leg, classification="upper", name=state + " Senate"
         )
+        Organization.objects.create(
+            jurisdiction=j,
+            parent=leg,
+            classification="executive",
+            name="Office of the Governor",
+        )
 
     alaska = Jurisdiction.objects.get(name="Alaska")
+    legislature = alaska.organizations.get(classification="legislature")
     house = alaska.organizations.get(classification="lower")
 
     # AK House
-    amanda = make_person("Amanda Adams", "Alaska", "lower", "1", "Republican")
+    amanda_links = [
+        {"url": "https://amandaadamsforstaterep.com", "note": "campaign website"},
+        {"url": "https://linkedin.com/adams", "note": "linkedin page"},
+        {"url": "https://alaskalegislature.gov/amanda-adams/bio", "note": ""},
+    ]
+    amanda = make_person(
+        "Amanda Adams", "Alaska", "lower", "1", "Republican", amanda_links
+    )
     birch = make_person("Bob Birch", "Alaska", "lower", "2", "Republican")
     carrie = make_person("Carrie Carr", "Alaska", "lower", "3", "Democratic")
     don = make_person("Don Dingle", "Alaska", "lower", "4", "Republican")
@@ -152,7 +171,7 @@ def populate_db():
         legislative_session=session,
         from_organization=house,
         classification=["bill", "constitutional amendment"],
-        subject=["nature"],
+        subject=["nature", "moose not meese"],
     )
     b1.abstracts.create(abstract="Grants all moose equal rights under the law.")
     b1.abstracts.create(abstract="Ensure moose freedom.")
@@ -162,7 +181,11 @@ def populate_db():
     b1.other_identifiers.create(identifier="HCA 1")
     b1.other_identifiers.create(identifier="SB 1")
     a = b1.actions.create(
-        description="Introduced", order=10, organization=house, date="2018-01-01"
+        description="Introduced",
+        order=10,
+        organization=house,
+        date="2018-01-01",
+        classification=["introduction"],
     )
     a.related_entities.create(name="Amanda Adams", entity_type="person", person=amanda)
     b1.actions.create(
@@ -247,6 +270,32 @@ def populate_db():
         primary=False, classification="cosponsor", name="Beth Two", person=amanda
     )
 
+    b2 = Bill.objects.create(
+        id="ocd-bill/2",
+        title="Aurora Borealis Act",
+        identifier="HB 2",
+        legislative_session=session,
+        from_organization=house,
+        classification=["bill"],
+        subject=["nature"],
+    )
+    a = b2.actions.create(
+        description="Introduced", order=10, organization=legislature, date="2018-01-01"
+    )
+    b2.actions.create(
+        description="Amended", order=20, organization=legislature, date="2018-02-01"
+    )
+    a = b2.actions.create(
+        description="Passed Legislature",
+        order=30,
+        organization=legislature,
+        date="2018-03-01",
+        classification=["passage"],
+    )
+    a.related_entities.create(
+        name="Legislature", entity_type="organization", organization=legislature
+    )
+
     for x in range(10):
         make_random_bill("Alaska")
     for x in range(14):
@@ -273,9 +322,51 @@ def populate_unicam():
         identifier="2018", name="2018", start_date="2018-01-01"
     )
 
-    Organization.objects.create(
+    leg = Organization.objects.create(
         jurisdiction=j, classification="legislature", name="Nebraska Legislature"
+    )
+    Organization.objects.create(
+        jurisdiction=j,
+        parent=leg,
+        classification="executive",
+        name="Office of the Governor",
     )
 
     make_person("Quincy Quip", "Nebraska", "legislature", "1", "Nonpartisan")
     make_person("Wendy Wind", "Nebraska", "legislature", "2", "Nonpartisan")
+
+    nebraska = Jurisdiction.objects.get(name="Nebraska")
+    legislature = nebraska.organizations.get(classification="legislature")
+    session = nebraska.legislative_sessions.get(identifier="2018")
+
+    b1 = Bill.objects.create(
+        id="ocd-bill/42",
+        title="Rainbow Cows Act",
+        identifier="LB 42",
+        legislative_session=session,
+        from_organization=legislature,
+        classification=["bill"],
+        subject=["farms"],
+    )
+    a = b1.actions.create(
+        description="Introduced",
+        order=10,
+        organization=legislature,
+        date="2018-01-01",
+        classification=["introduction"],
+    )
+    b1.actions.create(
+        description="Amended", order=20, organization=legislature, date="2018-02-01"
+    )
+    a = b1.actions.create(
+        description="Passed Legislature",
+        order=30,
+        organization=legislature,
+        date="2018-03-01",
+        classification=["passage"],
+    )
+    a.related_entities.create(
+        name="Nebraska Legislature",
+        entity_type="organization",
+        organization=legislature,
+    )

@@ -97,7 +97,7 @@
     {% endfor %}
     </div>
 
-    <a class="button" href="/{{state}}/bills/?sponsor={{person.id}}">
+    <a class="button" href="/{{state}}/bills/?sponsor_name={{ person.name|urlencode }}">
         View more bills
     </a>
 </section>

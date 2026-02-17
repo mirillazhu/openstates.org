@@ -11,7 +11,7 @@ def setup():
 
 @pytest.mark.django_db
 def test_legislators_view(client, django_assert_num_queries):
-    with django_assert_num_queries(5):
+    with django_assert_num_queries(9):
         resp = client.get("/ak/legislators/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -23,7 +23,7 @@ def test_legislators_view(client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_person_view(client, django_assert_num_queries):
     p = Person.objects.get(name="Amanda Adams")
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(13):
         resp = client.get(pretty_url(p))
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -41,6 +41,7 @@ def test_person_view(client, django_assert_num_queries):
         "division_id": "ocd-division/country:us/state:ak/sldl:1",
         "title": "Representative",
     }
+    assert person.selected_link.url == "https://amandaadamsforstaterep.com"
     assert len(person.sponsored_bills) == 2
     assert len(person.vote_events) == 1
     assert resp.context["retired"] is False
@@ -50,7 +51,7 @@ def test_person_view(client, django_assert_num_queries):
 def test_person_view_retired(client, django_assert_num_queries):
     p = Person.objects.get(name="Rhonda Retired")
     # fewer views, we don't do the bill queries
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(13):
         resp = client.get(pretty_url(p))
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
