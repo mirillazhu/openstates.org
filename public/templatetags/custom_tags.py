@@ -152,11 +152,11 @@ def titlecase_caps(title):
 
 
 @register.filter()
-def titlecase_votes(title):
+def titlecase_all(title):
     title = title.title()
 
-    # uppercase bill abbreviations with vowels
-    bill_abbreviations_with_vowels = {
+    # uppercase abbreviations with vowels
+    abbreviations_with_vowels = {
         "AB",
         "ACR",
         "HRES",
@@ -165,8 +165,17 @@ def titlecase_votes(title):
         "AR",
         "CA",
         "HJRES",
+        "LCO",
+        "SE",
+        "DPA",
+        "WAM",
+        "LOB",
+        "JHA",
+        "HRE",
+        "HJUB",
+        "EEP",
     }
-    pattern = r"\b(" + "|".join(bill_abbreviations_with_vowels) + r")(?=\s|\d|$)"
+    pattern = r"\b(" + "|".join(abbreviations_with_vowels) + r")(?=\s|\d|$|\/)"
     title = re.sub(pattern, lambda m: m.group(1).upper(), title, flags=re.IGNORECASE)
 
     # uppercase bill abbreviations (or any words) with no vowels or y's

@@ -23,7 +23,7 @@
                     {% if vote.legislator_vote %}
                     {{ vote.bill.identifier }}
                     {% else %}
-                    {{ vote.motion_text|titlecase_votes }}
+                    {{ vote.motion_text|titlecase_all }}
                     {% endif %}
             </h3>
             <span class="label
@@ -38,7 +38,7 @@
         </div>
         {% if vote.legislator_vote %}
         <p>
-            {{ vote.motion_text|titlecase_votes }}
+            {{ vote.motion_text|titlecase_all }}
         </p>
         <!-- TODO: Add more bill info? -->
         {% else %}
