@@ -112,8 +112,10 @@ def district_maybe(district):
 
 
 @register.filter()
-def party_color(party_name):
-    if "Democratic" in party_name and "Republican" in party_name:  # just in case
+def party_color_bg(party_name):
+    if not party_name:
+        return "#ffffff"
+    elif "Democratic" in party_name and "Republican" in party_name:  # just in case
         return "#fff3cd"
     elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
         return "#cfe5f4"
@@ -123,6 +125,20 @@ def party_color(party_name):
         return "#edf3f8"
     else:
         return "#fff3cd"
+
+
+@register.filter()
+def party_abbr(party_name):
+    if not party_name:
+        return ""
+    elif "Democratic" in party_name and "Republican" in party_name:  # just in case
+        return ""
+    elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
+        return "(D)"
+    elif "Republican" in party_name:
+        return "(R)"
+    else:
+        return ""
 
 
 @register.filter()
@@ -136,11 +152,11 @@ def titlecase_caps(title):
 
 
 @register.filter()
-def titlecase_votes(title):
+def titlecase_all(title):
     title = title.title()
 
-    # uppercase bill abbreviations with vowels
-    bill_abbreviations_with_vowels = {
+    # uppercase abbreviations with vowels
+    abbreviations_with_vowels = {
         "AB",
         "ACR",
         "HRES",
@@ -149,8 +165,17 @@ def titlecase_votes(title):
         "AR",
         "CA",
         "HJRES",
+        "LCO",
+        "SE",
+        "DPA",
+        "WAM",
+        "LOB",
+        "JHA",
+        "HRE",
+        "HJUB",
+        "EEP",
     }
-    pattern = r"\b(" + "|".join(bill_abbreviations_with_vowels) + r")(?=\s|\d|$)"
+    pattern = r"\b(" + "|".join(abbreviations_with_vowels) + r")(?=\s|\d|$|\/)"
     title = re.sub(pattern, lambda m: m.group(1).upper(), title, flags=re.IGNORECASE)
 
     # uppercase bill abbreviations (or any words) with no vowels or y's
@@ -170,6 +195,14 @@ def titlecase_votes(title):
     title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
 
     return title
+
+
+@register.filter()
+def voter_display_name(legislator_vote):
+    if legislator_vote.voter:
+        return legislator_vote.voter.family_name
+    else:
+        return legislator_vote.voter_name
 
 
 @register.filter()

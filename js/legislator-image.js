@@ -20,11 +20,13 @@ export default class LegislatorImage extends React.Component {
     const modifier = this.props.size === "medium" ? "" : "thumbnail--small";
     const containerModifier =
       this.props.size === "medium" ? "--medium mr1" : "--small";
-    let containerColor = "#ffdd03";
-    if (this.props.party === "Democratic") {
-      containerColor = "#00abff";
-    } else if (this.props.party == "Republican") {
-      containerColor = "#9e0e44";
+    let containerColor = "#fedb69ff"
+    if (!this.props.party) {
+      containerColor = "#949494";
+    } else if (this.props.party.includes("Democratic")) {
+      containerColor = "#3f98d3";
+    } else if (this.props.party.includes("Republican")) {
+      containerColor = "#d7616f";
     }
     let inner = null;
     if (!this.state.url) {

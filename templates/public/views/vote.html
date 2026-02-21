@@ -12,7 +12,7 @@
         <div class="overview__header">
             <div style="width: 100%;">
                 <div class="flex-container align-justify">
-                    <h3 class="overview__heading">Vote on {{ vote.bill.identifier }} - {{ vote.motion_text|titlecase_votes }}</h3>
+                    <h3 class="overview__heading">Vote on {{ vote.bill.identifier }} - {{ vote.motion_text|titlecase_all }}</h3>
                     <span style="height: min-content;" class="label
                         {% if vote.result == 'pass' %}
                             label--green
@@ -29,7 +29,7 @@
                         <a href="{% canonical_url vote.bill %}">{{ vote.bill.identifier }}</a>
                     </li>
                     <li>
-                        <strong>Motion Text:</strong> {{ vote.motion_text|titlecase_votes }}
+                        <strong>Motion Text:</strong> {{ vote.motion_text|titlecase_all }}
                     </li>
                     <li>
                         <strong>Legislative Session:</strong> {{ vote.legislative_session }}
@@ -77,7 +77,7 @@
                     <tbody>
                         {% for party, counts in party_votes %}
                             <tr>
-                                <td style="background-color: {{ party|party_color }}">{{ party }}</td>
+                                <td style="background-color: {{ party|party_color_bg }}">{{ party }}</td>
                                 <td>{{ counts.yes }}</td>
                                 <td>{{ counts.no }}</td>
                                 <td>{{ counts.other }}</td>
@@ -108,7 +108,7 @@
             <tr>
                 {% if pv.voter %}
                     <td><a href="{% canonical_url pv.voter %}">{{ pv.voter.name }}</a></td>
-                    <td style="white-space: nowrap; background-color: {{ pv.party|party_color }}">{{ pv.party }}</td>
+                    <td style="white-space: nowrap; background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
                 {% else %}
                     <td>{{ pv.voter_name }}</td>
                     <td></td>

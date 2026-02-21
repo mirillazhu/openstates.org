@@ -256,7 +256,10 @@ def bill(request, state, session, bill_id):
         )
     }
     for s in sponsorships:
-        s.person = sponsor_people.get(s.person_id)
+        if s.person_id:
+            s.person = sponsor_people.get(s.person_id)
+        elif s.name.startswith("b'") and s.name.endswith("'"):
+            s.name = s.name[2:-1]  # byte encoding formatting fix
 
     related_entities = Prefetch(
         "related_entities",
