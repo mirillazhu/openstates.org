@@ -1,6 +1,5 @@
 import _ from "lodash";
 import React from "react";
-import ReactDOM from "react-dom";
 import LegislatorImage from "./legislator-image";
 
 export function ChamberButtons(props) {
