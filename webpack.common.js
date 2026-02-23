@@ -8,8 +8,6 @@ module.exports = {
     main: ['babel-polyfill', './js/main'],
     common_components: ['./js/common-components'],
     fyl: ['./js/find-your-legislator'],
-    state_map: ['./js/state-map'],
-    district_map: ['./js/legislator-map'],
     dashboards: ['./js/dashboards'],
     people_admin: ['./js/admin/people'],
   },

@@ -287,7 +287,7 @@ export default class FindYourLegislator extends React.Component {
     return (
       <div className="find-your-legislator">
         <div>
-          <h2 class="heading--small">
+          <h2 className="heading--small mb1">
              Find out who represents you by entering your address below:
           </h2>
           <div className="input-group">
