@@ -1,4 +1,4 @@
-import _ from "lodash";
+import orderBy from "lodash/orderBy";
 import React from "react";
 import LegislatorImage from "./legislator-image";
 
@@ -132,7 +132,7 @@ export default class LegislatorList extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {_.orderBy(
+            {orderBy(
               this.props.legislators,
               [this.state.orderBy],
               [this.state.order]
