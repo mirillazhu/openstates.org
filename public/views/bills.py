@@ -11,6 +11,8 @@ from openstates.data.models import (
     BillActionRelatedEntity,
     VoteEvent,
     Person,
+    BillVersion,
+    BillDocument,
 )
 from openstates.utils.transformers import fix_bill_id
 from utils.common import (
@@ -406,5 +408,50 @@ def vote(request, vote_id):
             "person_votes": person_votes,
             "party_votes": party_votes,
             "has_voter_parties": has_voter_parties,
+        },
+    )
+
+
+def bill_document(request, document_id, document_type):
+
+    if document_type == "bill_text":
+        document = get_object_or_404(
+            BillVersion.objects.all()
+            .select_related(
+                "bill",
+                "bill__legislative_session",
+                "bill__from_organization",
+                "bill__legislative_session__jurisdiction",
+            )
+            .prefetch_related("links"),
+            pk=document_id,
+        )
+    else:  # related document
+        document = get_object_or_404(
+            BillDocument.objects.all()
+            .select_related(
+                "bill",
+                "bill__legislative_session",
+                "bill__from_organization",
+                "bill__legislative_session__jurisdiction",
+            )
+            .prefetch_related("links"),
+            pk=document_id,
+        )
+
+    state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
+    request.session["selected_state"] = state
+
+    document_sources = document.links.values_list("url", flat=True)
+
+    return render(
+        request,
+        "public/views/bill_document.html",
+        {
+            "state": state,
+            "state_nav": "bills",
+            "document": document,
+            "document_type": document_type,
+            "document_sources": document_sources,
         },
     )

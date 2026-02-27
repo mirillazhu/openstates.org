@@ -66,8 +66,11 @@ def action_card(action):
 
 
 @register.inclusion_tag("public/components/document-card.html")
-def document_card(document):
-    return {"document": document}
+def document_card(document_type, document):
+    return {
+        "document_type": document_type,
+        "document": document,
+    }
 
 
 @register.filter()

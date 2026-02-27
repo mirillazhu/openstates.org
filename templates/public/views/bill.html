@@ -194,7 +194,7 @@
         </thead>
         <tbody>
             {% for version in versions reversed %}
-                {% document_card version %}
+                {% document_card "bill_text" version %}
             {% empty %}
                 <tr>
                     <td colspan="100%">No related documents.</td>
@@ -215,7 +215,7 @@
         </thead>
         <tbody>
             {% for document in documents reversed %}
-                {% document_card document %}
+                {% document_card "related" document %}
             {% empty %}
                 <tr>
                     <td colspan="100%">No related documents.</td>
