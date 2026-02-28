@@ -8,25 +8,23 @@
 
 {% block content %}
 <section class="section">
-
-            <div style="width: 100%;">
-                <div class="flex-container align-justify">
-                    <h3 class="overview__heading">
-                        {% if document_type == "bill_text" %}
-                            Bill Text for {{ document.bill.identifier }}
-                        {% else %}
-                            Related Document for {{ document.bill.identifier }}
-                        {% endif %} - {{ document.note }}
-                    </h3>
-                    <div style="margin-left: auto;">
-                        <a class="button" href="{% canonical_url document.bill %}">Back to Bill</a>
-                    </div>
-                </div>
+    <div style="width: 100%;">
+        <div class="flex-container align-justify">
+            <h3 class="overview__heading">
+                {% if document_type == "bill_text" %}
+                    Bill Text for {{ document.bill.identifier }}
+                {% else %}
+                    Related Document for {{ document.bill.identifier }}
+                {% endif %} - {{ document.note }}
+            </h3>
+            <div style="margin-left: auto;">
+                <a class="button" href="{% canonical_url document.bill %}">Back to Bill</a>
             </div>
+        </div>
+    </div>
 
+    {% sources state document_link.url %}
 
 </section>
-
-{% sources state document_sources %}
 
 {% endblock %}

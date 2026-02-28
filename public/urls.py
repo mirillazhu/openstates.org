@@ -59,7 +59,7 @@ urlpatterns = [
     ),
     re_path(r"^vote/(?P<vote_id>[-0-9a-f]+)/$", vote, name="vote-detail"),
     re_path(
-        r"^document/(?P<document_type>[\w]+)/(?P<document_id>[-0-9a-f]+)/$",
+        r"^document/(?P<document_type>[\w]+)/(?P<document_link_id>[-0-9a-f]+)/$",
         bill_document,
         name="bill_document",
     ),

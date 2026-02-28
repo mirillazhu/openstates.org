@@ -11,8 +11,8 @@ from openstates.data.models import (
     BillActionRelatedEntity,
     VoteEvent,
     Person,
-    BillVersion,
-    BillDocument,
+    BillVersionLink,
+    BillDocumentLink,
 )
 from openstates.utils.transformers import fix_bill_id
 from utils.common import (
@@ -412,37 +412,33 @@ def vote(request, vote_id):
     )
 
 
-def bill_document(request, document_id, document_type):
+def bill_document(request, document_link_id, document_type):
 
     if document_type == "bill_text":
-        document = get_object_or_404(
-            BillVersion.objects.all()
-            .select_related(
-                "bill",
-                "bill__legislative_session",
-                "bill__from_organization",
-                "bill__legislative_session__jurisdiction",
-            )
-            .prefetch_related("links"),
-            pk=document_id,
+        document_link = get_object_or_404(
+            BillVersionLink.objects.all().select_related(
+                "version__bill",
+                "version__bill__legislative_session",
+                "version__bill__from_organization",
+                "version__bill__legislative_session__jurisdiction",
+            ),
+            pk=document_link_id,
         )
+        document = document_link.version
     else:  # related document
-        document = get_object_or_404(
-            BillDocument.objects.all()
-            .select_related(
-                "bill",
-                "bill__legislative_session",
-                "bill__from_organization",
-                "bill__legislative_session__jurisdiction",
-            )
-            .prefetch_related("links"),
-            pk=document_id,
+        document_link = get_object_or_404(
+            BillDocumentLink.objects.all().select_related(
+                "document__bill",
+                "document__bill__legislative_session",
+                "document__bill__from_organization",
+                "document__bill__legislative_session__jurisdiction",
+            ),
+            pk=document_link_id,
         )
+        document = document_link.document
 
     state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
     request.session["selected_state"] = state
-
-    document_sources = document.links.values_list("url", flat=True)
 
     return render(
         request,
@@ -451,7 +447,7 @@ def bill_document(request, document_id, document_type):
             "state": state,
             "state_nav": "bills",
             "document": document,
+            "document_link": document_link,
             "document_type": document_type,
-            "document_sources": document_sources,
         },
     )
