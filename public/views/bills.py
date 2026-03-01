@@ -289,7 +289,7 @@ def bill(request, state, session, bill_id):
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
     try:
         sorted_links = sorted(versions[0].links.all(), key=_document_sort_key)
-        read_link = sorted_links[0].url
+        read_link = sorted_links[0]
     except IndexError:
         read_link = None
 
