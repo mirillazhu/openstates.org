@@ -1,7 +1,14 @@
 from django.urls import path, re_path
 from .views.other import home, state, site_search
 from .views.legislators import legislators, person, find_your_legislator
-from .views.bills import bills, bill_dashboard, bill, vote, bill_document
+from .views.bills import (
+    bills,
+    bill_dashboard,
+    bill,
+    vote,
+    bill_document,
+    document_proxy_for_development,
+)
 from .views.fallback import fallback, legislator_fallback
 from utils.common import states
 
@@ -63,6 +70,8 @@ urlpatterns = [
         bill_document,
         name="bill_document",
     ),
+    # for development only -- remove for production
+    path("development-pdf-proxy/<path:remote_url>", document_proxy_for_development),
     # fallbacks
     path("reportcard/", fallback),
     re_path(r"[a-z]{2}/votes/[A-Z]{2}V\d{8}/$", fallback),

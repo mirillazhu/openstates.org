@@ -25,6 +25,7 @@ from profiles.models import Subscription
 from utils.bills import get_bills, get_filter_options, paginate_bills, get_sort_context
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
 from .fallback import fallback
+import requests
 
 
 def bills(request, state):
@@ -451,3 +452,11 @@ def bill_document(request, document_link_id, document_type):
             "document_type": document_type,
         },
     )
+
+
+# to allow pdf render in pdf.js -- for development only
+def document_proxy_for_development(request, remote_url):
+    if not remote_url:
+        return HttpResponse("Missing 'url' parameter", status=400)
+    response = requests.get(remote_url, verify=False)
+    return HttpResponse(response.content, content_type="application/pdf")

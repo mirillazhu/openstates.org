@@ -5,7 +5,6 @@
 {% block og_title %}{{ bill.identifier }} - {{ state|state_name }} {{ bill.from_organization.name }} ({{bill.legislative_session.identifier }}) - Open States{% endblock %}
 {% block description %}Details on {{ state|state_name }} {{ bill.identifier}} ({{ bill.legislative_session }}) - {{ bill.title|titlecase_caps }}{% endblock %}
 
-
 {% block content %}
 <section class="section">
     <div style="width: 100%;">
@@ -21,6 +20,15 @@
                 <a class="button" href="{% canonical_url document.bill %}">Back to Bill</a>
             </div>
         </div>
+    </div>
+
+    <div>
+        <iframe 
+            src="/static/pdfjs/web/viewer.html?file=/development-pdf-proxy/{{ document_link.url }}"
+            width="100%" 
+            height="800px"
+            frameborder="0">
+        </iframe>
     </div>
 
     {% sources state document_link.url %}
