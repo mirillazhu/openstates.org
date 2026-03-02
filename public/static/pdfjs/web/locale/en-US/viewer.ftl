@@ -215,27 +215,27 @@ pdfjs-find-highlight-checkbox = Highlight All
 pdfjs-find-match-case-checkbox-label = Match Case
 pdfjs-find-match-diacritics-checkbox-label = Match Diacritics
 pdfjs-find-entire-word-checkbox-label = Whole Words
-pdfjs-find-reached-top = Reached top of document, continued from bottom
-pdfjs-find-reached-bottom = Reached end of document, continued from top
+pdfjs-find-reached-top = 
+pdfjs-find-reached-bottom = 
 
 # Variables:
 #   $current (Number) - the index of the currently active find result
 #   $total (Number) - the total number of matches in the document
 pdfjs-find-match-count =
     { $total ->
-        [one] { $current } of { $total } match
-       *[other] { $current } of { $total } matches
+        [one] { $current }/{ $total }
+       *[other] { $current }/{ $total }
     }
 
 # Variables:
 #   $limit (Number) - the maximum number of matches
 pdfjs-find-match-count-limit =
     { $limit ->
-        [one] More than { $limit } match
-       *[other] More than { $limit } matches
+        [one] { $limit }+
+       *[other] { $limit }+
     }
 
-pdfjs-find-not-found = Phrase not found
+pdfjs-find-not-found = 0/0
 
 ## Predefined zoom values
 

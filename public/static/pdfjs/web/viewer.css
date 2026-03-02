@@ -605,7 +605,7 @@
     }
 
 :is(:is(.dialog .mainContainer) .title)  > span{
-        font-size:13px;
+        font-size:12px;
         font-style:normal;
         font-weight:590;
         line-height:150%;
@@ -670,7 +670,7 @@
 
 :is(:is(:is(.dialog .mainContainer) .radio) > .radioLabel)  > span{
           flex:1 0 0;
-          font-size:11px;
+          font-size:12px;
           color:var(--text-secondary-color);
         }
 
@@ -679,7 +679,7 @@
       border:1px solid;
       font:menu;
       font-weight:590;
-      font-size:13px;
+      font-size:12px;
       padding:4px 16px;
       width:auto;
       height:32px;
@@ -5783,7 +5783,7 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
   --status-undo-bg:var(--csstools-light-dark-toggle--138, rgb(0 98 250 / 0.08));
   --status-waiting-bg:var(--status-undo-bg);
   --csstools-light-dark-toggle--139:var(--csstools-color-scheme--light) #00cadb;
-  --indicator-color:var(--csstools-light-dark-toggle--139, #0062fa);
+  --indicator-color:transparent;
   --csstools-light-dark-toggle--140:var(--csstools-color-scheme--light) #6e001f;
   --status-warning-bg:var(--csstools-light-dark-toggle--140, #ffe8ea);
   --csstools-light-dark-toggle--141:var(--csstools-color-scheme--light) #ffa0aa;
@@ -5864,7 +5864,7 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
 
 @supports (color: light-dark(red, red)){
 #viewsManager{
-  --indicator-color:light-dark(#0062fa, #00cadb);
+  --indicator-color:transparent;
   --status-warning-bg:light-dark(#ffe8ea, #6e001f);
   --indicator-warning-color:light-dark(#b20037, #ffa0aa);
 }
@@ -5997,14 +5997,15 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
 #viewsManager{
 
   display:flex;
-  padding-bottom:16px;
+  padding-bottom:0px;
+  border-bottom: none;
   flex-direction:column;
   align-items:flex-start;
   height:calc(
-    var(--viewer-container-height) - var(--toolbar-height) -
-      var(--doorhanger-height)
+    var(--viewer-container-height)
   );
   position:absolute;
+  top: var(--toolbar-height);
 
   inset-inline-start:calc(
     -1 * var(--viewsManager-width, --sidebar-width) - 1px
@@ -6013,7 +6014,7 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
   transition-duration:var(--sidebar-transition-duration);
   transition-timing-function:var(--sidebar-transition-timing-function);
 }
-
+  
 #viewsManager .sidebarResizer{
     inset-inline-start:100%;
   }
@@ -6451,6 +6452,14 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
         vertical-align: top;
       }
 
+:is(:is(#viewsManager #viewsManagerContent) #thumbnailsView) > .thumbnail:first-child {
+        margin-top: 30px;
+}
+
+:is(:is(#viewsManager #viewsManagerContent) #thumbnailsView) > .thumbnail:last-child {
+        margin-bottom: 60px;
+}
+
 :is(:is(:is(#viewsManager #viewsManagerContent) #thumbnailsView) > .thumbnail):not(.isDragging)::after{
           content:attr(page-number);
           color:var(--image-page-number-fg);
@@ -6712,9 +6721,9 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
 
   border-radius:var(--sidebar-border-radius);
   box-shadow:var(--sidebar-box-shadow);
-  border:1px solid var(--sidebar-border-color);
+  border:0px solid var(--sidebar-border-color);
   background-color:var(--sidebar-bg-color);
-  inset-block-start:calc(100% + var(--doorhanger-height) - 2px);
+  inset-block-start:calc(100% - 1px);
   padding-block:var(--sidebar-padding);
   width:var(--sidebar-width);
   min-width:var(--sidebar-min-width);
@@ -6734,7 +6743,7 @@ button.hasPopupMenu[aria-expanded="false"] + menu{
     inset-inline-start:calc(0px - var(--resizer-width) / 2);
     transition:background-color 0.5s ease-in-out;
     box-sizing:border-box;
-    border:1px solid transparent;
+    border:0px solid transparent;
     border-block-width:0;
     background-clip:content-box;
   }
@@ -7376,7 +7385,7 @@ body.wait::before{
   height:var(--toolbar-height);
   background-color:var(--sidebar-toolbar-bg-color);
   box-shadow:var(--toolbarSidebar-box-shadow);
-  border-bottom:var(--toolbarSidebar-border-bottom);
+  border-bottom:none;
   padding:var(--toolbar-vertical-padding) var(--toolbar-horizontal-padding);
   justify-content:space-between;
 }
@@ -7662,11 +7671,12 @@ body.wait::before{
 }
 
 .toolbarField:focus{
-    border-color:#0a84ff;
+    border-color:var(--field-border-color);
   }
 
 #pageNumber{
   -moz-appearance:textfield;
+  font-size: 12px !important;
   text-align:end;
   width:40px;
   background-size:0 0;
@@ -7679,7 +7689,7 @@ body.wait::before{
 
 .loadingInput:has( > .loading:is(#pageNumber))::after{
     display:inline;
-    visibility:visible;
+    visibility:hidden;
 
     transition-property:visibility;
     transition-delay:var(--loading-icon-delay);
@@ -7953,8 +7963,7 @@ dialog :link{
 .toolbarButtonWithContainer .menuContainer{
     height:auto;
     max-height:calc(
-      var(--viewer-container-height) - var(--toolbar-height) -
-        var(--doorhanger-height)
+      var(--viewer-container-height) - var(--toolbar-height)
     );
     display:flex;
     flex-direction:column;
@@ -8177,6 +8186,7 @@ dialog :link{
 
 #findbar #findInputContainer{
     margin-inline-start:2px;
+    position: relative;
   }
 
 :is(#findbar #findInputContainer) #findPreviousButton::before{
@@ -8192,29 +8202,37 @@ dialog :link{
 :is(#findbar #findInputContainer) #findInput{
       width:200px;
       padding:5px var(--input-horizontal-padding);
+      padding-inline-end: 40px;
+      font-size: 13px !important;
     }
 
 :is(:is(#findbar #findInputContainer) #findInput)::-moz-placeholder{
         font-style:normal;
+        font-size: 13px !important;
       }
 
 :is(:is(#findbar #findInputContainer) #findInput)::placeholder{
         font-style:normal;
+        font-size: 13px !important;
       }
 
 .loadingInput:has( > [data-status="pending"]:is(:is(#findbar #findInputContainer) #findInput))::after{
         display:inline;
-        visibility:visible;
+        visibility:hidden;
         inset-inline-end:calc(var(--input-horizontal-padding) + 1px);
       }
 
 [data-status="notFound"]:is(:is(#findbar #findInputContainer) #findInput){
-        background-color:rgb(255 102 102);
+        background-color:transparent;
       }
 
 #findbar #findbarMessageContainer{
     display:none;
     gap:4px;
+    position: absolute; 
+    right: 65px; 
+    pointer-events: none; 
+    z-index: 2; 
   }
 
 :is(#findbar #findbarMessageContainer):has( > :is(#findResultsCount,#findMsg):not(:empty)){
@@ -8222,9 +8240,9 @@ dialog :link{
     }
 
 :is(#findbar #findbarMessageContainer) #findResultsCount{
-      background-color:rgb(217 217 217);
-      color:rgb(82 82 82);
-      padding-block:4px;
+      background-color:transparent;
+      color:var(--main-color);
+      padding-block:0px;
     }
 
 :is(:is(#findbar #findbarMessageContainer) #findResultsCount):empty{
@@ -8232,7 +8250,7 @@ dialog :link{
       }
 
 [data-status="notFound"]:is(:is(#findbar #findbarMessageContainer) #findMsg){
-        font-weight:bold;
+        font-weight:normal;
       }
 
 :is(:is(#findbar #findbarMessageContainer) #findMsg):empty{
