@@ -7603,15 +7603,7 @@ body.wait::before{
 }
 
 .pdfSidebarNotification::after{
-  position:absolute;
-  display:inline-block;
-  top:2px;
-  inset-inline-end:2px;
-  content:"";
-  background-color:rgb(112 219 85);
-  height:9px;
-  width:9px;
-  border-radius:50%;
+  display: none !important;
 }
 
 .verticalToolbarSeparator{
@@ -7662,7 +7654,7 @@ body.wait::before{
   border-radius:2px;
   background-color:var(--field-bg-color);
   background-clip:padding-box;
-  border:1px solid var(--field-border-color);
+  border:0px solid var(--field-border-color);
   box-shadow:none;
   color:var(--field-color);
   font-size:12px;
@@ -7678,7 +7670,7 @@ body.wait::before{
   -moz-appearance:textfield;
   font-size: 12px !important;
   text-align:end;
-  width:40px;
+  width:30px;
   background-size:0 0;
   transition-property:none;
 }
@@ -8223,7 +8215,7 @@ dialog :link{
       }
 
 [data-status="notFound"]:is(:is(#findbar #findInputContainer) #findInput){
-        background-color:transparent;
+        background-color:var(--field-bg-color);
       }
 
 #findbar #findbarMessageContainer{
@@ -8240,7 +8232,7 @@ dialog :link{
     }
 
 :is(#findbar #findbarMessageContainer) #findResultsCount{
-      background-color:transparent;
+      background-color:var(--field-bg-color);
       color:var(--main-color);
       padding-block:0px;
     }
@@ -8395,12 +8387,12 @@ dialog :link{
   width:fit-content;
   min-width:140px;
   padding:0;
-  background-color:var(--dropdown-btn-bg-color);
-  border:var(--dropdown-btn-border);
+  background-color:var(--field-bg-color);
+  border:0px var(--dropdown-btn-border);
   border-radius:2px;
   color:var(--main-color);
   font-size:12px;
-  line-height:14px;
+  line-height:16px;
   -webkit-user-select:none;
      -moz-user-select:none;
           user-select:none;
@@ -8419,7 +8411,7 @@ dialog :link{
             appearance:none;
     width:inherit;
     min-width:inherit;
-    height:28px;
+    height:24px;
     font:message-box;
     font-size:12px;
     color:var(--main-color);
@@ -8427,8 +8419,9 @@ dialog :link{
     padding-block:1px 2px;
     padding-inline:6px 38px;
     border:none;
+    border-radius:2px;
     outline:none;
-    background-color:var(--dropdown-btn-bg-color);
+    background-color:var(--field-bg-color);
   }
 
 :is(.dropdownToolbarButton > select)  > option{
