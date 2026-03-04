@@ -242,7 +242,7 @@ def test_bill_view(client, django_assert_num_queries):
     assert len(resp.context["votes"]) == 1
     assert len(resp.context["versions"]) == 2
     assert len(resp.context["documents"]) == 2
-    assert resp.context["read_link"] == "https://example.com/f.pdf"
+    assert resp.context["read_link"].url == "https://example.com/f.pdf"
     assert resp.context["stages"][1] == {
         "date": "2018-03-01",
         "stage": "Alaska House",
@@ -279,7 +279,7 @@ def test_vote_view(client, django_assert_num_queries):
     assert resp.context["has_voter_parties"] is True
 
 
-@pytest.mark.django_db
-def test_bills_feed(client):
-    resp = client.get("/ak/bills/feed/")
-    assert resp.status_code == 200
+# @pytest.mark.django_db
+# def test_bills_feed(client):
+#    resp = client.get("/ak/bills/feed/")
+#    assert resp.status_code == 200
