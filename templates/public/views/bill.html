@@ -57,9 +57,11 @@
                     <div class="cell small-12 medium-9">
                         <h3 class="heading--medium">{{ bill.title|titlecase_caps }}</h3>
                     </div>
+                    {% if read_link %}
                     <div class="cell shrink">
                         <a class="button" href="{% url 'bill_document' 'bill_text' read_link.id %} ">View Latest Bill Text</a>
                     </div>
+                    {% endif %}
                 </div>
                 <div class="grid-x grid-margin-x align-justify">
                   <div class="cell small-12 medium-9">
