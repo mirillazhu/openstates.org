@@ -426,6 +426,7 @@ def bill_document(request, document_link_id, document_type):
             pk=document_link_id,
         )
         document = document_link.version
+        document_type_formatted = "Bill Text"
     else:  # related document
         document_link = get_object_or_404(
             BillDocumentLink.objects.all().select_related(
@@ -437,6 +438,7 @@ def bill_document(request, document_link_id, document_type):
             pk=document_link_id,
         )
         document = document_link.document
+        document_type_formatted = "Related Document"
 
     state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
     request.session["selected_state"] = state
@@ -449,7 +451,7 @@ def bill_document(request, document_link_id, document_type):
             "state_nav": "bills",
             "document": document,
             "document_link": document_link,
-            "document_type": document_type,
+            "document_type_formatted": document_type_formatted,
         },
     )
 
