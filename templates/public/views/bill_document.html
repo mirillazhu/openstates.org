@@ -18,13 +18,11 @@
 
     <div id="pdf-wrapper">
         <iframe 
-            id="pdf-viewer"
-            width="100%"
-            height="800px"
-            frameborder="0">
+            id="pdf-viewer" 
+            class="pdf-viewer">
         </iframe>
 
-        <div id="error-state" style="width: 100%; height: 800px; display: none;">
+        <div id="error-state" class="error-state">
             <h3>Unable to Load Document</h3>
             <p id="error-message"></p>
         </div>
@@ -58,7 +56,7 @@
             // check if viewer is accessible
             const viewerResponse = await fetch(viewerUrl, { method: 'HEAD' });
             if (!viewerResponse.ok) {
-                throw new Error('The PDF viewer is unavailable at this time.');
+                throw new Error('The PDF viewer failed to load.');
             }
             
             // load viewer with PDF
