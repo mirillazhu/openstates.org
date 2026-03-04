@@ -1,23 +1,17 @@
 {% extends "../components/base.html" %}
 {% load custom_tags %}
 
-{% block title %}{{ document.bill.identifier }} - {{ state|state_name }} {{ bill.from_organization.name }} ({{bill.legislative_session.identifier }}) - Open States{% endblock %}
-{% block og_title %}{{ bill.identifier }} - {{ state|state_name }} {{ bill.from_organization.name }} ({{bill.legislative_session.identifier }}) - Open States{% endblock %}
-{% block description %}Details on {{ state|state_name }} {{ bill.identifier}} ({{ bill.legislative_session }}) - {{ bill.title|titlecase_caps }}{% endblock %}
+{% block title %}{{ document_type_formatted }} for {{ document.bill.identifier }} - Open States{% endblock %}
 
 {% block content %}
 <section class="section">
     <div style="width: 100%;">
         <div class="flex-container align-justify">
-            <h3 class="overview__heading">
-                {% if document_type == "bill_text" %}
-                    Bill Text for {{ document.bill.identifier }}
-                {% else %}
-                    Related Document for {{ document.bill.identifier }}
-                {% endif %} - {{ document.note }}
-            </h3>
-            <div style="margin-left: auto;">
-                <a class="button" href="{% canonical_url document.bill %}">Back to Bill</a>
+            <h1 class="heading--large document-header">
+                {{ document_type_formatted }} for {{ document.bill.identifier }} - {{ document.note }}
+            </h1>
+            <div class="back-to-bill-button">
+                <a class = "button" href="{% canonical_url document.bill %}" style="width: 120px;">Back to Bill</a>
             </div>
         </div>
     </div>
