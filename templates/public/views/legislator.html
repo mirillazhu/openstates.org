@@ -10,7 +10,6 @@
 
 {% block scripts %}
   <script src="{% static "bundles/common_components.js" %}"></script>
-  <script src="{% static "bundles/district_map.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -77,9 +76,7 @@
             {% if not retired %}
             <div class="overview__subsection overview__subsection--map">
                 <p class="heading--xsmall">Serving {{ district_maybe }} {{ person.current_role.district }}</p>
-                <div style="width:280px;height:215px" data-hook="legislator-map"
-                    data-division-id="{{ person.current_role.division_id }}"
-                    data-state="{{ state }}"></div>
+                <div style="width:280px; height:200px"></div>
             </div>
             {% endif %}
         </div>

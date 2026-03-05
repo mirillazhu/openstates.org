@@ -6,9 +6,6 @@
 {% block og_title %}{{ legislature.name }} - Open States{% endblock %}
 {% block description %}Follow along with what is happening in the {{ legislature.name }} with Open States.{% endblock %}
 
-{% block scripts %}
-  <script src="{% static "bundles/state_map.js" %}"></script>
-{% endblock %}
 
 {% block content %}
     <script> window.chambers = {{ chambers_json|jsonify }}; </script>
@@ -22,8 +19,6 @@
     </div>
 
     <section class="state-overview-people">
-        <div style="width:100%; height: 300px;" class="state-map" data-hook="state-map" data-state="{{ state }}">
-        </div>
         <div class="state-overview-chambers">
             {% for chamber in chambers %}
                 <div class="state-overview-chamber">
