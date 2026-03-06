@@ -13,7 +13,7 @@
     </li>
     {% if bill.latest_action_date != bill.first_action_date %}
     <li class="card__detail type--xsmall">
-        {{ bill.latest_action_description }} {{ bill.latest_action_date|fdate:"%b %d %Y" }}
+        {{ bill.latest_action_description|titlecase_all }} {{ bill.latest_action_date|fdate:"%b %d %Y" }}
     </li>
     {% endif %}
     {% if bill.first_sponsors %}

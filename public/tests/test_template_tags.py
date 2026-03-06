@@ -1,7 +1,7 @@
 from public.templatetags.custom_tags import (
     state_name,
     titlecase_caps,
-    titlecase_votes,
+    titlecase_all,
 )
 
 
@@ -21,30 +21,28 @@ def test_titlecase_caps():
     assert titlecase_caps("THIS IS A BILL’S TITLE") == "This Is A Bill's Title"
 
 
-def test_titlecase_votes():
-    assert titlecase_votes("This is a vote description") == "This Is A Vote Description"
-    assert titlecase_votes("THIS IS A VOTE DESCRIPTION") == "This Is A Vote Description"
+def test_titlecase_all():
+    assert titlecase_all("This is a vote description") == "This Is A Vote Description"
+    assert titlecase_all("THIS IS A VOTE DESCRIPTION") == "This Is A Vote Description"
     assert (
-        titlecase_votes("THIS IS A VOTE'S DESCRIPTION")
-        == "This Is A Vote's Description"
+        titlecase_all("THIS IS A VOTE'S DESCRIPTION") == "This Is A Vote's Description"
     )
     assert (
-        titlecase_votes("THIS IS A VOTE’S DESCRIPTION")
-        == "This Is A Vote's Description"
+        titlecase_all("THIS IS A VOTE’S DESCRIPTION") == "This Is A Vote's Description"
     )
     assert (
-        titlecase_votes("hb123 passed on the 3RD reading")
+        titlecase_all("hb123 passed on the 3RD reading")
         == "HB123 Passed On The 3rd Reading"
     )
     assert (
-        titlecase_votes("hb 123 passed on the 3RD reading")
+        titlecase_all("hb 123 passed on the 3RD reading")
         == "HB 123 Passed On The 3rd Reading"
     )
     assert (
-        titlecase_votes("ab123 passed on the 3RD reading")
+        titlecase_all("ab123 passed on the 3RD reading")
         == "AB123 Passed On The 3rd Reading"
     )
     assert (
-        titlecase_votes("ab 123 passed on the 3RD reading")
+        titlecase_all("ab 123 passed on the 3RD reading")
         == "AB 123 Passed On The 3rd Reading"
     )

@@ -47,7 +47,7 @@
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
                             <td>
                                 <div class="td-truncate td-truncate-long">
-                                    <span>{{ bill.latest_action_description|title }}</span>
+                                    <span>{{ bill.latest_action_description|titlecase_all }}</span>
                                     <br>
                                     <span class="u-color--gray">{{ bill.latest_action_date|fdate:"%b %d %Y" }}</span>
                                 </div>
