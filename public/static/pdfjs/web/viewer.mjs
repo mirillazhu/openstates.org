@@ -5947,7 +5947,7 @@ const LinkTarget = {
   TOP: 4
 };
 class PDFLinkService {
-  externalLinkEnabled = true;
+  externalLinkEnabled = false;
   constructor({
     eventBus,
     externalLinkTarget = null,
@@ -22767,7 +22767,7 @@ const PDFViewerApplication = {
       this.pdfDocumentProperties?.setDocument(null);
       this.pdfTextExtractor?.setViewer(null);
     }
-    this.pdfLinkService.externalLinkEnabled = true;
+    this.pdfLinkService.externalLinkEnabled = false;
     this.store = null;
     this.isInitialViewSet = false;
     this.url = "";
