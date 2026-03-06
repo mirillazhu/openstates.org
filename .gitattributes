@@ -1,0 +1,2 @@
+# mark pdfjs as vendored
+public/static/pdfjs/** linguist-vendored
