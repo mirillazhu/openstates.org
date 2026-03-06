@@ -6,7 +6,9 @@
 {% block og_title %}{{ bill.identifier }} - {{ state|state_name }} {{ bill.from_organization.name }} ({{bill.legislative_session.identifier }}) - Open States{% endblock %}
 {% block description %}Details on {{ state|state_name }} {{ bill.identifier}} ({{ bill.legislative_session }}) - {{ bill.title|titlecase_caps }}{% endblock %}
 {% block link %}
-    <link rel="canonical" href="https://pluralpolicy.com/app/legislative-tracking/bill/details/{% if state == 'us' %}federal{% else %}state-{{ state }}{% endif %}-{{bill.legislative_session.identifier|dash_check }}-{{ bill.identifier|cut:" "|lower }}" />
+    <link rel="prefetch" href="{% static 'pdfjs/build/pdf.mjs' %}" as="script">
+    <link rel="prefetch" href="{% static 'pdfjs/web/viewer.mjs' %}" as="script">
+    <link rel="prefetch" href="{% static 'pdfjs/web/viewer.css' %}" as="style">
 {% endblock %}
 
 {% block scripts %}
@@ -55,10 +57,11 @@
                     <div class="cell small-12 medium-9">
                         <h3 class="heading--medium">{{ bill.title|titlecase_caps }}</h3>
                     </div>
+                    {% if read_link %}
                     <div class="cell shrink">
-                        <!-- TODO: Add icon indicating external link -->
-                        <a class="button" href="{{ read_link }}">View Latest Bill Text</a>
+                        <a class="button" href="{% url 'bill_document' 'bill_text' read_link.id %} ">View Latest Bill Text</a>
                     </div>
+                    {% endif %}
                 </div>
                 <div class="grid-x grid-margin-x align-justify">
                   <div class="cell small-12 medium-9">
@@ -194,7 +197,7 @@
         </thead>
         <tbody>
             {% for version in versions reversed %}
-                {% document_card version %}
+                {% document_card "bill_text" version %}
             {% empty %}
                 <tr>
                     <td colspan="100%">No related documents.</td>
@@ -215,7 +218,7 @@
         </thead>
         <tbody>
             {% for document in documents reversed %}
-                {% document_card document %}
+                {% document_card "related" document %}
             {% empty %}
                 <tr>
                     <td colspan="100%">No related documents.</td>

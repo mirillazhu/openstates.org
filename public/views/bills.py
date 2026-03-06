@@ -11,6 +11,8 @@ from openstates.data.models import (
     BillActionRelatedEntity,
     VoteEvent,
     Person,
+    BillVersionLink,
+    BillDocumentLink,
 )
 from openstates.utils.transformers import fix_bill_id
 from utils.common import (
@@ -23,6 +25,7 @@ from profiles.models import Subscription
 from utils.bills import get_bills, get_filter_options, paginate_bills, get_sort_context
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
 from .fallback import fallback
+import requests
 
 
 def bills(request, state):
@@ -287,7 +290,7 @@ def bill(request, state, session, bill_id):
     documents = list(bill.documents.order_by("-date").prefetch_related("links"))
     try:
         sorted_links = sorted(versions[0].links.all(), key=_document_sort_key)
-        read_link = sorted_links[0].url
+        read_link = sorted_links[0]
     except IndexError:
         read_link = None
 
@@ -408,3 +411,54 @@ def vote(request, vote_id):
             "has_voter_parties": has_voter_parties,
         },
     )
+
+
+def bill_document(request, document_link_id, document_type):
+
+    if document_type == "bill_text":
+        document_link = get_object_or_404(
+            BillVersionLink.objects.all().select_related(
+                "version__bill",
+                "version__bill__legislative_session",
+                "version__bill__from_organization",
+                "version__bill__legislative_session__jurisdiction",
+            ),
+            pk=document_link_id,
+        )
+        document = document_link.version
+        document_type_formatted = "Bill Text"
+    else:  # related document
+        document_link = get_object_or_404(
+            BillDocumentLink.objects.all().select_related(
+                "document__bill",
+                "document__bill__legislative_session",
+                "document__bill__from_organization",
+                "document__bill__legislative_session__jurisdiction",
+            ),
+            pk=document_link_id,
+        )
+        document = document_link.document
+        document_type_formatted = "Related Document"
+
+    state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
+    request.session["selected_state"] = state
+
+    return render(
+        request,
+        "public/views/bill_document.html",
+        {
+            "state": state,
+            "state_nav": "bills",
+            "document": document,
+            "document_link": document_link,
+            "document_type_formatted": document_type_formatted,
+        },
+    )
+
+
+# to allow pdf render in pdf.js -- for development only
+def document_proxy_for_development(request, remote_url):
+    if not remote_url:
+        return HttpResponse("Missing 'url' parameter", status=400)
+    response = requests.get(remote_url, verify=False)
+    return HttpResponse(response.content, content_type="application/pdf")

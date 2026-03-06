@@ -32,6 +32,9 @@ def header(context):
 
 @register.inclusion_tag("public/components/sources.html")
 def sources(state, sources=None):
+    if isinstance(sources, str):  # convert url to list
+        sources = [sources]
+
     if state:
         legislature = get_legislature_from_abbr(state)
         return {
@@ -66,8 +69,11 @@ def action_card(action):
 
 
 @register.inclusion_tag("public/components/document-card.html")
-def document_card(document):
-    return {"document": document}
+def document_card(document_type, document):
+    return {
+        "document_type": document_type,
+        "document": document,
+    }
 
 
 @register.filter()

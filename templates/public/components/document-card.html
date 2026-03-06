@@ -2,7 +2,7 @@
     <td>{{ document.note }}</td>
     <td>
     {% for link in document.links.all %}
-        <a class="label" href="{{ link.url }}">{{ link.media_type|upper|cut:"APPLICATION/"|cut:"TEXT/"|default:"TEXT" }}</a>
+        <a class="label" href="{% url 'bill_document' document_type link.id %}">{{ link.media_type|upper|cut:"APPLICATION/"|cut:"TEXT/"|default:"TEXT" }}</a>
     {% endfor %}
     </td>
 </tr>
