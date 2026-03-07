@@ -36,12 +36,12 @@
               {% if person.email %}
               <p>
                 <span class="contact__label">Email</span>
-                <a href="mailto:{{ person.email }}">{{ person.email }}</a>
+                {{ person.email }}
               </p>
               {% endif %}
               {% if person.selected_link %}
               <span class="contact__label">Website</span>
-                <a href="{{ person.selected_link.url }}">{{ person.selected_link.url }}</a>
+                {{ person.selected_link.url }}
               {% endif %}
 
             </div>
@@ -57,7 +57,7 @@
                             {% endif %}
                             {% if office.voice %}
                                 <span class="contact__label">Phone</span>
-                                <a href="tel:{{ office.voice }}">{{ office.voice }}</a>
+                                {{ office.voice }}
                             {% endif %}
                             {% if office.fax %}
                                 <span class="contact__label">Fax</span>
