@@ -10,118 +10,120 @@
 
 {% block content %}
 <section class="section">
-
-    <div class="overview">
-        <div class="overview__header">
-          <div data-hook="legislator-image" data-image="{{ person.image }}" data-person-id="{{ person.id }}" data-size="medium" data-party="{{ person.primary_party }}"> </div>
-            <div>
-                <h1 class="overview__heading">{{ person.name }}</h1>
-                <ul class="card__detail-group">
-                    {% if retired %}
-                    <li class="card__detail type--xsmall">Former {{ state|state_name }} Legislator</li>
-                    {% else %}
-                    <li class="card__detail type--xsmall">{{ state|state_name }}</li>
-                    <li class="card__detail type--xsmall">{{ person.current_role.title }}</li>
-                    <li class="card__detail type--xsmall">{{ person.primary_party|party_noun }}</li>
-                    <li class="card__detail type--xsmall">{{ person.current_role.district|district_maybe }} {{ person.current_role.district }}</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-
-        <div class="overview__section overview__section--parent">
-            {% if person.email or person.all_links %}
-            <div class="overview__subsection">
-              <h3 class="heading--small">Online</h3>
-              {% if person.email %}
-              <p>
-                <span class="contact__label">Email</span>
-                {{ person.email }}
-              </p>
-              {% endif %}
-              {% if person.selected_link %}
-              <span class="contact__label">Website</span>
-                {{ person.selected_link.url }}
-              {% endif %}
-
-            </div>
-            {% endif %}
-            {% if person.all_offices %}
-                {% for office in person.all_offices %}
-                <div class="overview__subsection">
-                    <address class="contact">
-                        <h3 class="heading--small">{{ office.display_name }}</h3>
-                            <p>
-                            {% if office.address %}
-                            <p>{{ office.address|format_address }}</p>
-                            {% endif %}
-                            {% if office.voice %}
-                                <span class="contact__label">Phone</span>
-                                {{ office.voice }}
-                            {% endif %}
-                            {% if office.fax %}
-                                <span class="contact__label">Fax</span>
-                                {{ office.fax }}
-                            {% endif %}
-                            </p>
-                    </address>
+    <section class="mb1">
+        <div class="overview">
+            <div class="overview__header">
+            <div data-hook="legislator-image" data-image="{{ person.image }}" data-person-id="{{ person.id }}" data-size="medium" data-party="{{ person.primary_party }}"> </div>
+                <div>
+                    <h1 class="overview__heading">{{ person.name }}</h1>
+                    <ul class="card__detail-group">
+                        {% if retired %}
+                        <li class="card__detail type--xsmall">Former {{ state|state_name }} Legislator</li>
+                        {% else %}
+                        <li class="card__detail type--xsmall">{{ state|state_name }}</li>
+                        <li class="card__detail type--xsmall">{{ person.current_role.title }}</li>
+                        <li class="card__detail type--xsmall">{{ person.primary_party|party_noun }}</li>
+                        <li class="card__detail type--xsmall">{{ person.current_role.district|district_maybe }} {{ person.current_role.district }}</a></li>
+                        {% endif %}
+                    </ul>
                 </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if not retired %}
-            <div class="overview__subsection overview__subsection--map">
-                <p class="heading--xsmall">Serving {{ district_maybe }} {{ person.current_role.district }}</p>
-                <div style="width:280px; height:200px"></div>
             </div>
-            {% endif %}
-        </div>
 
-    </div>
-</section>
-
-{% if person.sponsored_bills %}
-<section class="section">
-    <h2 class="heading--medium">Sponsored Bills</h2>
-    <hr>
-    <div class="bill-grid">
-    {% for bill in person.sponsored_bills %}
-        {% bill_card state bill %}
-    {% endfor %}
-    </div>
-
-    <a class="button" href="/{{state}}/bills/?sponsor_name={{ person.name|urlencode }}">
-        View more bills
-    </a>
-</section>
-{% endif %}
-
-
-{% if person.vote_events %}
-<section class="section">
-    <h2 class="heading--medium">Recent Votes</h2>
-    <hr>
-
-    <div class="timeline">
-    {% regroup person.vote_events by start_date as votes_by_date %}
-    {% for start_date in votes_by_date reversed %}
-        {% for vote_event in start_date.list %}
-        <div class="timeline-item">
-            <div class="timeline-date">
-                {% if forloop.first %}
-                <h3 class="heading--xsmall">{{ start_date.grouper|fdate:"%b %d, %Y" }}</h3>
+            <div class="overview__section overview__section--parent">
+                {% if person.email or person.all_links %}
+                <div class="overview__subsection">
+                <h3 class="heading--small">Online</h3>
+                {% if person.email %}
+                <p>
+                    <span class="contact__label">Email</span>
+                    {{ person.email }}
+                </p>
                 {% endif %}
-            </div>
-            <div class="timeline-activity">
-                {% vote_card vote_event %}
-            </div>
-        </div>
-        {% endfor %}
-    {% endfor %}
-    </div>
-</section>
-{% endif %}
+                {% if person.selected_link %}
+                <span class="contact__label">Website</span>
+                    {{ person.selected_link.url }}
+                {% endif %}
 
-{% sources state person.sources.all %}
+                </div>
+                {% endif %}
+                {% if person.all_offices %}
+                    {% for office in person.all_offices %}
+                    <div class="overview__subsection">
+                        <address class="contact">
+                            <h3 class="heading--small">{{ office.display_name }}</h3>
+                                <p>
+                                {% if office.address %}
+                                <p>{{ office.address|format_address }}</p>
+                                {% endif %}
+                                {% if office.voice %}
+                                    <span class="contact__label">Phone</span>
+                                    {{ office.voice }}
+                                {% endif %}
+                                {% if office.fax %}
+                                    <span class="contact__label">Fax</span>
+                                    {{ office.fax }}
+                                {% endif %}
+                                </p>
+                        </address>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                
+                <div class="overview__subsection overview__subsection--map {% if retired %}overview__subsection--empty{% endif %}">
+                    {% if not retired %}
+                    <p class="heading--xsmall">Serving {{ district_maybe }} {{ person.current_role.district }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    {% if person.sponsored_bills %}
+    <section>
+        <h2 class="heading--medium">Sponsored Bills</h2>
+        <hr>
+        <div class="bill-grid">
+        {% for bill in person.sponsored_bills %}
+            {% bill_card state bill %}
+        {% endfor %}
+        </div>
+
+        <a class="button" href="/{{state}}/bills/?sponsor_name={{ person.name|urlencode }}">
+            View more bills
+        </a>
+    </section>
+    {% endif %}
+
+
+    {% if person.vote_events %}
+    <section>
+        <h2 class="heading--medium">Recent Votes</h2>
+        <hr>
+
+        <div class="timeline">
+        {% regroup person.vote_events by start_date as votes_by_date %}
+        {% for start_date in votes_by_date reversed %}
+            {% for vote_event in start_date.list %}
+            <div class="timeline-item">
+                <div class="timeline-date">
+                    {% if forloop.first %}
+                    <h3 class="heading--xsmall">{{ start_date.grouper|fdate:"%b %d, %Y" }}</h3>
+                    {% endif %}
+                </div>
+                <div class="timeline-activity">
+                    {% vote_card vote_event %}
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% sources state person.sources.all %}
+
+</section>
 
 {% endblock %}
