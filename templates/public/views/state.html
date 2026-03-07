@@ -3,9 +3,6 @@
 {% load static %}
 
 {% block title %}{{ legislature.name }} - Open States{% endblock %}
-{% block og_title %}{{ legislature.name }} - Open States{% endblock %}
-{% block description %}Follow along with what is happening in the {{ legislature.name }} with Open States.{% endblock %}
-
 
 {% block content %}
     <script> window.chambers = {{ chambers_json|jsonify }}; </script>
