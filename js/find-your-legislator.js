@@ -331,8 +331,7 @@ export default class FindYourLegislator extends React.Component {
           )}
 
           <div className="mapbox-credit">
-              Post-redistricting geographic data graciously provided by 
-              <a href="https://redistrictingdatahub.org/"> Redistricting Data Hub</a>.
+              Post-redistricting geographic data graciously provided by Redistricting Data Hub.
           </div>
           
           <div className="mapbox-credit">Geolocation powered by <img
