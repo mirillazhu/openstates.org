@@ -7,6 +7,25 @@
 <section class="section">
     <h1 class="heading--large">Bills I'm Following</h1>
 
+    {% if not tracked_bills %}
+
+    <h2 class="heading--small" style="margin-top: 48px;">
+      You aren't currently following any bills. Search for a bill to add today!
+    </h2>
+
+    <form action="{% url 'state_search' state|default:'us' %}">
+      <div class="input-group">
+          <input class="input-group-field" type="search" placeholder="SB 38, Veterans, Public Finance, Correction" name="query">
+          <div class="input-group-button">
+              <button type="submit" class="button button--secondary">
+                Search
+              </button>
+          </div>
+      </div>
+    </form>
+
+    {% else %}
+
     <div class="grid-x grid-margin-x">
         <div class="cell medium-12">
 
@@ -76,5 +95,8 @@
             {% pagination tracked_bills request.GET %}
         </div>
     </div>
+
+    {% endif %}
+
 </section>
 {% endblock %}
