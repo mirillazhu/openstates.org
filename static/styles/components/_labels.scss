@@ -29,18 +29,18 @@ a.label {
         height: 1.5rem;
         margin-left: -0.25rem;
         margin-right: 0.25rem;
-        vertical-align: middle;
+        vertical-align: middle; 
     }
 
     .label--green {
         background-color: lighten($color-green, 20%);
-        color: darken($color-green, 20%);
+        color: darken($color-green, 40%);
         font-weight: $global-weight-bold;
     }
 
     .label--red {
-        background-color: lighten($color-red, 20%);
-        color: darken($color-red, 20%);
+        background-color: #f83073; // built in function produced color that was too faded, so set manually
+        color: darken($color-red, 90%);
         font-weight: $global-weight-bold;
     }
 

@@ -25,6 +25,9 @@
         <div class="text-center">
           <h2 class="heading--medium">Search &amp; Track Legislation</h2>
           <img src="{% static "images/nounproject/political_2003975.svg" %}">
+          <p>
+            Find out which bills are being proposed and follow bills about topics you care about. 
+          </p>
           <form action="/search/">
               <div class="input-group">
                   <input class="input-group-field" type="search" placeholder="Coronavirus, Transportation, etc." name="query">
@@ -38,45 +41,37 @@
         <div class="text-center">
             <h2 class="heading--medium">Find Your Legislators</h2>
             <img src="{% static "images/nounproject/people_2911761.svg" %}">
+            <p>
+                Legislators write, debate, and vote on bills. Your legislators represent you and your interests.
+            </p>
             <form action="/us/find_your_legislator/">
-              <div class="fyl-row">
                 <div class="input-group">
                     <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
                     <div class="input-group-button">
                         <input type="submit" class="button button--primary" value="Search">
                     </div>
                 </div>
-
-                <div class="fyl-locate">
-                  <input type="submit" id="locate" class="button button--primary" name="geolocate" value="Use Current Location">
-                </div>
-              </div>
             </form>
         </div>
 
         <div class="text-center">
             <hr>
-            <h2 class="heading--medium">Dig In To Our Data &amp; APIs</h2>
+            <h2 class="heading--medium">Explore Committee Data</h2>
             <img height="150" src="{% static "images/nounproject/data_2921737.svg" %}">
             <p style="margin-top: 1rem">
-                We make all of our data available for bulk download
-                and via our powerful APIs.
-                <br>
-                <br>
-                Get an API key to get started.
+                Information on committee topics and membership for all bill committees in your state. 
             </p>
+            <input type="submit" class="button button--primary" value="Go to Committees">
         </div>
 
         <div class="text-center">
             <hr>
-            <h2 class="heading--medium">Project Updates</h2>
+            <h2 class="heading--medium">Resources</h2>
             <img height="150" src="{% static "images/nounproject/news_750649.svg" %}">
-            {% for update in blog_updates %}
-            <div class="blog-update">
-                <div class="blog-date">{{ update.date|fdate:"%B %-d, %Y" }}</div>
-                {{ update.title }}
-            </div>
-            {% endfor %}
+            <p style="margin-top: 1rem;">
+                Learn about the policy process and how you can have a say in which bills become law. 
+            </p>
+            <input type="submit" class="button button--primary" value="Go to Resources">
         </div>
     </div>
 
