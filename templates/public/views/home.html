@@ -3,21 +3,15 @@
 {% load custom_tags %}
 
 {% block title %}Open States: discover politics in your state and Congress{% endblock %}
-{% block og_title %}Open States: discover politics in your state and Congress{% endblock %}
-{% block description %}Follow politics in your state legislature, Congress and more. Find your legislators, browse bills and track how legislators have voted.{% endblock %}
-
-{% block link %}
-    <link rel="canonical" href="https://pluralpolicy.com/open" />
-{% endblock %}
 
 {% block content %}
 
 <section class="section" id="homepage-section">
     <div class="homepage-hero">
         <div style="padding: .75rem 1.25rem; border: 1px solid #ffeeba; background-color: #fff3cd; margin-bottom: 1rem;">
-            Open States is now Plural! The Open States website is now available at <a>open.pluralpolicy.com</a>.<br>
+            Open States is now Plural! The Open States website is now available at open.pluralpolicy.com.<br>
             You are welcome to continue using these tools while we prepare a migration process to help you adopt our new tools.<br>
-            You can try out an account using those new and improved tools now, at <a>https://pluralpolicy.com/get-started/</a>
+            You can try out an account using those new and improved tools now, at https://pluralpolicy.com/get-started/.
         </div>
         <h1 class="heading--large">Discover Politics In Your State and Congress</h1>
         <p class="heading--small">Track bills, review upcoming legislation, and see how your local and federal representatives are voting.</p>
@@ -65,11 +59,11 @@
             <h2 class="heading--medium">Dig In To Our Data &amp; APIs</h2>
             <img height="150" src="{% static "images/nounproject/data_2921737.svg" %}">
             <p style="margin-top: 1rem">
-                We make all of our data available for <a href="/data/">bulk download</a>
-                and via our powerful <a href="https://docs.openstates.org/api-v3/">APIs</a>.
+                We make all of our data available for bulk download
+                and via our powerful APIs.
                 <br>
                 <br>
-                <a href="/accounts/profile/#apikey">Get an API key</a> to get started.
+                Get an API key to get started.
             </p>
         </div>
 
@@ -80,7 +74,7 @@
             {% for update in blog_updates %}
             <div class="blog-update">
                 <div class="blog-date">{{ update.date|fdate:"%B %-d, %Y" }}</div>
-                <a href="{{ update.link }}">{{ update.title }}</a>
+                {{ update.title }}
             </div>
             {% endfor %}
         </div>

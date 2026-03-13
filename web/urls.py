@@ -1,11 +1,7 @@
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from django.contrib import admin
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, RedirectView
-from graphapi.views import KeyedGraphQLView
-from graphapi.middleware import QueryProtectionMiddleware
-from bundles.views import bundle_view
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -14,38 +10,38 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("accounts/profile/", include("profiles.urls")),
     path("dashboard/", include("dashboards.urls")),
-    re_path(
-        "^graphql/?$",
-        csrf_exempt(
-            KeyedGraphQLView.as_view(
-                graphiql=True, middleware=[QueryProtectionMiddleware(5000)]
-            )
-        ),
-    ),
+    # re_path(
+    #     "^graphql/?$",
+    #     csrf_exempt(
+    #         KeyedGraphQLView.as_view(
+    #             graphiql=True, middleware=[QueryProtectionMiddleware(5000)]
+    #         )
+    #     ),
+    # ),
     path("", include("public.urls")),
-    path("", include("web.redirects")),
-    path("data/", include("bulk.urls")),
-    path("bundles/", include("bundles.urls")),
-    path("covid19/", bundle_view, {"slug": "covid19"}),
+    # path("", include("web.redirects")),
+    # path("data/", include("bulk.urls")),
+    # path("bundles/", include("bundles.urls")),
+    # path("covid19/", bundle_view, {"slug": "covid19"}),
     # flatpages
     path("about/", TemplateView.as_view(template_name="flat/about.html")),
-    path(
-        "about/contributing/",
-        TemplateView.as_view(template_name="flat/contributing.html"),
-    ),
-    path(
-        "about/subscriptions/",
-        TemplateView.as_view(template_name="flat/subscriptions.html"),
-    ),
+    # path(
+    #     "about/contributing/",
+    #     TemplateView.as_view(template_name="flat/contributing.html"),
+    # ),
+    # path(
+    #     "about/subscriptions/",
+    #     TemplateView.as_view(template_name="flat/subscriptions.html"),
+    # ),
     path("tos/", TemplateView.as_view(template_name="flat/tos.html")),
-    path("api/registered/", TemplateView.as_view(template_name="flat/registered.html")),
-    re_path(
-        "^api/v1",
-        RedirectView.as_view(
-            url="https://docs.openstates.org/api-v3/",
-            permanent=True,
-        ),
-    ),
+    # path("api/registered/", TemplateView.as_view(template_name="flat/registered.html")),
+    # re_path(
+    #     "^api/v1",
+    #     RedirectView.as_view(
+    #         url="https://docs.openstates.org/api-v3/",
+    #         permanent=True,
+    #     ),
+    # ),
 ]
 
 

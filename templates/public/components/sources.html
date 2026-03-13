@@ -1,14 +1,14 @@
 <section>
   <h3 class="heading--medium">Sources</h3>
 
-    <p>Data on Open States is updated periodically throughout the day from the official website of the <a href="{{ legislature_url }}">{{ legislature_name }}</a>.</p>
+    <p>Data on Open States is updated periodically throughout the day from the official website of the {{ legislature_name }}.</p>
 
-    <p>If you notice any inconsistencies with these official sources, feel free to <a href="https://github.com/openstates/issues/issues">file an issue</a>.</p>
+    <p>If you notice any inconsistencies with these official sources, feel free to <a>file an issue</a>.</p>
 
   {% if sources %}
   <ul>
     {% for source in sources %}
-      <li>{{ source|urlize }}</li>
+      <li>{{ source }}</li>
     {% endfor %}
   </ul>
   {% endif %}
