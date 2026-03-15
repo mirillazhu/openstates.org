@@ -29,7 +29,7 @@ export function ChamberButtons(props) {
           onClick={() => props.setChamber(null)}
           className={`button ${props.chamber === null ? "button--active" : ""}`}
         >
-          Both Chambers
+          All
         </button>
       </div>
     );
@@ -134,8 +134,8 @@ export default class LegislatorList extends React.Component {
           <tbody>
             {orderBy(
               this.props.legislators,
-              [this.state.orderBy],
-              [this.state.order]
+              [this.state.orderBy, "name"],
+              [this.state.order, "asc"]
             )
               .filter(
                 legislator =>
