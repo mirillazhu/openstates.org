@@ -6,6 +6,8 @@ from utils.orgs import get_chambers_from_abbr, get_legislature_from_abbr, org_as
 
 
 def committees(request, state):
+    request.session["selected_state"] = state
+
     chambers = get_chambers_from_abbr(state)
     chambers.append(
         get_legislature_from_abbr(state)
@@ -36,6 +38,8 @@ def _role_sort_key(membership):
 
 
 def committee(request, state, committee_id):
+    request.session["selected_state"] = state
+
     ocd_org_id = decode_uuid(committee_id, "organization")
     org = get_object_or_404(Organization.objects.all(), pk=ocd_org_id)
 
