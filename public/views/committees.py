@@ -44,6 +44,9 @@ def committee(request, state, committee_id):
     if request.path != canonical_url:
         return redirect(canonical_url, permanent=True)
 
+    # get sources
+    committee_sources = [source["url"] for source in org.sources]
+
     # because there are memberships without person records, we need to do this
     # piecemeal, we'll grab the people and memberships separately and combine them
     memberships = sorted(
@@ -70,6 +73,7 @@ def committee(request, state, committee_id):
             "state": state,
             "state_nav": "committees",
             "committee": org,
+            "committee_sources": committee_sources,
             "memberships": memberships,
         },
     )
