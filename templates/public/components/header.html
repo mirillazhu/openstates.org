@@ -57,7 +57,8 @@ context ~a little differently~.
                     <li><a {% if state_nav == "overview" %} class="is-active" {% endif %} href="{% url 'state' state %}">Overview </a></li>
                     <li><a {% if state_nav == "legislators" %} class="is-active" {% endif %} href="{% url 'legislators' state %}">Legislators</a></li>
                     <li><a {% if state_nav == "bills" %} class="is-active" {% endif %} href="{% url 'bills' state %}">Bills</a></li>
-                {% endif %}
+                    <li><a {% if state_nav == "committees" %} class="is-active" {% endif %} href="{% url 'committees' state %}">Committees</a></li>
+                    {% endif %}
                 </ul>
 
                 <form action="
@@ -94,3 +95,12 @@ context ~a little differently~.
     </div>
     {% endif %}
 </header>
+
+<script>
+    window.addEventListener('pageshow', function(event) {
+        // reload entire page if the page is loaded from back button
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            window.location.reload();
+        }
+    });
+</script>

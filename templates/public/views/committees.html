@@ -1,0 +1,40 @@
+{% extends "../components/base.html" %}
+{% load custom_tags %}
+{% load static %}
+
+{% block title %}{{ state|state_name }} Committees - Open States{% endblock %}
+
+{% block scripts %}
+  <script src="{% static "bundles/common_components.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+    <h1 class="heading--large">{{ state|state_name }} Committees</h1>
+
+    {% if not committees %}
+    <p>
+        No committee data is currently available for {{ state|state_name}}.
+    </p>
+    {% else %}
+
+    <div data-hook="committee-list"></div>
+
+    <script>
+        window.committees = {{ committees|jsonify }};
+        window.chambers = {{ chambers|jsonify }};
+    </script>
+    <noscript>
+        <ul>
+        {% for com in committees %}
+        <li><a href="{{ com.pretty_url }}">{{ com.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </noscript>
+
+    {% sources state %}
+
+    {% endif %}
+
+</section>
+{% endblock %}

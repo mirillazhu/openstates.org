@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import LegislatorImage from "./legislator-image";
 import LegislatorList from "./legislator-list";
+import CommitteeList from "./committee-list";
 import FollowButton from "./follow-button";
 
 window.addEventListener("load", () => {
@@ -13,6 +14,17 @@ window.addEventListener("load", () => {
         chambers: window.chambers,
       }),
       ll
+    );
+  }
+
+  const cl = document.querySelector('[data-hook="committee-list"]');
+  if (cl) {
+    ReactDOM.render(
+      React.createElement(CommitteeList, {
+        committees: window.committees,
+        chambers: window.chambers,
+      }),
+      cl
     );
   }
 
