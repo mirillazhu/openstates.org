@@ -35,7 +35,7 @@ SYNONYM_GROUPS = [
     ["bail", "pretrial"],
     ["dog", "canine"],
     ["drug", "substance", "narcotic"],
-    ["crime", "offense", "violation", "felony"],
+    ["crime", "offense", "felony"],
     ["attorney", "lawyer", "public defender"],
     ["sentence", "conviction", "resentencing"],
     ["juvenile", "youth"],
@@ -79,7 +79,7 @@ SYNONYM_GROUPS = [
     ["union", "collective bargaining", "labor organization"],
     ["workplace", "work environment", "osha"],
     ["discrimination", "bias", "inequity", "prejudice"],
-    ["religious freedom", "religion", "faith", "church"],
+    ["religious freedom", "religion", "faith"],
     # government
     ["election", "vote", "ballot", "disenfranchisement"],
     ["redistricting", "gerrymandering", "reapportionment"],
