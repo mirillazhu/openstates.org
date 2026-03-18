@@ -28,6 +28,7 @@ openstates = "6.17.8"
 rrl = "^0.3.1"
 PyGithub = "^1.54.1"
 yamlordereddictloader = "^0.4.0"
+snowballstemmer = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.0"
