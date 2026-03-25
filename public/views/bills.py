@@ -452,6 +452,7 @@ def bill_document(request, document_link_id, document_type):
             "document": document,
             "document_link": document_link,
             "document_type_formatted": document_type_formatted,
+            "viewer_mode": "image",  # image or pdf, temp solution for testing
         },
     )
 

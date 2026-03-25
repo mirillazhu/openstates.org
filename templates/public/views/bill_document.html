@@ -1,7 +1,20 @@
 {% extends "../components/base.html" %}
 {% load custom_tags %}
+{% load static %}
 
 {% block title %}{{ document_type_formatted }} for {{ document.bill.identifier }} - Open States{% endblock %}
+
+{% block scripts %}
+    <script>
+        window.PDF_URL = '/development-pdf-proxy/{{ document_link.url }}';
+    </script>
+
+    {% if viewer_mode == 'image' %}
+        <script src="{% static 'bundles/image_viewer.js' %}"></script>
+    {% else %}
+        <script src="{% static 'bundles/pdf_viewer.js' %}"></script>
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <section class="section">
@@ -16,11 +29,26 @@
         </div>
     </div>
 
-    <div id="pdf-wrapper">
-        <iframe 
-            id="pdf-viewer" 
-            class="pdf-viewer">
-        </iframe>
+    <div id="document-wrapper" class="document-wrapper mb1">
+        <div id="pdf-viewer-div">
+            <iframe id="pdf-viewer" class="pdf-viewer"></iframe>
+        </div>
+
+        <div id="image-viewer" class="image-viewer">  <!-- image fallback -->
+            <div id="toolbar">
+                <button id="zoom-out" class="tool-button">&#8722;</button>
+                <span id="zoom-level">75%</span>
+                <button id="zoom-in"  class="tool-button">&#43;</button>
+            </div>
+
+            <div id="viewer-scroll">
+                <div id="initial-loading">
+                    <img src="/static/pdfjs/web/images/loading.svg" class="loading-spinner"/>
+                    <span>Loading document...</span>
+                </div>
+                <div id="pages-wrapper" style="display:none;"></div>
+            </div>
+        </div>
 
         <div id="error-state" class="error-state">
             <h3>Unable to Load Document</h3>
@@ -31,48 +59,5 @@
     {% sources state document_link.url %}
 
 </section>
-
-<script>
-    const pdfUrl = '/development-pdf-proxy/{{ document_link.url }}';
-    const viewerUrl = '/static/pdfjs/web/viewer.html';
-    const iframe = document.getElementById('pdf-viewer');
-    const errorState = document.getElementById('error-state');
-    const errorMessage = document.getElementById('error-message');
-
-    function showError(message) {
-        iframe.style.display = 'none';
-        errorState.style.display = 'block';
-        errorMessage.textContent = message;
-    }
-
-    async function loadPDF() {
-        try {
-            // check if PDF is accessible -- change for DB solution
-            const pdfResponse = await fetch(pdfUrl, { method: 'HEAD' });
-            if (!pdfResponse.ok) {
-                throw new Error('This PDF is unavailable or may no longer exist.');
-            }
-            
-            // check if viewer is accessible
-            const viewerResponse = await fetch(viewerUrl, { method: 'HEAD' });
-            if (!viewerResponse.ok) {
-                throw new Error('The PDF viewer failed to load.');
-            }
-            
-            // load viewer with PDF
-            iframe.src = `${viewerUrl}?file=${encodeURIComponent(pdfUrl)}`;
-        
-            // catch any errors from iframe
-            iframe.addEventListener('error', () => {
-                showError('The PDF viewer failed to load.'); 
-            });
-            
-        } catch (error) {
-            showError(error.message);
-        }
-    }
-
-    loadPDF();
-</script>
 
 {% endblock %}
