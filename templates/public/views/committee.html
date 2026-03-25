@@ -13,7 +13,7 @@
     <h1 class="heading--large">{{ committee.name }}</h1>
     <h2 class="heading--small">
         {% if committee.parent.classification == "legislature" %}
-        {{ committee.parent }}
+        {{ committee.parent }} Committee
         {% else %}
         {{ state|state_name }} {{ committee.parent }} Committee
         {% endif %}
@@ -33,7 +33,7 @@
             <tr>
                 {% if membership.member %}
                 <td>
-                    <div data-hook="legislator-image" data-image="{{ membership.member.image }}" data-person-id="{{ membership.person_id }}"> </div>
+                    <div data-hook="legislator-image" data-image="{{ membership.member.image }}" data-person-id="{{ membership.person_id }}"  data-party="{{ membership.member.primary_party }}"> </div>
                 </td>
                 <td><a href="{% canonical_url membership.member %}">{{ membership.member.name }}</a></td>
                 <td>{{ membership.member.primary_party }}</td>
@@ -44,13 +44,13 @@
                 <td>{{ membership.person_name }}</td>
                 <td></td>
                 {% endif %}
-                <td>{{ membership.role }}</td>
+                <td>{{ membership.role|title }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    {% sources state committee.sources.all %}
+    {% sources state committee_sources %}
 
 </section>
 {% endblock %}

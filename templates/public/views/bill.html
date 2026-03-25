@@ -82,7 +82,7 @@
                     <h3 class="heading--xsmall">Bill Subjects</h3>
                     {% for subject in bill.subject %}
                         <!-- TODO: Link to bill subjects -->
-                        <a class="label" link="#">{{ subject|title }}</a>
+                        <span class="label label--bold">{{ subject|title }}</span>
                     {% endfor %}
                 </div>
                 {% endif %}

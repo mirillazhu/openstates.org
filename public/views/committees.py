@@ -2,11 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Count, F
 from openstates.data.models import Organization, Person
 from utils.common import decode_uuid, pretty_url
-from utils.orgs import get_chambers_from_abbr, org_as_dict
+from utils.orgs import get_chambers_from_abbr, get_legislature_from_abbr, org_as_dict
 
 
 def committees(request, state):
+    request.session["selected_state"] = state
+
     chambers = get_chambers_from_abbr(state)
+    chambers.append(
+        get_legislature_from_abbr(state)
+    )  # include legislature in chambers for joint committees
 
     committees = [
         org_as_dict(c)
@@ -33,6 +38,8 @@ def _role_sort_key(membership):
 
 
 def committee(request, state, committee_id):
+    request.session["selected_state"] = state
+
     ocd_org_id = decode_uuid(committee_id, "organization")
     org = get_object_or_404(Organization.objects.all(), pk=ocd_org_id)
 
@@ -40,6 +47,9 @@ def committee(request, state, committee_id):
     canonical_url = pretty_url(org)
     if request.path != canonical_url:
         return redirect(canonical_url, permanent=True)
+
+    # get sources
+    committee_sources = [source["url"] for source in org.sources]
 
     # because there are memberships without person records, we need to do this
     # piecemeal, we'll grab the people and memberships separately and combine them
@@ -67,6 +77,7 @@ def committee(request, state, committee_id):
             "state": state,
             "state_nav": "committees",
             "committee": org,
+            "committee_sources": committee_sources,
             "memberships": memberships,
         },
     )

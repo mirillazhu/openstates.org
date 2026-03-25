@@ -12,15 +12,16 @@
     white-space: nowrap;
 }
 
+.label--bold {
+    font-weight: $global-weight-bold;
+}
+
 a.label {
     font-weight: $global-weight-bold;
     transition: opacity 200ms ease;
-    cursor: default;
-
-    // TODO: are tags going to be clickable?
-    // &:hover {
-    //     opacity: 0.75;
-    // }
+    &:hover {
+        opacity: 0.75;
+    }
 }
 
     .label__icon {
@@ -29,7 +30,7 @@ a.label {
         height: 1.5rem;
         margin-left: -0.25rem;
         margin-right: 0.25rem;
-        vertical-align: middle; 
+        vertical-align: middle;
     }
 
     .label--green {

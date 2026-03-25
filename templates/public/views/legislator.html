@@ -85,8 +85,8 @@
                     <svg class="label__icon"><use xlink:href="{% static 'images/icons.svg' %}#icon-group"></use></svg>
                     {{ m.organization.name }}
                     {% if m.role.lower != 'member' %}
-                    <span style="font-weight: normal;">
-                        | {{ m.role|title }}
+                    <span>
+                        ({{ m.role|title }})
                     </span>
                     {% endif %}
                 </a>
