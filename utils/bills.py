@@ -1,10 +1,10 @@
 import re
-from django.contrib.postgres.search import SearchQuery
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import F, Func
 from django.http import Http404
 from openstates.data.models import Bill, Person
 from openstates.utils.transformers import fix_bill_id
+from .bill_search import expand_query
 from .common import abbr_to_jid, sessions_with_bills
 from .orgs import get_chambers_from_abbr
 
@@ -47,14 +47,10 @@ def search_bills(
         jid = abbr_to_jid(state.lower())
         bills = bills.filter(legislative_session__jurisdiction_id=jid)
     if query:
-        if re.match(r"\w{1,3}\s*\d{1,5}", query):
+        if re.match(r"\w{1,3}\s*\d{1,5}", query):  # bill id, e.g. SB 23
             bills = bills.filter(identifier__iexact=fix_bill_id(query))
-        else:
-            bills = bills.filter(
-                searchable__search_vector=SearchQuery(
-                    query, search_type="websearch", config="english"
-                )
-            )
+        else:  # bill keywords
+            bills = bills.filter(searchable__search_vector=expand_query(query))
     if chamber:
         bills = bills.filter(from_organization__classification=chamber)
     if session:
