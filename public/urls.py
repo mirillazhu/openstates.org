@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from .views.other import home, state, site_search
+from .views.other import home, state, resources, site_search
 from .views.legislators import legislators, person, find_your_legislator
 from .views.bills import (
     bills,
@@ -24,6 +24,7 @@ urlpatterns = [
     # top level views
     path("", home, name="home"),
     path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
+    path("resources/", resources, name="resources"),
     # non state-specific search (placeholder)
     path("search/", site_search, name="search"),
     re_path(r"^(?P<state>{})/$".format(state_abbr_pattern), state, name="state"),
