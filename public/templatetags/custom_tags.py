@@ -84,12 +84,12 @@ def state_name(state_abbr):
         return "New York State"
     elif state_abbr.lower() == "wa":
         return "Washington State"
-    elif state:
-        return state.name
     elif state_abbr.lower() == "dc":
         return "District of Columbia"
     elif state_abbr.lower() == "us":
         return "Federal"
+    elif state:
+        return state.name
     else:
         return ""
 
