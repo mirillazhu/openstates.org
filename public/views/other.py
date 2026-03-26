@@ -135,15 +135,9 @@ def state(request, state):
 
 
 def resources(request):
-
-    # get state for state dropdown
     state = request.session.get("selected_state", "")
-
-    return render(
-        request,
-        "public/views/resources.html",
-        {"state": state},
-    )
+    context = {"state": state}
+    return render(request, "public/views/resources.html", context)
 
 
 def site_search(request, state=None):
