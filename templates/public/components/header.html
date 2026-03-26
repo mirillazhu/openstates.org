@@ -8,7 +8,7 @@ context ~a little differently~.
 
 <header class="header">
     <div class="grid-container" id="header__top">
-        <a href="{% url 'home' %}">
+        <a href="{% url 'state_homepage' state|default:'us' %}">
             <img class="header__logo" width="300" src="{% static 'images/openstates_plural_logo.png' %}" alt="OpenStates Logo">
         </a>
 

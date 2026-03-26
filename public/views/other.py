@@ -1,10 +1,9 @@
 import feedparser
 from collections import Counter
-from django.core.cache import cache
 from django.db.models import Sum
 from django.shortcuts import render
 from openstates.data.models import Bill, Organization, Person
-from utils.common import abbr_to_jid, states, sessions_with_bills, jid_to_abbr
+from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
     search_bills,
     EXCLUDED_CLASSIFICATIONS,
@@ -42,14 +41,10 @@ def _preprocess_sponsors(bills):
         bill.extra_sponsors = len(sponsorships) - len(bill.first_sponsors)
 
 
-def home(request):
-    # cache these to try to keep the homepage as cheap as possible
-    cache_time = 60 * 60 * 24  # cache for a full day
-    updates = cache.get_or_set(
-        "homepage-blog-updates-cb", _get_latest_updates, cache_time
-    )
-
-    context = {"states": states, "blog_updates": updates}
+# state-specific homepage
+def home(request, state="us"):
+    request.session["selected_state"] = state
+    context = {"state": state}
     return render(request, "public/views/home.html", context)
 
 

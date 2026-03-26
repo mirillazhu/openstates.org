@@ -80,7 +80,11 @@ def document_card(document_type, document):
 def state_name(state_abbr):
     # lookup returns None if there's no such state, but can't take a None value itself
     state = us.states.lookup(state_abbr or "")
-    if state:
+    if state_abbr.lower() == "ny":
+        return "New York State"
+    elif state_abbr.lower() == "wa":
+        return "Washington State"
+    elif state:
         return state.name
     elif state_abbr.lower() == "dc":
         return "District of Columbia"

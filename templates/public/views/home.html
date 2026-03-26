@@ -23,12 +23,12 @@
 
     <div class="homepage-grid">
         <div class="text-center">
-          <h2 class="heading--medium">Search &amp; Track Legislation</h2>
+          <h2 class="heading--medium">Search {{ state|state_name }} Bills</h2>
           <img src="{% static "images/nounproject/political_2003975.svg" %}">
           <p>
-            Find out which bills are being proposed and follow bills about topics you care about. 
+            Find out which bills are being introduced and follow bills about topics you care about. 
           </p>
-          <form action="/search/">
+          <form action="{% url 'state_search' state %}">
               <div class="input-group">
                   <input class="input-group-field" type="search" placeholder="Coronavirus, Transportation, etc." name="query">
                   <div class="input-group-button">
@@ -44,7 +44,7 @@
             <p>
                 Legislators write, debate, and vote on bills. Your legislators represent you and your interests.
             </p>
-            <form action="/us/find_your_legislator/">
+            <form action="{% url 'find_your_legislator' state %}">
                 <div class="input-group">
                     <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
                     <div class="input-group-button">
@@ -59,9 +59,9 @@
             <h2 class="heading--medium">Explore Committee Data</h2>
             <img height="150" src="{% static "images/nounproject/data_2921737.svg" %}">
             <p style="margin-top: 1rem">
-                Detailed information on committee topics and membership for all bill committees in your state. 
+                Information on committee topics and membership for all legislative committees {% if state == 'us' %}in Congress{% else %}in your state{% endif %}.
             </p>
-            <input type="submit" class="button button--primary" value="Go to Committees">
+            <a href="{% url 'committees' state %}" class="button button--primary">Go to Committees</a>
         </div>
 
         <div class="text-center">
@@ -69,7 +69,7 @@
             <h2 class="heading--medium">Resources</h2>
             <img height="150" src="{% static "images/nounproject/news_750649.svg" %}">
             <p style="margin-top: 1rem;">
-                What is a bill? What can my legislator do for me? How can I have a say in which bills become law? Find out here! 
+                Learn about the policy process and how you can have a say in which bills become law. 
             </p>
             <a href="/resources/" class="button button--primary">Go to Resources</a>
         </div>
