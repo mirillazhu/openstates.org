@@ -8,15 +8,17 @@ context ~a little differently~.
 
 <header class="header">
     <div class="grid-container" id="header__top">
-        <a href="{% url 'home' %}">
+        <a href="{% url 'state_homepage' state|default:'us' %}">
             <img class="header__logo" width="300" src="{% static 'images/openstates_plural_logo.png' %}" alt="OpenStates Logo">
         </a>
 
        <div id="header__login">
+         <a href="/resources">Resources</a>
+         <span style="margin-left: 3em;"></span>
          {% if user.is_authenticated %}
          <a href="/bill_dashboard">
             My Bills{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
-        </a>
+         </a>
          <span style="margin-left: 3em;">
          <a href="/accounts/profile/">{{ user.username|default:"Profile" }}</a> |
          <a href="/accounts/logout/">Sign Out</a>
@@ -54,9 +56,8 @@ context ~a little differently~.
 
                 <ul class="navigation__section navigation__menu">
                 {% if state %}
-                    <li><a {% if state_nav == "overview" %} class="is-active" {% endif %} href="{% url 'state' state %}">Overview </a></li>
-                    <li><a {% if state_nav == "legislators" %} class="is-active" {% endif %} href="{% url 'legislators' state %}">Legislators</a></li>
                     <li><a {% if state_nav == "bills" %} class="is-active" {% endif %} href="{% url 'bills' state %}">Bills</a></li>
+                    <li><a {% if state_nav == "legislators" %} class="is-active" {% endif %} href="{% url 'legislators' state %}">Legislators</a></li>
                     <li><a {% if state_nav == "committees" %} class="is-active" {% endif %} href="{% url 'committees' state %}">Committees</a></li>
                     {% endif %}
                 </ul>
