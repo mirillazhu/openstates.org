@@ -10,6 +10,8 @@ module.exports = {
     fyl: ['./js/find-your-legislator'],
     dashboards: ['./js/dashboards'],
     people_admin: ['./js/admin/people'],
+    pdf_viewer: ['./js/pdf-viewer'],
+    image_viewer: ['./js/image-viewer'],
   },
   output: {
     path: path.resolve(output_dir),
