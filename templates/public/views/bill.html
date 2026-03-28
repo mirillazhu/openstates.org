@@ -11,6 +11,7 @@
 
 {% block scripts %}
   <script src="{% static "bundles/common_components.js" %}"></script>
+  <script src="{% static "bundles/sponsors_toggle.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -230,22 +231,6 @@
     {% sources state bill.sources.all %}
 
 </section>
-
-<script>
-    var grid = document.getElementById('sponsors-grid');
-    var cells = grid.getElementsByClassName('cell');
-
-    document.getElementById('sponsors-toggle').onclick = function() {
-        var expanded = this.getAttribute('data-expanded') === 'true';
-        
-        for (var i = 18; i < cells.length; i++) {
-            cells[i].style.display = expanded ? 'none' : '';
-        }
-        
-        this.setAttribute('data-expanded', expanded ? 'false' : 'true');
-        this.textContent = expanded ? '+ More' : '- Less';
-    };
-</script>
 
 {% endblock %}
 

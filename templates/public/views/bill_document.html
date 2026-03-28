@@ -9,10 +9,10 @@
         window.PDF_URL = '/development-pdf-proxy/{{ document_link.url }}';
     </script>
 
-    {% if viewer_mode == 'image' %}
-        <script src="{% static 'bundles/image_viewer.js' %}"></script>
-    {% else %}
+    {% if viewer_mode == 'pdf' %}
         <script src="{% static 'bundles/pdf_viewer.js' %}"></script>
+    {% else %}
+        <script src="{% static 'bundles/image_viewer.js' %}"></script>
     {% endif %}
 {% endblock %}
 

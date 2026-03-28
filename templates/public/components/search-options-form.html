@@ -1,6 +1,11 @@
 {% load custom_tags %}
+{% load static %}
 
-<form onsubmit="cleanUrl(this)"> 
+{% block scripts %}
+  <script src="{% static "bundles/search_options_form.js" %}"></script>
+{% endblock %}
+
+<form id="search-options-form"> 
 
     {% if search_html_hidden_vars %}
         <input type="hidden" name="query" value="{{ query }}" /> 
@@ -100,41 +105,10 @@
     <button type="submit" class="button button--primary">Apply Filters</button>
 
     <button type="button" 
+            id="clear-filters-button"
             class="button button--primary" 
             style="background-color: #dbe6f1; border-color: #dbe6f1; color: #015f5d;"
-            onclick="resetFilters(this.form)">
+            >
         Clear Filters&nbsp;
     </button>
 </form>
-
-<script>
-    function cleanUrl(form) {
-        /* removes empty filter parameters from URL */
-        for (var i = 0; i < form.elements.length; i++) {
-            var input = form.elements[i];
-            if (input.name && (!input.value || input.value === '')) {
-                input.name = ''; 
-            }
-        }
-    }
-
-    function resetFilters(form) {
-        /* clear all form inputs */
-        form.querySelectorAll('select').forEach(select => {
-            Array.from(select.options).forEach(option => {
-                option.selected = false;
-            });
-        });
-        
-        form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        
-        form.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.checked = false;
-        });
-
-        cleanUrl(form)
-        form.submit();
-    }
-</script>

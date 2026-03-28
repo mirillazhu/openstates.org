@@ -96,12 +96,3 @@ context ~a little differently~.
     </div>
     {% endif %}
 </header>
-
-<script>
-    window.addEventListener('pageshow', function(event) {
-        // reload entire page if the page is loaded from back button
-        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-            window.location.reload();
-        }
-    });
-</script>
