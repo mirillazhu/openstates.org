@@ -24,3 +24,13 @@ function checkIE() {
 }
 
 window.addEventListener("load", checkIE);
+
+function reloadPage(event) {
+  // reload entire page if the page is loaded from back button
+  const navEntry = performance.getEntriesByType("navigation")[0];
+  if (event.persisted || (navEntry && navEntry.type === "back_forward")) {
+    window.location.reload();
+  }
+}
+
+window.addEventListener("pageshow", reloadPage);
