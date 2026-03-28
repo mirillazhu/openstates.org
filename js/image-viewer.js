@@ -16,9 +16,9 @@ window.addEventListener('load', function() {
     const ZOOM_MAX     = 300;
 
     function showError(message) {
-        imageViewer.style.display   = 'none';
-        errorState.style.display     = 'block';
-        errorMessage.textContent     = message;
+        imageViewer.style.display = 'none';
+        errorState.style.display  = 'block';
+        errorMessage.textContent  = message;
     }
 
     // page zoom
