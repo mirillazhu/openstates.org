@@ -5,23 +5,9 @@ export default class FollowButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      following: false,
+      following: JSON.parse(this.props.isFollowing.toLowerCase()),
     };
     this.toggle = this.toggle.bind(this);
-    this.checkIfFollowing = this.checkIfFollowing.bind(this);
-    if (!this.props.skipCheck) {
-      this.checkIfFollowing();
-    }
-  }
-
-  checkIfFollowing() {
-    fetch("/accounts/profile/bill_sub/?bill_id=" + this.props.billId)
-      .then(response => {
-        return response.json();
-      })
-      .then(json => {
-        this.setState({ following: json.active });
-      });
   }
 
   toggle() {
@@ -35,13 +21,16 @@ export default class FollowButton extends React.Component {
       method = "POST";
     }
 
-    fetch("/accounts/profile/bill_sub/", {
+    fetch("/bill_subscription/", {
       method: method,
       credentials: "same-origin",
       headers: {
         "X-CSRFToken": csrftoken,
       },
-      body: JSON.stringify({ bill_id: this.props.billId }),
+      body: JSON.stringify({ 
+        bill_id: this.props.billId, 
+        latest_action_id: this.props.latestActionId 
+      }),
     })
       .then(response => {
         return response.json();
@@ -67,7 +56,3 @@ export default class FollowButton extends React.Component {
     }
   }
 }
-
-FollowButton.defaultProps = {
-  skipCheck: false,
-};

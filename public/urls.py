@@ -8,6 +8,7 @@ from .views.bills import (
     vote,
     bill_document,
     document_proxy_for_development,
+    bill_subscription,
 )
 from .views.committees import committees, committee
 from .views.fallback import fallback, legislator_fallback
@@ -24,6 +25,7 @@ urlpatterns = [
     # top level views
     path("", home, name="home"),
     path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
+    path("bill_subscription/", bill_subscription, name="bill_subscription"),
     path("resources/", resources, name="resources"),
     # non state-specific search (placeholder)
     path("search/", site_search, name="search"),
@@ -42,7 +44,7 @@ urlpatterns = [
         legislators,
         name="legislators",
     ),
-    re_path(r"^person/.*\-(?P<person_id>[0-9A-Za-z]+)/$", person, name="person-detail"),
+    re_path(r"^person/(?P<person_id>[0-9A-Za-z]+)/$", person, name="person-detail"),
     # state-specific search
     re_path(
         r"^(?P<state>{})/search/$".format(state_abbr_pattern),
@@ -83,7 +85,7 @@ urlpatterns = [
         name="committees",
     ),
     re_path(
-        r"^(?P<state>{})/committees/.*\-(?P<committee_id>[0-9A-Za-z]+)/$".format(
+        r"^(?P<state>{})/committees/(?P<committee_id>[0-9A-Za-z]+)/$".format(
             state_abbr_pattern
         ),
         committee,

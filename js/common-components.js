@@ -46,7 +46,8 @@ window.addEventListener("load", () => {
     ReactDOM.render(
       React.createElement(FollowButton, {
         billId: fb.getAttribute("data-bill-id"),
-        skipCheck: fb.getAttribute("data-skip-check"),
+        latestActionId: fb.getAttribute("data-latest-action-id"),
+        isFollowing: fb.getAttribute("data-following"),
       }),
       fb
     );

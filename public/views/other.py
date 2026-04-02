@@ -1,6 +1,7 @@
 import feedparser
 from collections import Counter
 from django.db.models import Sum
+from django.http import Http404
 from django.shortcuts import render
 from openstates.data.models import Bill, Organization, Person
 from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
@@ -8,9 +9,10 @@ from utils.bills import (
     search_bills,
     EXCLUDED_CLASSIFICATIONS,
     get_bills,
-    paginate_bills,
     get_sort_context,
     get_filter_options,
+    paginate_bills,
+    PageOutOfBounds,
 )
 from utils.people import person_as_dict
 
@@ -158,7 +160,10 @@ def site_search(request, state=None):
         if state:
             # bill search
             bills, form = get_bills(request, state, allow_query=True)
-            paginator, page_num = paginate_bills(request, bills, 20)
+            try:
+                paginator, page_num = paginate_bills(request, bills, 20)
+            except PageOutOfBounds:
+                raise Http404()
             sort_context = get_sort_context(
                 request, ["first_action", "latest_action"], []
             )
@@ -216,7 +221,10 @@ def site_search(request, state=None):
                 sort="-latest_action",
                 exclude_classifications=EXCLUDED_CLASSIFICATIONS,
             )
-            paginator, page_num = paginate_bills(request, bills, 20)
+            try:
+                paginator, page_num = paginate_bills(request, bills, 20)
+            except PageOutOfBounds:
+                raise Http404()
 
             # people search
             people = []

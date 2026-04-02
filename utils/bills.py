@@ -223,21 +223,6 @@ def get_filter_options(state, base_bills):
     return options
 
 
-def paginate_bills(request, bills, page_size):
-    # handle pagination for bills queryset
-    try:
-        page_num = int(request.GET.get("page", 1))
-    except ValueError:
-        raise Http404()  # invalid pages not found
-    paginator = Paginator(bills, page_size)
-    try:
-        bills = paginator.page(page_num)
-    except EmptyPage:
-        raise Http404()
-
-    return paginator, page_num
-
-
 def get_sort_context(request, sortable_columns, ascending_by_default):
     # get sort urls & arrows
     sort = request.GET.get("sort", "-latest_action")
@@ -267,3 +252,27 @@ def get_sort_context(request, sortable_columns, ascending_by_default):
         context[f"{col_name}_arrow"] = arrow
 
     return context
+
+
+def paginate_bills(request, bills, page_size):
+    # handle pagination for bills queryset
+    try:
+        page_num = int(request.GET.get("page", 1))
+    except ValueError:
+        raise Http404()  # invalid pages not found
+    paginator = Paginator(bills, page_size)
+    try:
+        bills = paginator.page(page_num)
+    except EmptyPage:
+        # redirect to the last valid page if page no longer exists
+        if page_num > paginator.num_pages and paginator.num_pages > 0:
+            raise PageOutOfBounds(paginator.num_pages)
+        else:
+            raise Http404()
+
+    return paginator, page_num
+
+
+class PageOutOfBounds(Exception):
+    def __init__(self, last_page):
+        self.last_page = last_page

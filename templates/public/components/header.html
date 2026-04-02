@@ -13,19 +13,11 @@ context ~a little differently~.
         </a>
 
        <div id="header__login">
-         <a href="/resources">Resources</a>
-         <span style="margin-left: 3em;"></span>
-         {% if user.is_authenticated %}
          <a href="/bill_dashboard">
-            My Bills{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
+            Bill Dashboard{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
          </a>
-         <span style="margin-left: 3em;">
-         <a href="/accounts/profile/">{{ user.username|default:"Profile" }}</a> |
-         <a href="/accounts/logout/">Sign Out</a>
-         {% else %}
-         <a href="/accounts/login/">Log In</a> /
-         <a href="/accounts/signup/">Sign Up</a>
-         {% endif %}
+         <span style="margin-left: 3.5em;">
+         <a href="/resources">Resources</a>
        </div>
     </div>
 

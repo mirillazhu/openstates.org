@@ -1,35 +1,36 @@
 from django.core.cache import cache
+from utils.bill_subscriptions import get_bill_subscriptions
 
 
-# Add unread bills count to "My Bills" link in header if user is logged in
+# add unread bills count to bill dashboard link in header
 def unread_bills_count(request):
-    if not request.user.is_authenticated:
-        return {"unread_bills_count": 0}
 
-    # Cache for 15 minutes per user; only fetch from DB if value not cached
-    cache_key = f"unread_bills_{request.user.id}"
+    # cache for 30 minutes per user; only fetch from DB if value not cached
+    if not request.session.session_key:
+        request.session.save()
+    session_key = request.session.session_key
+
+    cache_key = f"unread_bills_{session_key}"
     count = cache.get(cache_key)
 
     if count is None:
-        # Compute count
+        # compute count
         count = 0
-        active_subscriptions = request.user.subscriptions.filter(
-            bill_id__isnull=False,
-            active=True,
-        ).select_related("bill")
+        bill_subscriptions = get_bill_subscriptions(request, get_related_fields=False)
 
-        for sub in active_subscriptions:
-
-            latest_action = sub.bill.actions.order_by("-date", "-order").first()
+        for bill in bill_subscriptions:
+            latest_action = bill.actions.order_by("-date", "-order").first()
 
             if latest_action:
-                if (
-                    sub.last_viewed_bill_action_id != latest_action.id
-                ):  # Last viewed action is not latest action
+                if bill.last_viewed_bill_action_id != str(
+                    latest_action.id
+                ):  # last viewed action is not latest action
                     count += 1
-                elif not sub.last_viewed_bill_action_id:  # Never viewed but has actions
+                elif (
+                    not bill.last_viewed_bill_action_id
+                ):  # never viewed but has actions
                     count += 1
 
-        cache.set(cache_key, count, 900)  # Cache for 15 minutes
+        cache.set(cache_key, count, 1800)  # cache for 30 minutes
 
     return {"unread_bills_count": count}
