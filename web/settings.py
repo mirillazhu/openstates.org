@@ -57,6 +57,8 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     RECAPTCHA_USE_SSL = True
     # update when changing domains
     SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
+    SESSION_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
+    SESSION_SAVE_EVERY_REQUEST = True
     # enable once SSL is ready
     # SECURE_HSTS_SECONDS = 3600
     # SECURE_SSL_REDIRECT = True

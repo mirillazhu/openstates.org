@@ -1,4 +1,3 @@
-import json
 import uuid
 import datetime
 from collections import defaultdict
@@ -7,7 +6,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest
 from .models import Subscription, Profile, Notification, WEEKLY
 
 
@@ -165,38 +164,6 @@ def add_sponsor_subscription(request):
     if created:
         messages.success(request, f"Created new subscription: {sub.pretty}")
     return redirect("/accounts/profile/")
-
-
-@login_required
-def bill_subscription(request):
-    _ensure_feature_flag(request.user)
-
-    error = ""
-    active = False
-
-    if request.method == "POST":
-        bill_id = json.loads(request.body)["bill_id"]
-        sub, created = activate_subscription(
-            user=request.user, bill_id=bill_id, query="", subjects=[], status=[]
-        )
-        active = True
-    elif request.method == "GET":
-        bill_id = request.GET["bill_id"]
-        active = Subscription.objects.filter(
-            user=request.user, active=True, bill_id=bill_id
-        ).exists()
-    elif request.method == "DELETE":
-        bill_id = json.loads(request.body)["bill_id"]
-        try:
-            sub = Subscription.objects.get(
-                user=request.user, bill_id=bill_id, active=True
-            )
-            sub.active = False
-            sub.save()
-        except Subscription.DoesNotExist:
-            error = "no such subscription"
-
-    return JsonResponse({"active": active, "bill_id": bill_id, "error": error})
 
 
 @login_required

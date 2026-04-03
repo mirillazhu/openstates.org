@@ -1,8 +1,8 @@
+import json
 from collections import defaultdict
-from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db.models import Prefetch
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render, reverse, redirect
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.decorators.cache import never_cache
@@ -14,16 +14,27 @@ from openstates.data.models import (
     BillVersionLink,
     BillDocumentLink,
 )
-from openstates.utils.transformers import fix_bill_id
 from utils.common import (
     get_state_abbr,
     abbr_to_jid,
     jid_to_abbr,
     pretty_url,
 )
-from profiles.models import Subscription
-from utils.bills import get_bills, get_filter_options, paginate_bills, get_sort_context
+from utils.bills import (
+    get_bills,
+    get_filter_options,
+    get_sort_context,
+    paginate_bills,
+    PageOutOfBounds,
+)
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
+from utils.bill_subscriptions import (
+    get_bill_subscriptions,
+    follow_bill,
+    unfollow_bill,
+    is_bill_followed,
+    update_last_viewed_bill_action,
+)
 from .fallback import fallback
 import requests
 
@@ -41,7 +52,10 @@ def bills(request, state):
     request.session["selected_state"] = state
 
     bills, form = get_bills(request, state, allow_query=False)
-    paginator, page_num = paginate_bills(request, bills, 20)
+    try:
+        paginator, page_num = paginate_bills(request, bills, 20)
+    except PageOutOfBounds:
+        raise Http404()
     sort_context = get_sort_context(request, ["first_action", "latest_action"], [])
 
     # filter options: try to retrieve from cache or compute if none cached
@@ -110,7 +124,6 @@ def bills_feed(request, state):
     return HttpResponse(feed.writeString("utf-8"), content_type="application/xml")
 
 
-@login_required
 @never_cache
 def bill_dashboard(request):
 
@@ -118,32 +131,23 @@ def bill_dashboard(request):
     state = request.session.get("selected_state", "")
 
     # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
-    cache.delete(f"unread_bills_{request.user.id}")
+    session_key = request.session.session_key
+    cache.delete(f"unread_bills_{session_key}")
 
-    # get all active bill subscriptions
-    bill_subscriptions = (
-        request.user.subscriptions.filter(
-            bill_id__isnull=False,
-            active=True,
-        )
-        .select_related("bill")
-        .order_by("bill_id")
-    )
+    # get all bill subscriptions
+    bill_subscriptions = get_bill_subscriptions(
+        request, get_related_fields=True
+    )  # includes legislative session, jurisdiction, organization for bills
 
-    tracked_bills = []
-
-    for subscription in bill_subscriptions:
-        bill = subscription.bill
-
+    # loop through bill subscriptions to append additional fields
+    for bill in bill_subscriptions:
         bill_state_abbr = get_state_abbr(bill.legislative_session.jurisdiction.name)
         bill.identifier_with_state = f"{bill_state_abbr} {bill.identifier}"
 
         # get bill actions for determining (a) bill status and (2) whether the latest bill action is unread
         actions = list(
             bill.actions.all()
-            .select_related("organization")
-            .order_by("-date", "-order")
-        )
+        )  # actions prefetched in descending order in get_bill_subscriptions
 
         # determine bill status
         first_chamber, second_chamber = get_bill_chambers(bill, actions)
@@ -164,9 +168,9 @@ def bill_dashboard(request):
         # determine if there has been a bill update since user last viewed bill
         latest_action = actions[0] if actions else None
 
-        if subscription.last_viewed_bill_action_id and latest_action:
-            if (
-                subscription.last_viewed_bill_action_id != latest_action.id
+        if bill.last_viewed_bill_action_id and latest_action:
+            if bill.last_viewed_bill_action_id != str(
+                latest_action.id
             ):  # there is a new bill action
                 bill.has_unread_action = True
             else:  # no new bill action; latest_action id is same as last viewed
@@ -175,8 +179,6 @@ def bill_dashboard(request):
             bill.has_unread_action = True
         else:  # bill has no actions
             bill.has_unread_action = False
-
-        tracked_bills.append(bill)
 
     # sort tracked bills
     sort = request.GET.get("sort", "-latest_action")
@@ -190,9 +192,14 @@ def bill_dashboard(request):
         "latest_action": lambda b: b.latest_action_date or "",
     }
 
+    # convert bills from queryset to list for sorting
+    bill_subscriptions = list(bill_subscriptions)
+
     field = sort.lstrip("-")
     if field in sort_key_mapping:
-        tracked_bills.sort(key=sort_key_mapping[field], reverse=sort.startswith("-"))
+        bill_subscriptions.sort(
+            key=sort_key_mapping[field], reverse=sort.startswith("-")
+        )
 
     # get sort context
     sortable_columns = list(sort_key_mapping.keys())
@@ -204,13 +211,33 @@ def bill_dashboard(request):
     sort_context = get_sort_context(request, sortable_columns, ascending_by_default)
 
     # paginate
-    paginator, page_num = paginate_bills(request, tracked_bills, 8)
+    try:
+        paginator, page_num = paginate_bills(request, bill_subscriptions, 8)
+    except PageOutOfBounds as e:
+        params = request.GET.copy()
+        params["page"] = e.last_page
+        return redirect(f"{request.path}?{params.urlencode()}")
 
     return render(
         request,
         "public/views/bill_dashboard.html",
         {"tracked_bills": paginator.page(page_num), "state": state, **sort_context},
     )
+
+
+def bill_subscription(request):
+
+    if request.method == "POST":
+        bill_id = json.loads(request.body)["bill_id"]
+        latest_action_id = json.loads(request.body)["latest_action_id"]
+        follow_bill(request, bill_id, latest_action_id)
+        active = True
+    elif request.method == "DELETE":
+        bill_id = json.loads(request.body)["bill_id"]
+        unfollow_bill(request, bill_id)
+        active = False
+
+    return JsonResponse({"active": active, "bill_id": bill_id})
 
 
 def _document_sort_key(doc):
@@ -223,15 +250,8 @@ def _document_sort_key(doc):
 def bill(request, state, session, bill_id):
 
     request.session["selected_state"] = state
-
-    # canonicalize without space
-    if " " in bill_id:
-        return redirect(
-            "bill", state, session, bill_id.replace(" ", ""), permanent=True
-        )
-
     jid = abbr_to_jid(state)
-    identifier = fix_bill_id(bill_id)
+    bill_id = "ocd-bill/" + bill_id
 
     try:
         bill = Bill.objects.select_related(
@@ -241,12 +261,12 @@ def bill(request, state, session, bill_id):
         ).get(
             legislative_session__jurisdiction_id=jid,
             legislative_session__identifier=session,
-            identifier=identifier,
+            id=bill_id,
         )
     except Bill.DoesNotExist:
-        # try to find the asset in S3
-        request.path = request.path.replace(bill_id, identifier)
-        return fallback(request)
+        return fallback(
+            request
+        )  # to do: figure out fallback rerouting given url change
 
     # sponsorships, attach people manually
     sponsorships = list(bill.sponsorships.all())
@@ -297,18 +317,18 @@ def bill(request, state, session, bill_id):
     # update last viewed bill action for dashboard read/unread logic
     latest_action = actions[0] if actions else None
 
-    if request.user.is_authenticated and latest_action:
-
-        # update last viewed bill action if active subscription
-        updated = Subscription.objects.filter(
-            user=request.user,
-            bill=bill,
-            active=True,
-        ).update(last_viewed_bill_action_id=latest_action.id)
+    if latest_action:
+        # update last viewed bill action if bill is tracked
+        is_updated = update_last_viewed_bill_action(request, bill_id, latest_action.id)
 
         # if there is an update to last viewed bill action, clear cache item that tracks number of unread bills (context_preprocessors.py)
-        if updated > 0:
-            cache.delete(f"unread_bills_{request.user.id}")
+        if is_updated > 0:
+            session_key = request.session.session_key
+            cache.delete(f"unread_bills_{session_key}")
+
+    # get latest action id and following state for follow button logic
+    latest_action_id = latest_action.id if latest_action else None
+    is_followed = is_bill_followed(request, bill_id)
 
     return render(
         request,
@@ -325,6 +345,8 @@ def bill(request, state, session, bill_id):
             "versions": versions,
             "documents": documents,
             "read_link": read_link,
+            "latest_action_id": latest_action_id,
+            "is_followed": is_followed,
         },
     )
 

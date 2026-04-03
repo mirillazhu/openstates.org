@@ -15,13 +15,14 @@
 
     <form action="{% url 'state_search' state|default:'us' %}">
       <div class="input-group">
-          <input class="input-group-field" type="search" placeholder="SB 38, Veterans, Public Finance, Correction" name="query">
+          <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query">
           <div class="input-group-button">
               <button type="submit" class="button button--secondary">
                 Search
               </button>
           </div>
       </div>
+      <p>Click on the bill number of the bill you wish to follow on the search page, then click "Follow Bill."</p>
     </form>
 
     {% else %}
