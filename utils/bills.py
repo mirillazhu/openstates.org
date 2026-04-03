@@ -255,7 +255,6 @@ def get_sort_context(request, sortable_columns, ascending_by_default):
 
 
 def paginate_bills(request, bills, page_size):
-    # handle pagination for bills queryset
     try:
         page_num = int(request.GET.get("page", 1))
     except ValueError:
@@ -264,7 +263,6 @@ def paginate_bills(request, bills, page_size):
     try:
         bills = paginator.page(page_num)
     except EmptyPage:
-        # redirect to the last valid page if page no longer exists
         if page_num > paginator.num_pages and paginator.num_pages > 0:
             raise PageOutOfBounds(paginator.num_pages)
         else:
