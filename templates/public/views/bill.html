@@ -76,8 +76,7 @@
                 <div class="mb2">
                     <h3 class="heading--xsmall">Bill Subjects</h3>
                     {% for subject in bill.subject %}
-                        <!-- TODO: Link to bill subjects -->
-                        <span class="label label--bold">{{ subject|title }}</span>
+                        <a class="label" href="/{{state}}/bills/?subjects={{ subject|urlencode }}">{{ subject|title }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
