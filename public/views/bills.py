@@ -22,6 +22,7 @@ from utils.common import (
 )
 from utils.bills import (
     get_bills,
+    get_search_summary,
     get_filter_options,
     get_sort_context,
     paginate_bills,
@@ -81,6 +82,11 @@ def bills(request, state):
         **sort_context,
     }
     context.update(filter_options)
+    context["search_summary"] = get_search_summary(
+        context["form"],
+        context["sessions"],
+        context["chambers"],
+    )
 
     return render(request, "public/views/bills.html", context)
 
