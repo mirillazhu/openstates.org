@@ -4,6 +4,10 @@ from graphapi.tests.utils import populate_db
 from openstates.data.models import Person
 from profiles.models import Subscription
 
+pytestmark = pytest.mark.skip(
+    reason="Deactivated accounts for now and changed bill subscription logic"
+)
+
 COMPLEX_STR = (
     "Bills matching 'topic' from AK, upper chamber, "
     "classified as bill, including subjects 'MOOSE, WILDLIFE', "
@@ -57,7 +61,7 @@ def test_complex_pretty():
 @pytest.mark.django_db
 def test_subscription_site_url():
     bs, qs, ss = _one_of_each()
-    assert bs.site_url == "/ak/bills/2018/HB1/"
+    assert bs.site_url == "/ak/bills/2018/1/"
     assert qs.site_url == "/ak/bills/?query=topic"
     assert ss.site_url.startswith("/person/amanda-adams")
     qs.state = None

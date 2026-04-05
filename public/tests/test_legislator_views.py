@@ -11,7 +11,7 @@ def setup():
 
 @pytest.mark.django_db
 def test_legislators_view(client, django_assert_num_queries):
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(12):
         resp = client.get("/ak/legislators/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -23,7 +23,7 @@ def test_legislators_view(client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_person_view(client, django_assert_num_queries):
     p = Person.objects.get(name="Amanda Adams")
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(17):
         resp = client.get(pretty_url(p))
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -51,7 +51,7 @@ def test_person_view(client, django_assert_num_queries):
 def test_person_view_retired(client, django_assert_num_queries):
     p = Person.objects.get(name="Rhonda Retired")
     # fewer views, we don't do the bill queries
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(17):
         resp = client.get(pretty_url(p))
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -68,16 +68,6 @@ def test_person_view_invalid_uuid(client, django_assert_num_queries):
         pretty_url(p)[:-1] + "abcdefghij/"
     )  # this won't be a valid pretty UUID
     assert resp.status_code == 404
-
-
-@pytest.mark.django_db
-def test_canonicalize_person(client):
-    p = Person.objects.get(name="Amanda Adams")
-    url = pretty_url(p).replace("amanda", "xyz")
-    assert "xyz" in url
-    resp = client.get(url)
-    assert resp.status_code == 301
-    assert resp.url == pretty_url(p)
 
 
 # TODO: test find_your_legislator

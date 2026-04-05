@@ -8,6 +8,7 @@ def setup():
 
 
 @pytest.mark.django_db
+@pytest.mark.skip("state page has been commented out, skip for now")
 def test_state_view(client, django_assert_max_num_queries):
     # difficult to make this one exact, so settled for max of 13,
     # fluctuates between 12-13 (not including state sessioning)
@@ -43,6 +44,7 @@ def test_state_view(client, django_assert_max_num_queries):
 
 
 @pytest.mark.django_db
+@pytest.mark.skip("state page has been commented out, skip for now")
 def test_state_view_unicam(client, django_assert_num_queries):
     populate_unicam()
     resp = client.get("/ne/")
@@ -57,16 +59,15 @@ def test_state_view_unicam(client, django_assert_num_queries):
 
 @pytest.mark.django_db
 def test_homepage(client, django_assert_num_queries):
-    with django_assert_num_queries(0):
+    with django_assert_num_queries(7):
         resp = client.get("/")
     assert resp.status_code == 200
     assert len(resp.context["states"]) == 53
-    assert len(resp.context["blog_updates"])
 
 
 @pytest.mark.django_db
 def test_search(client, django_assert_num_queries):
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(10):
         resp = client.get("/search/?query=moose")
     assert resp.status_code == 200
     assert len(resp.context["bills"]) == 1

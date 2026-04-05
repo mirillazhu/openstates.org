@@ -4,7 +4,12 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from openstates.data.models import Bill
 from graphapi.tests.utils import populate_db, populate_unicam
-from utils.bills import get_filter_options, paginate_bills, get_sort_context
+from utils.bills import (
+    get_filter_options,
+    get_sort_context,
+    paginate_bills,
+    PageOutOfBounds,
+)
 
 
 @pytest.mark.django_db
@@ -91,7 +96,7 @@ def test_paginate_bills():
     # empty page
     request = factory.get("/ct/bills/?page=999")
 
-    with pytest.raises(Http404):
+    with pytest.raises(PageOutOfBounds):
         paginate_bills(request, bills, page_size=8)
 
 

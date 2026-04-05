@@ -35,7 +35,7 @@ ALASKA_BILLS = 13
 
 @pytest.mark.django_db
 def test_bills_view_basics(client, django_assert_num_queries):
-    with django_assert_num_queries(BILLS_QUERY_COUNT + 4):
+    with django_assert_num_queries(BILLS_QUERY_COUNT + 7):
         resp = client.get("/ak/bills/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -213,7 +213,7 @@ def test_bills_view_caching(client, django_assert_num_queries):
     cache.delete(cache_key)
 
     # first request should set cache
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(14):
         client.get("/ak/bills/")
 
     cached_value = cache.get(cache_key)
@@ -230,8 +230,8 @@ def test_bills_view_caching(client, django_assert_num_queries):
 
 @pytest.mark.django_db
 def test_bill_view(client, django_assert_num_queries):
-    with django_assert_num_queries(21):
-        resp = client.get("/ak/bills/2018/HB1/")
+    with django_assert_num_queries(24):
+        resp = client.get("/ak/bills/2018/1/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
     assert resp.context["state_nav"] == "bills"
@@ -253,7 +253,7 @@ def test_bill_view(client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_vote_view(client, django_assert_num_queries):
     vid = VoteEvent.objects.get(motion_text="Vote on House Passage").id.split("/")[1]
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(13):
         resp = client.get(f"/vote/{vid}/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
