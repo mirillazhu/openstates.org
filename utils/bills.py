@@ -185,12 +185,7 @@ def get_search_summary(form, sessions, chambers):
             raise Http404()
         summary.append(f'{chambers[form["chamber"]]} only')
 
-    summary = (", ".join(summary)).title()
-    summary = re.sub(
-        r"(\d)([A-Z])", lambda m: m.group(1) + m.group(2).lower(), summary
-    )  # lowercase letters after numbers, e.g. 109th
-
-    return summary
+    return ", ".join(summary)
 
 
 def get_filter_options(state, base_bills):
