@@ -171,7 +171,6 @@ def get_search_summary(form, sessions, chambers):
                 status_text.append("passed Legislature")
             else:
                 status_text.append(f"passed {chambers['upper']}")
-
         if status_text:
             summary.append("which have " + " and ".join(status_text))
 
@@ -189,7 +188,7 @@ def get_search_summary(form, sessions, chambers):
     summary = (", ".join(summary)).title()
     summary = re.sub(
         r"(\d)([A-Z])", lambda m: m.group(1) + m.group(2).lower(), summary
-    )  # lowercase letters after numbers
+    )  # lowercase letters after numbers, e.g. 109th
 
     return summary
 
