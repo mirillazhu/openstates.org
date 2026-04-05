@@ -142,8 +142,37 @@ def get_bills(request, state, allow_query=True):
     return bills, form
 
 
-def get_search_summary(form, sessions, chambers, sponsors):
+def get_search_summary(form, sessions, chambers):
     summary = []
+
+    if form["subjects"]:
+        summary.append(f"on {', '.join(form['subjects'])}")
+    if form["sponsor_name"]:
+        summary.append(f"sponsored by {form['sponsor_name']}")
+    if form["session"]:
+        # this is almost always bad crawlers or XSS attempts
+        if form["session"] not in sessions:
+            raise Http404()
+        summary.append("from " + sessions[form["session"]])
+
+    if "signed" in form["status"]:
+        summary.append("signed into law")
+    else:
+        status_text = []
+        if (
+            "passed-lower-chamber" in form["status"]
+            and "passed-upper-chamber" in form["status"]
+        ):
+            status_text.append(f"passed {chambers['lower']} and {chambers['upper']}")
+        elif "passed-lower-chamber" in form["status"]:
+            status_text.append(f"passed {chambers['lower']}")
+        elif "passed-upper-chamber" in form["status"]:
+            if "legislature" in chambers:
+                status_text.append("passed Legislature")
+            else:
+                status_text.append(f"passed {chambers['upper']}")
+        if status_text:
+            summary.append("which have " + " and ".join(status_text))
 
     if form["classification"] and form["chamber"]:
         summary.append(
@@ -155,36 +184,6 @@ def get_search_summary(form, sessions, chambers, sponsors):
         if form["chamber"] not in chambers:
             raise Http404()
         summary.append(f'{chambers[form["chamber"]]} only')
-
-    if form["session"]:
-        # this is almost always bad crawlers or XSS attempts
-        if form["session"] not in sessions:
-            raise Http404()
-        summary.append("from " + sessions[form["session"]])
-    if form["sponsor"]:
-        # there are ways this can happen that are legit, so just warn about it
-        if form["sponsor"] not in sponsors:
-            summary.append("invalid sponsor")
-        else:
-            summary.append(f"sponsored by {sponsors[form['sponsor']]}")
-    if form["sponsor_name"]:
-        summary.append(f"sponsored by {form['sponsor_name']}")
-    if form["subjects"]:
-        summary.append(f"including subjects {', '.join(form['subjects'])}")
-
-    status_text = []
-    if "passed-lower-chamber" in form["status"]:
-        status_text.append(f"passed in the {chambers['lower']}")
-    if "passed-upper-chamber" in form["status"]:
-        if "legislature" in chambers:
-            status_text.append(f"passed in the {chambers['legislature']}")
-        else:
-            status_text.append(f"passed in the {chambers['upper']}")
-    if "signed" in form["status"]:
-        status_text.append("been signed into law")
-
-    if status_text:
-        summary.append("which have " + " and ".join(status_text))
 
     return ", ".join(summary)
 
