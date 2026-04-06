@@ -158,21 +158,22 @@ def get_search_summary(form, sessions, chambers):
     if "signed" in form["status"]:
         summary.append("signed into law")
     else:
-        status_text = []
         if (
             "passed-lower-chamber" in form["status"]
             and "passed-upper-chamber" in form["status"]
+            and "upper" in chambers
+            and "lower" in chambers
         ):
-            status_text.append(f"passed {chambers['lower']} and {chambers['upper']}")
-        elif "passed-lower-chamber" in form["status"]:
-            status_text.append(f"passed {chambers['lower']}")
+            summary.append(
+                f"which have passed {chambers['lower']} and {chambers['upper']}"
+            )
+        elif "passed-lower-chamber" in form["status"] and "lower" in chambers:
+            summary.append(f"which have passed {chambers['lower']}")
         elif "passed-upper-chamber" in form["status"]:
             if "legislature" in chambers:
-                status_text.append("passed Legislature")
-            else:
-                status_text.append(f"passed {chambers['upper']}")
-        if status_text:
-            summary.append("which have " + " and ".join(status_text))
+                summary.append("which have passed Legislature")
+            elif "upper" in chambers:
+                summary.append(f"which have passed {chambers['upper']}")
 
     if form["classification"] and form["chamber"]:
         summary.append(
