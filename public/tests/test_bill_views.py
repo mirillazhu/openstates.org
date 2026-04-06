@@ -1,7 +1,13 @@
 import pytest
 from django.core.cache import cache
 from graphapi.tests.utils import populate_db, populate_unicam
-from openstates.data.models import Person, VoteEvent
+from openstates.data.models import (
+    Bill,
+    Person,
+    VoteEvent,
+    BillDocumentLink,
+    BillVersionLink,
+)
 from testutils.factories import create_test_bill
 
 
@@ -251,6 +257,15 @@ def test_bill_view(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
+def test_bill_view_no_bill_text(client):
+    bill = Bill.objects.get(legislative_session__identifier="2018", identifier="HB 1")
+    bill.versions.all().delete()
+
+    resp = client.get("/ak/bills/2018/1/")
+    assert resp.context["read_link"] is None
+
+
+@pytest.mark.django_db
 def test_vote_view(client, django_assert_num_queries):
     vid = VoteEvent.objects.get(motion_text="Vote on House Passage").id.split("/")[1]
     with django_assert_num_queries(13):
@@ -277,6 +292,34 @@ def test_vote_view(client, django_assert_num_queries):
     assert resp.context["party_votes"][2][1]["no"] == 1
 
     assert resp.context["has_voter_parties"] is True
+
+
+@pytest.mark.django_db
+def test_bill_document_view_bill_text(client):
+    text_id = BillVersionLink.objects.get(url="https://example.com/f.pdf").id
+    resp = client.get(f"/document/bill_text/{text_id}/")
+
+    assert resp.status_code == 200
+    assert resp.context["state"] == "ak"
+    assert resp.context["state_nav"] == "bills"
+    assert resp.context["document"].note == "Final Draft"
+    assert resp.context["document_link"].url == "https://example.com/f.pdf"
+    assert resp.context["document_type_formatted"] == "Bill Text"
+    assert resp.context["document"].bill.id == "ocd-bill/1"  # for back to bill button
+
+
+@pytest.mark.django_db
+def test_bill_document_view_related_document(client):
+    text_id = BillDocumentLink.objects.get(url="https://example.com/fn").id
+    resp = client.get(f"/document/related/{text_id}/")
+
+    assert resp.status_code == 200
+    assert resp.context["state"] == "ak"
+    assert resp.context["state_nav"] == "bills"
+    assert resp.context["document"].note == "Fiscal Note"
+    assert resp.context["document_link"].url == "https://example.com/fn"
+    assert resp.context["document_type_formatted"] == "Related Document"
+    assert resp.context["document"].bill.id == "ocd-bill/1"  # for back to bill button
 
 
 # @pytest.mark.django_db
