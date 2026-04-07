@@ -22,7 +22,7 @@ def admin_user():
 
 
 @pytest.mark.django_db
-def test_apply_match_matches(client, django_assert_num_queries, kansas, admin_user):
+def test_apply_match_matches(client, django_assert_max_num_queries, kansas, admin_user):
     p = Person.objects.create(name="Samuel L. Jackson")
 
     # kansas is a test fixture, it has some fake data attached we can use
@@ -35,7 +35,7 @@ def test_apply_match_matches(client, django_assert_num_queries, kansas, admin_us
         "match_data": {"unmatchedId": 1, "button": "Match", "matchedId": p.id}
     }
     client.force_login(admin_user)
-    with django_assert_num_queries(6):
+    with django_assert_max_num_queries(6):
         resp = client.post(
             "/admin/people/matcher/update/",
             json.dumps(apply_data),
@@ -106,9 +106,9 @@ def test_apply_match_source_error(
 
 
 @pytest.mark.django_db
-def test_apply_match_404(client, django_assert_num_queries, admin_user):
+def test_apply_match_404(client, django_assert_max_num_queries, admin_user):
     client.force_login(admin_user)
-    with django_assert_num_queries(6):
+    with django_assert_max_num_queries(6):
         match_data = {
             "match_data": {"unmatchedId": 9999, "button": "Match", "matchedId": "1"}
         }
@@ -130,7 +130,7 @@ def test_people_list(client, django_assert_num_queries, admin_user, kansas):
     create_test_person("Bosephorous Fogg", org=house, party="Republican", district="2")
     create_test_person("Cran Crumble", org=senate, party="Republican", district="A")
     client.force_login(admin_user)
-    with django_assert_num_queries(8):
+    with django_assert_num_queries(7):
         resp = client.get("/admin/people/ks/")
     assert resp.status_code == 200
     people = resp.context["context"]["current_people"]

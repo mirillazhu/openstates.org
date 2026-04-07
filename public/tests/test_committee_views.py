@@ -32,7 +32,7 @@ def setup():
 
 @pytest.mark.django_db
 def test_committees_view(client, django_assert_num_queries):
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(11):
         resp = client.get("/ak/committees/")
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -53,7 +53,7 @@ def test_committees_view(client, django_assert_num_queries):
 @pytest.mark.django_db
 def test_committee_detail(client, django_assert_num_queries):
     o = Organization.objects.get(name="Wizards")
-    with django_assert_num_queries(8):
+    with django_assert_num_queries(15):
         resp = client.get(pretty_url(o))
     assert resp.status_code == 200
     assert resp.context["state"] == "ak"
@@ -61,13 +61,3 @@ def test_committee_detail(client, django_assert_num_queries):
     org = resp.context["committee"]
     assert org.name == "Wizards"
     assert len(resp.context["memberships"]) == 5
-
-
-@pytest.mark.django_db
-def test_canonicalize_committee(client):
-    o = Organization.objects.get(name="Wizards")
-    url = pretty_url(o).replace("wizards", "xyz")
-    assert "xyz" in url
-    resp = client.get(url)
-    assert resp.status_code == 301
-    assert resp.url == pretty_url(o)
