@@ -126,7 +126,6 @@ INSTALLED_APPS = [
     "public",
     "graphapi",
     "profiles.apps.ProfilesConfig",
-    "bundles",
     "dashboards",
     "people_admin",
 ]
