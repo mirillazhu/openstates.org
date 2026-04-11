@@ -125,7 +125,6 @@ INSTALLED_APPS = [
     "graphene_graphiql_explorer",
     "public",
     "graphapi",
-    "bulk",
     "profiles.apps.ProfilesConfig",
     "bundles",
     "dashboards",
