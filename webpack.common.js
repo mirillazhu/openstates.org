@@ -1,5 +1,7 @@
 const path = require("path")
 
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
 const output_dir = 'static/bundles'
 
 
@@ -35,7 +37,7 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          { loader: "style-loader", options: {sourceMap: true} },
+          { loader: MiniCssExtractPlugin.loader },
           { loader: "css-loader" },
           { loader: "sass-loader", options: { 
             //includePaths: [path.resolve(__dirname, 'node_modules')],
@@ -43,7 +45,13 @@ module.exports = {
           } }, 
         ]
       },
-      { test: /\.css$/, use: [{loader: "css-loader"}] },
+      { 
+        test: /\.css$/, 
+        use: [
+          { loader: MiniCssExtractPlugin.loader },
+          { loader: "css-loader" },
+        ] 
+      },
       {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
         use: [
@@ -58,4 +66,9 @@ module.exports = {
       }
     ],
   },
+  plugins: [ 
+    new MiniCssExtractPlugin({
+      filename: "[name].css"
+    })
+  ]
 }
