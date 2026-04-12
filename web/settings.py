@@ -127,7 +127,6 @@ INSTALLED_APPS = [
     "graphapi",
     "profiles.apps.ProfilesConfig",
     "dashboards",
-    "people_admin",
 ]
 
 MIDDLEWARE = [
