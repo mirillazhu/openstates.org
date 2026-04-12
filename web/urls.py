@@ -4,6 +4,14 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 
 
+class FlatPageView(TemplateView):
+    # get selected state for header
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["state"] = self.request.session.get("selected_state", "")
+        return context
+
+
 urlpatterns = [
     path("djadmin/", admin.site.urls),
     # path("accounts/", include("allauth.urls")),
@@ -12,17 +20,17 @@ urlpatterns = [
     path("", include("public.urls")),
     # path("", include("web.redirects")),
     # flatpages
-    path("about/", TemplateView.as_view(template_name="flat/about.html")),
+    path("about/", FlatPageView.as_view(template_name="flat/about.html")),
     # path(
     #     "about/contributing/",
-    #     TemplateView.as_view(template_name="flat/contributing.html"),
+    #     FlatPageView.as_view(template_name="flat/contributing.html"),
     # ),
     # path(
     #     "about/subscriptions/",
-    #     TemplateView.as_view(template_name="flat/subscriptions.html"),
+    #     FlatPageView.as_view(template_name="flat/subscriptions.html"),
     # ),
-    path("tos/", TemplateView.as_view(template_name="flat/tos.html")),
-    # path("api/registered/", TemplateView.as_view(template_name="flat/registered.html")),
+    path("tos/", FlatPageView.as_view(template_name="flat/tos.html")),
+    # path("api/registered/", FlatPageView.as_view(template_name="flat/registered.html")),
 ]
 
 
