@@ -9,19 +9,8 @@ urlpatterns = [
     # path("accounts/", include("allauth.urls")),
     # path("accounts/profile/", include("profiles.urls")),
     path("dashboard/", include("dashboards.urls")),
-    # re_path(
-    #     "^graphql/?$",
-    #     csrf_exempt(
-    #         KeyedGraphQLView.as_view(
-    #             graphiql=True, middleware=[QueryProtectionMiddleware(5000)]
-    #         )
-    #     ),
-    # ),
     path("", include("public.urls")),
     # path("", include("web.redirects")),
-    # path("data/", include("bulk.urls")),
-    # path("bundles/", include("bundles.urls")),
-    # path("covid19/", bundle_view, {"slug": "covid19"}),
     # flatpages
     path("about/", TemplateView.as_view(template_name="flat/about.html")),
     # path(
@@ -34,13 +23,6 @@ urlpatterns = [
     # ),
     path("tos/", TemplateView.as_view(template_name="flat/tos.html")),
     # path("api/registered/", TemplateView.as_view(template_name="flat/registered.html")),
-    # re_path(
-    #     "^api/v1",
-    #     RedirectView.as_view(
-    #         url="https://docs.openstates.org/api-v3/",
-    #         permanent=True,
-    #     ),
-    # ),
 ]
 
 
