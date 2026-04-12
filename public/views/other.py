@@ -1,4 +1,3 @@
-import feedparser
 from collections import Counter
 from django.db.models import Sum
 from django.http import Http404
@@ -19,16 +18,6 @@ from utils.people import person_as_dict
 
 def styleguide(request):
     return render(request, "public/views/styleguide.html")
-
-
-def _get_latest_updates():
-    RSS_FEED = "https://blog.openstates.org/index.xml"
-
-    feed = feedparser.parse(RSS_FEED)
-    return [
-        {"title": entry.title, "link": entry.link, "date": entry.published}
-        for entry in feed.entries
-    ][:3]
 
 
 def _preprocess_sponsors(bills):

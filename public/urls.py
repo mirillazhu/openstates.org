@@ -57,12 +57,6 @@ urlpatterns = [
         bills,
         name="bills",
     ),
-    # has trailing slash for consistency
-    # re_path(
-    #     r"^(?P<state>{})/bills/feed/$".format(state_abbr_pattern),
-    #     bills_feed,
-    #     name="bills_feed",
-    # ),
     re_path(
         r"^(?P<state>{})/bills/(?P<session>[-\w ]+)/(?P<bill_id>[-\w\. ]+)/$".format(
             state_abbr_pattern
