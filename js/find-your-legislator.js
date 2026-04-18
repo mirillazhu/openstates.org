@@ -15,9 +15,9 @@ export default class FindYourLegislator extends React.Component {
     const stateAbbr = pathParts.length > 0 && pathParts[0] !== 'us' 
       ? pathParts[0] 
       : ""; 
-
+        
     this.state = {
-      address: queryParams.get("address") || "",
+      address: props.address || "",
       lat: queryParams.get("lat") || 0,
       lon: queryParams.get("lon") || 0,
       geocodedAddress: null,
@@ -28,11 +28,6 @@ export default class FindYourLegislator extends React.Component {
       federalLegislators:[],
       error: "",
     };
-
-     // clear url parameters after reading them
-    if (window.location.search) {
-      history.replaceState({}, '', window.location.pathname);
-    }
 
     this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
@@ -352,5 +347,9 @@ export default class FindYourLegislator extends React.Component {
 
 window.addEventListener("load", () => {
   const fyl = document.querySelector('[data-hook="find-your-legislator"]');
-  ReactDOM.render(React.createElement(FindYourLegislator, {}), fyl);
+  ReactDOM.render(
+    React.createElement(FindYourLegislator, {
+      address: fyl.getAttribute("data-address"),
+    }), fyl
+  );
 });

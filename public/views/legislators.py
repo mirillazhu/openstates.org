@@ -71,10 +71,12 @@ def find_your_legislator(request, state):
         people = _people_from_lat_lon(lat, lon)
         return JsonResponse({"legislators": people})
 
+    address = request.POST.get("address")
+
     return render(
         request,
         "public/views/find_your_legislator.html",
-        {"state": state},
+        {"state": state, "address": address},
     )
 
 
