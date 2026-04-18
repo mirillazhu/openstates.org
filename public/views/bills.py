@@ -50,7 +50,7 @@ def bills(request, state):
     """
     request.session["selected_state"] = state
 
-    bills, form = get_bills(request, state, allow_query=False)
+    bills, form = get_bills(request, state, query=None)
     try:
         paginator, page_num = paginate_bills(request, bills, 20)
     except PageOutOfBounds:

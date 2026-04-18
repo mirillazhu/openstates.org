@@ -55,9 +55,11 @@ context ~a little differently~.
                 </ul>
 
                 {% if state %}
-                <form action="
-                    {% url 'state_search' state=state %}
-                " id="header__search">
+                <form 
+                method="POST"
+                action="{% url 'state_search' state=state %}" 
+                id="header__search">
+                {% csrf_token %}
                 <div class="input-group">
                     <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query">
                     <div class="input-group-button">

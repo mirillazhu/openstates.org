@@ -13,7 +13,8 @@
       You aren't currently following any bills. Search for a bill to add today!
     </h2>
 
-    <form action="{% url 'state_search' state|default:'us' %}">
+    <form method="POST" action="{% url 'state_search' state|default:'us' %}">
+      {% csrf_token %}
       <div class="input-group">
           <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query">
           <div class="input-group-button">

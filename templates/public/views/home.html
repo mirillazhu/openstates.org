@@ -8,7 +8,7 @@
 
 <section class="section" id="homepage-section">
     <div class="homepage-hero">
-        <h1 class="heading--large">Discover How Policy is Made {% if state == 'us' %}in Congress{% else %}in Your State{% endif %}</h1>
+        <h1 class="heading--large">Discover Legislative Policy {% if state == 'us' %}in Congress{% else %}in Your State{% endif %}</h1>
         <p class="heading--small">Track bills, review upcoming legislation, and see how your representatives are voting.</p>
         <p class="heading--small">Open States is the leading source for truly open data on policy-making process and legislation.</p>
 
@@ -23,7 +23,8 @@
           <p>
             Find out which bills are being introduced and follow bills about topics you care about. 
           </p>
-          <form action="{% url 'state_search' state %}">
+          <form method="POST" action="{% url 'state_search' state %}">
+          {% csrf_token %}
               <div class="input-group">
                   <input class="input-group-field" type="search" placeholder="SB 46, Healthcare, etc." name="query">
                   <div class="input-group-button">
@@ -64,7 +65,7 @@
             <h2 class="heading--medium">Resources</h2>
             <img height="150" src="{% static "images/nounproject/news-822273.svg" %}">
             <p style="margin-top: 1rem;">
-                Learn about the policy process and how you can help determine which bills become law. 
+                Learn about the policy process and how you can have a say in which bills become law. 
             </p>
             <a href="/resources/" class="button button--primary">Go to Resources</a>
         </div>
