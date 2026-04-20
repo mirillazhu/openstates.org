@@ -112,7 +112,7 @@ export default class FindYourLegislator extends React.Component {
       .then(response => response.json())
       .then(function(json) {
 
-        // return error message if relevance is not returned (e.g. search term is alphabet soup)
+        // return error message if relevance is not returned (e.g. if mapbox cannot geocode search term)
         if (!json.features || json.features.length === 0) {
           component.setError(geocoding_error_message);
           return;
@@ -128,7 +128,7 @@ export default class FindYourLegislator extends React.Component {
         }
 
         // if stateAbbr, return error message if geocoded state is different than inital state 
-        // (this can happen because state bounding boxes are not exact)
+        // (this can happen even when limiting geocoding to state bounding box because state bounds are not exact)
         if (component.state.stateAbbr) {
           const context = json.features[0].context;
           let stateContext = null;
