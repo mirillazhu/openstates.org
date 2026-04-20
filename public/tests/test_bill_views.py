@@ -320,9 +320,3 @@ def test_bill_document_view_related_document(client):
     assert resp.context["document_link"].url == "https://example.com/fn"
     assert resp.context["document_type_formatted"] == "Related Document"
     assert resp.context["document"].bill.id == "ocd-bill/1"  # for back to bill button
-
-
-# @pytest.mark.django_db
-# def test_bills_feed(client):
-#    resp = client.get("/ak/bills/feed/")
-#    assert resp.status_code == 200

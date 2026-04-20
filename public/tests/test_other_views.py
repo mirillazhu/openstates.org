@@ -66,20 +66,6 @@ def test_homepage(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_search(client, django_assert_num_queries):
-    with django_assert_num_queries(10):
-        resp = client.get("/search/?query=moose")
-    assert resp.status_code == 200
-    assert len(resp.context["bills"]) == 1
-    assert len(resp.context["people"]) == 0
-
-    with django_assert_num_queries(6):
-        resp = client.get("/search/?query=amanda")
-    assert len(resp.context["bills"]) == 0
-    assert len(resp.context["people"]) == 1
-
-
-@pytest.mark.django_db
 def test_state_specific_search(client):
     # test title search works
     resp = client.get("/ak/search/?query=moose")

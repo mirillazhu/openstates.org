@@ -54,12 +54,9 @@ context ~a little differently~.
                     {% endif %}
                 </ul>
 
+                {% if state %}
                 <form action="
-                    {% if state %}
-                        {% url 'state_search' state=state %}
-                    {% else %}
-                        {% url 'search' %}
-                    {% endif %}
+                    {% url 'state_search' state=state %}
                 " id="header__search">
                 <div class="input-group">
                     <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query">
@@ -70,6 +67,7 @@ context ~a little differently~.
                     </div>
                 </div>
                 </form>
+                {% endif %}
             </div>
         </div>
 

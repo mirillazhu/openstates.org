@@ -15,7 +15,6 @@ module.exports = {
     pdf_viewer: ['./js/pdf-viewer'],
     image_viewer: ['./js/image-viewer'],
     dashboards: ['./js/dashboards'],
-    people_admin: ['./js/admin/people'],
   },
   output: {
     path: path.resolve(output_dir),

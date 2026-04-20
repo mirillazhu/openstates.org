@@ -4,44 +4,33 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 
 
+class FlatPageView(TemplateView):
+    # get selected state for header
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["state"] = self.request.session.get("selected_state", "")
+        return context
+
+
 urlpatterns = [
     path("djadmin/", admin.site.urls),
-    path("admin/people/", include("people_admin.urls")),
     # path("accounts/", include("allauth.urls")),
     # path("accounts/profile/", include("profiles.urls")),
     path("dashboard/", include("dashboards.urls")),
-    # re_path(
-    #     "^graphql/?$",
-    #     csrf_exempt(
-    #         KeyedGraphQLView.as_view(
-    #             graphiql=True, middleware=[QueryProtectionMiddleware(5000)]
-    #         )
-    #     ),
-    # ),
     path("", include("public.urls")),
     # path("", include("web.redirects")),
-    # path("data/", include("bulk.urls")),
-    # path("bundles/", include("bundles.urls")),
-    # path("covid19/", bundle_view, {"slug": "covid19"}),
     # flatpages
-    path("about/", TemplateView.as_view(template_name="flat/about.html")),
+    path("about/", FlatPageView.as_view(template_name="flat/about.html")),
     # path(
     #     "about/contributing/",
-    #     TemplateView.as_view(template_name="flat/contributing.html"),
+    #     FlatPageView.as_view(template_name="flat/contributing.html"),
     # ),
     # path(
     #     "about/subscriptions/",
-    #     TemplateView.as_view(template_name="flat/subscriptions.html"),
+    #     FlatPageView.as_view(template_name="flat/subscriptions.html"),
     # ),
-    path("tos/", TemplateView.as_view(template_name="flat/tos.html")),
-    # path("api/registered/", TemplateView.as_view(template_name="flat/registered.html")),
-    # re_path(
-    #     "^api/v1",
-    #     RedirectView.as_view(
-    #         url="https://docs.openstates.org/api-v3/",
-    #         permanent=True,
-    #     ),
-    # ),
+    path("tos/", FlatPageView.as_view(template_name="flat/tos.html")),
+    # path("api/registered/", FlatPageView.as_view(template_name="flat/registered.html")),
 ]
 
 

@@ -3,16 +3,12 @@ from django.views.generic.base import RedirectView
 
 redirects = [
     ("api/register/", "/accounts/login/"),
-    ("api/", "https://docs.openstates.org/api-v3/"),
     ("contributing/", "/about/contributing/"),
     ("methodology/", "/about/"),
     ("mailing-list/", "/about/"),
     ("donate/", "/about/"),
     ("funding/", "/about/"),
     ("contact/", "/about/"),
-    ("bulk/csv/", "/data/session-csv/"),
-    ("csv_downloads/", "/data/session-csv/"),
-    ("downloads/", "/data/"),
 ]
 
 urlpatterns = [

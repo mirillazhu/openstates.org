@@ -3,8 +3,7 @@ from collections import defaultdict
 from django.core.cache import cache
 from django.db.models import Prefetch
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render, reverse, redirect
-from django.utils.feedgenerator import Rss201rev2Feed
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.cache import never_cache
 from openstates.data.models import (
     Bill,
@@ -18,7 +17,6 @@ from utils.common import (
     get_state_abbr,
     abbr_to_jid,
     jid_to_abbr,
-    pretty_url,
 )
 from utils.bills import (
     get_bills,
@@ -89,45 +87,6 @@ def bills(request, state):
     )
 
     return render(request, "public/views/bills.html", context)
-
-
-def bills_feed(request, state):
-    bills, form = get_bills(request, state, allow_query=True)
-    host = request.get_host()
-    link = "https://{}{}?{}".format(
-        host,
-        reverse("bills", kwargs={"state": state}),
-        request.META["QUERY_STRING"],
-    )
-    feed_url = "https://%s%s?%s" % (
-        host,
-        reverse("bills_feed", kwargs={"state": state}),
-        request.META["QUERY_STRING"],
-    )
-    description = f"{state.upper()} Bills"
-    if form["session"]:
-        description += f" ({form['session']})"
-    # TODO: improve RSS description
-    feed = Rss201rev2Feed(
-        title=description,
-        link=link,
-        feed_url=feed_url,
-        ttl=360,
-        description=description,
-    )
-    for item in bills[:100]:
-        link = "https://{}{}".format(host, pretty_url(item))
-        description = f"""{item.title}<br />
-                    Latest Action: {item.latest_action_description}
-                    <i>{item.latest_action_date}</i>"""
-
-        feed.add_item(
-            title=item.identifier,
-            link=link,
-            unique_id=link,
-            description=description,
-        )
-    return HttpResponse(feed.writeString("utf-8"), content_type="application/xml")
 
 
 @never_cache

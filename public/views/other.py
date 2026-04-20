@@ -1,4 +1,3 @@
-import feedparser
 from collections import Counter
 from django.db.models import Sum
 from django.http import Http404
@@ -6,8 +5,6 @@ from django.shortcuts import render
 from openstates.data.models import Bill, Organization, Person
 from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
-    search_bills,
-    EXCLUDED_CLASSIFICATIONS,
     get_bills,
     get_sort_context,
     get_filter_options,
@@ -19,16 +16,6 @@ from utils.people import person_as_dict
 
 def styleguide(request):
     return render(request, "public/views/styleguide.html")
-
-
-def _get_latest_updates():
-    RSS_FEED = "https://blog.openstates.org/index.xml"
-
-    feed = feedparser.parse(RSS_FEED)
-    return [
-        {"title": entry.title, "link": entry.link, "date": entry.published}
-        for entry in feed.entries
-    ][:3]
 
 
 def _preprocess_sponsors(bills):
@@ -142,7 +129,8 @@ def resources(request):
     return render(request, "public/views/resources.html", context)
 
 
-def site_search(request, state=None):
+# state-specific search -- state is now required
+def state_search(request, state):
     query = request.GET.get("query")
     request.session["selected_state"] = state
 
@@ -157,87 +145,57 @@ def site_search(request, state=None):
     }
 
     if query:
-        if state:
-            # bill search
-            bills, form = get_bills(request, state, allow_query=True)
-            try:
-                paginator, page_num = paginate_bills(request, bills, 20)
-            except PageOutOfBounds:
-                raise Http404()
-            sort_context = get_sort_context(
-                request, ["first_action", "latest_action"], []
-            )
+        # bill search
+        bills, form = get_bills(request, state, allow_query=True)
+        try:
+            paginator, page_num = paginate_bills(request, bills, 20)
+        except PageOutOfBounds:
+            raise Http404()
+        sort_context = get_sort_context(request, ["first_action", "latest_action"], [])
 
-            # compute/retrieve/set filter options
-            is_initial_query = True  # initial query is true iff request is not made through search options form
-            is_initial_query = not request.GET.get("is_filter_form")
+        # compute/retrieve/set filter options
+        is_initial_query = True  # initial query is true iff request is not made through search options form
+        is_initial_query = not request.GET.get("is_filter_form")
 
-            if is_initial_query:  # if bills haven't been filtered yet
+        if is_initial_query:  # if bills haven't been filtered yet
 
+            base_bills_exist = bills.exists()
+            request.session["base_bills_exist"] = base_bills_exist
+
+            if base_bills_exist:
+                filter_options = get_filter_options(state, bills)
+                request.session["filter_options"] = filter_options
+
+        else:  # if not initial query and base bills exist, retrieve previously computed filter options from session
+            base_bills_exist = request.session.get("base_bills_exist")
+            if base_bills_exist is None:  # fallback for lost session data
                 base_bills_exist = bills.exists()
                 request.session["base_bills_exist"] = base_bills_exist
 
-                if base_bills_exist:
+            if base_bills_exist:
+                filter_options = request.session.get("filter_options")
+                if filter_options is None:  # fallback for lost session data
                     filter_options = get_filter_options(state, bills)
                     request.session["filter_options"] = filter_options
 
-            else:  # if not initial query and base bills exist, retrieve previously computed filter options from session
-                base_bills_exist = request.session.get("base_bills_exist")
-                if base_bills_exist is None:  # fallback for lost session data
-                    base_bills_exist = bills.exists()
-                    request.session["base_bills_exist"] = base_bills_exist
+        # people search
+        people = []
+        for p in Person.objects.search(query, state=state):
+            pd = person_as_dict(p)
+            pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
+            people.append(pd)
 
-                if base_bills_exist:
-                    filter_options = request.session.get("filter_options")
-                    if filter_options is None:  # fallback for lost session data
-                        filter_options = get_filter_options(state, bills)
-                        request.session["filter_options"] = filter_options
+        context.update(
+            {
+                "bills": paginator.page(page_num),
+                "people": people,
+                "form": form,
+                **sort_context,
+                "base_bills_exist": base_bills_exist,
+            }
+        )
 
-            # people search
-            people = []
-            for p in Person.objects.search(query, state=state):
-                pd = person_as_dict(p)
-                pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
-                people.append(pd)
-
-            context.update(
-                {
-                    "bills": paginator.page(page_num),
-                    "people": people,
-                    "form": form,
-                    **sort_context,
-                    "base_bills_exist": base_bills_exist,
-                }
-            )
-
-            if base_bills_exist:  # only display search options form if base bills exist
-                context.update(filter_options)
-
-        else:  # no state provided (placeholder, can streamline later)
-
-            bills = search_bills(
-                state=None,
-                query=query,
-                sort="-latest_action",
-                exclude_classifications=EXCLUDED_CLASSIFICATIONS,
-            )
-            try:
-                paginator, page_num = paginate_bills(request, bills, 20)
-            except PageOutOfBounds:
-                raise Http404()
-
-            # people search
-            people = []
-            for p in Person.objects.search(query, state=None):
-                pd = person_as_dict(p)
-                pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
-                people.append(pd)
-
-            context.update(
-                {
-                    "bills": paginator.page(page_num),
-                    "people": people,
-                }
-            )
+        if base_bills_exist:  # only display search options form if base bills exist
+            context.update(filter_options)
 
     return render(request, "public/views/search.html", context)
