@@ -18,7 +18,8 @@
         <h4 class="heading--small">Don't know who your legislator is?</h4>
         <h4 class="heading--small">Find them now!</h4>
 
-        <form action="/{{ state }}/find_your_legislator/">
+        <form method="POST" action="/{{ state }}/find_your_legislator/">
+        {% csrf_token %}
             <div class="input-group">
                 <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
                 <div class="input-group-button">

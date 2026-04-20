@@ -15,9 +15,9 @@ export default class FindYourLegislator extends React.Component {
     const stateAbbr = pathParts.length > 0 && pathParts[0] !== 'us' 
       ? pathParts[0] 
       : ""; 
-
+        
     this.state = {
-      address: queryParams.get("address") || "",
+      address: props.address || "",
       lat: queryParams.get("lat") || 0,
       lon: queryParams.get("lon") || 0,
       geocodedAddress: null,
@@ -28,11 +28,6 @@ export default class FindYourLegislator extends React.Component {
       federalLegislators:[],
       error: "",
     };
-
-     // clear url parameters after reading them
-    if (window.location.search) {
-      history.replaceState({}, '', window.location.pathname);
-    }
 
     this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
@@ -108,23 +103,32 @@ export default class FindYourLegislator extends React.Component {
       config.MAPBOX_ACCESS_TOKEN
     }`;
 
+    // set error message depending on whether accessing from specific state (stateAbbr)
+    const geocoding_error_message = component.state.stateAbbr
+      ? "Unable to geolocate your address, try adding more information. We are not currently able to locate legislators for addresses outside " + component.state.stateAbbr.toUpperCase() + " but hope to add support for this in the future."
+      : "Unable to geolocate your address, try adding more information.";
+
     fetch(url)
       .then(response => response.json())
       .then(function(json) {
+
+        // return error message if relevance is not returned (e.g. if mapbox cannot geocode search term)
+        if (!json.features || json.features.length === 0) {
+          component.setError(geocoding_error_message);
+          return;
+        }
 
         // return error message if relevance (geocoding accuracy) is below threshold
         const relevance = json.features[0].relevance
         const RELEVANCE_THRESHOLD = 0.7;
         
         if (relevance < RELEVANCE_THRESHOLD) {
-          component.setError(
-            "Unable to geolocate your address, try adding more information."
-          );
+          component.setError(geocoding_error_message);
           return;
         }
 
-        // if stateAbbr, return error message if state for geocoded address is different than inital state 
-        // (this can happen because state bounding boxes are not exact)
+        // if stateAbbr, return error message if geocoded state is different than inital state 
+        // (this can happen even when limiting geocoding to state bounding box because state bounds are not exact)
         if (component.state.stateAbbr) {
           const context = json.features[0].context;
           let stateContext = null;
@@ -139,9 +143,7 @@ export default class FindYourLegislator extends React.Component {
           if (stateContext && stateContext.short_code) {
             geocodedState = stateContext.short_code.replace('US-', '').toLowerCase();
             if (geocodedState !== component.state.stateAbbr) {
-              component.setError(
-                "Unable to geolocate your address within " + component.state.stateAbbr.toUpperCase() + ". Try adding more information, or to find legislators for a different state, please use the Find Your Legislators tool on the homepage for that state."
-              );
+              component.setError(geocoding_error_message);
               return;
             }
           }
@@ -157,9 +159,7 @@ export default class FindYourLegislator extends React.Component {
       })
       .catch(function(error) {
         console.error(error);
-        component.setError(
-          "Unable to geolocate your address, try adding more information."
-        );
+        component.setError(geocoding_error_message);
       });
   }
 
@@ -352,5 +352,9 @@ export default class FindYourLegislator extends React.Component {
 
 window.addEventListener("load", () => {
   const fyl = document.querySelector('[data-hook="find-your-legislator"]');
-  ReactDOM.render(React.createElement(FindYourLegislator, {}), fyl);
+  ReactDOM.render(
+    React.createElement(FindYourLegislator, {
+      address: fyl.getAttribute("data-address"),
+    }), fyl
+  );
 });

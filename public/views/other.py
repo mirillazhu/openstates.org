@@ -1,7 +1,7 @@
 from collections import Counter
 from django.db.models import Sum
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from openstates.data.models import Bill, Organization, Person
 from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
@@ -131,7 +131,21 @@ def resources(request):
 
 # state-specific search -- state is now required
 def state_search(request, state):
-    query = request.GET.get("query")
+
+    # for initial form submission (via POST), store search query in session and redirect to GET
+    if request.method == "POST":
+        request.session["search_query"] = request.POST.get("query")
+        return redirect("state_search", state)
+
+    # clear search query in session if arriving from footer link, then redirect
+    if request.GET.get("clear"):
+        request.session.pop("search_query", None)
+        return redirect("state_search", state)
+
+    # upon redirect or GET requests from filter form, pagination, sort, nav buttons, etc., get search query from session
+    query = request.session.get("search_query", "")
+
+    # also save state as selected_state to session
     request.session["selected_state"] = state
 
     bills = []
@@ -146,7 +160,7 @@ def state_search(request, state):
 
     if query:
         # bill search
-        bills, form = get_bills(request, state, allow_query=True)
+        bills, form = get_bills(request, state, query)
         try:
             paginator, page_num = paginate_bills(request, bills, 20)
         except PageOutOfBounds:
