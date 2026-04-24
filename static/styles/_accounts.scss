@@ -49,7 +49,7 @@ a.socialaccount_provider {
             $color-royalblue,
             $color-royalblue,
             $color-royalblue,
-            hollow
+            solid
         );
         background-image: url("/static/images/openstates_icon_transparent.png");
         &:before {
@@ -65,7 +65,7 @@ a.socialaccount_provider {
         background-image: url("/static/images/logos/Twitter_Logo_WhiteOnBlue.png");
     }
     &.google {
-        @include button(false, #000, #000, #666, hollow);
+        @include button(false, #000, #000, #666, solid);
         background-image: url("/static/images/logos/g-logo.png");
     }
     &.github {

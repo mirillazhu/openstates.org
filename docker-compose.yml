@@ -49,6 +49,7 @@ services:
       POSTGRES_PASSWORD: openstates
       POSTGRES_USER: openstates
       POSTGRES_HOST_AUTH_METHOD: trust
+    platform: linux/amd64 # Mac M1 compatibility
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
