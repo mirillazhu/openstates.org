@@ -55,7 +55,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
     RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"]
     RECAPTCHA_USE_SSL = True
-    # update when changing domains
+    # todo: update when changing domains
     SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
     SESSION_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
     SESSION_ENGINE = "django.contrib.sessions.backends.db"
