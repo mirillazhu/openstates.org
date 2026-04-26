@@ -105,7 +105,7 @@ export default class FindYourLegislator extends React.Component {
 
     // set error message depending on whether accessing from specific state (stateAbbr)
     const geocoding_error_message = component.state.stateAbbr
-      ? "Unable to geolocate your address, try adding more information. We are not currently able to locate legislators for addresses outside " + component.state.stateAbbr.toUpperCase() + " but hope to add support for this in the future."
+      ? "Unable to geolocate your address, try adding more information. Currently, we are not able to locate legislators for addresses outside " + component.state.stateAbbr.toUpperCase() + " but hope to add support for this in the future."
       : "Unable to geolocate your address, try adding more information.";
 
     fetch(url)
@@ -230,54 +230,14 @@ export default class FindYourLegislator extends React.Component {
         </div>
       );
     }
-    const federalTable = this.renderFederalLegislator(this.state.federalLegislators);
 
     const section = (
       <div>
-        {table}{federalTable}
+        {table}
       </div>
     );
 
     return section;
-  }
-
-    renderFederalLegislator(legislators) {
-      const rows = legislators.map(leg => {
-        const office = leg.chamber == 'upper' ? 'U.S. Senate': `U.S. House ${leg.district}`;
-        return (
-        <tr key={leg.name}>
-          <td>
-            <LegislatorImage id={leg.id} image={leg.image} party={leg.party} />
-          </td>
-          <td>
-            <a href={leg.pretty_url}>{leg.name}</a>
-          </td>
-          <td>{leg.party}</td>
-          <td>{office}</td>
-        </tr>
-      )});
-      let table;
-
-      if (this.state.legislators.length) {
-        table = (
-          <div>
-            <h3>Federal</h3>
-            <table id="results">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Name</th>
-                  <th>Party</th>
-                  <th>Office</th>
-                </tr>
-              </thead>
-              <tbody>{rows}</tbody>
-            </table>
-          </div>
-        );
-      }
-
-    return table;
   }
 
 
