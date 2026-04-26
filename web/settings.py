@@ -58,7 +58,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     # update when changing domains
     SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
     SESSION_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
-    SESSION_SAVE_EVERY_REQUEST = True
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
     # enable once SSL is ready
     # SECURE_HSTS_SECONDS = 3600
     # SECURE_SSL_REDIRECT = True
@@ -137,6 +137,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "profiles.middleware.structlog_middleware",
