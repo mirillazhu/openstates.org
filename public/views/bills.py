@@ -448,5 +448,9 @@ def bill_document(request, document_link_id, document_type):
 def document_proxy_for_development(request, remote_url):
     if not remote_url:
         return HttpResponse("Missing 'url' parameter", status=400)
+
+    if "://" not in remote_url:
+        remote_url = remote_url.replace(":/", "://", 1)
+
     response = requests.get(remote_url, verify=False)
     return HttpResponse(response.content, content_type="application/pdf")

@@ -28,7 +28,7 @@ window.addEventListener('load', function() {
             }
             
             // load viewer with PDF
-            iframe.src = `${VIEWER_URL}?file=${encodeURIComponent(pdfUrl)}`;
+            iframe.src = `${VIEWER_URL}?file=${pdfUrl}`;
         
             // catch any errors from iframe
             iframe.addEventListener('error', () => {
