@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from .views.other import home, resources, state_search
+from .views.other import home, resources, demo_login, state_search
 from .views.legislators import legislators, person, find_your_legislator
 from .views.bills import (
     bills,
@@ -27,6 +27,7 @@ urlpatterns = [
     path("bill_dashboard/", bill_dashboard, name="bill_dashboard"),
     path("bill_subscription/", bill_subscription, name="bill_subscription"),
     path("resources/", resources, name="resources"),
+    path("login/", demo_login, name="demo_login"),
     # everything here onwards is state-specific
     re_path(
         r"^(?P<state>{})/$".format(state_abbr_pattern), home, name="state_homepage"
