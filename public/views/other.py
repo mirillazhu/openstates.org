@@ -1,7 +1,9 @@
 from collections import Counter
+from django.conf import settings
 from django.db.models import Sum
 from django.http import Http404
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from openstates.data.models import Bill, Organization, Person
 from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
@@ -213,3 +215,18 @@ def state_search(request, state):
             context.update(filter_options)
 
     return render(request, "public/views/search.html", context)
+
+
+def demo_login(request):
+    error = None
+
+    if request.method == "POST":
+        if request.POST.get("password") == settings.DEMO_PASSWORD:
+            request.session["is_authenticated"] = True
+            request.session["authenticated_at"] = timezone.now().isoformat()
+            return redirect(request.GET.get("next", "/"))
+        else:
+            error = "Incorrect sign in, please reach out if needed!"
+
+    context = {"error": error}
+    return render(request, "public/views/demo_login.html", context)

@@ -44,6 +44,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     ADMINS = [("James Turk", "dev@jamesturk.net")]
     # DOMAIN = ''
     SECRET_KEY = os.environ["SECRET_KEY"]
+    DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "testpassword")
     EMAIL_HOST = os.environ["EMAIL_HOST"]
     EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
     EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
@@ -67,6 +68,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
 else:
     DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "non-secret-key")
+    DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "testpassword")
     ALLOWED_HOSTS = ["*"]
     INTERNAL_IPS = ["127.0.0.1"]
     DOMAIN = "http://localhost:8000"
@@ -137,6 +139,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "public.middleware.login_required_middleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
