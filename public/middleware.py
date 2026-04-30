@@ -11,9 +11,6 @@ DEMO_SESSION_HOURS = 24
 def login_required_middleware(get_response):
     def middleware(request):
 
-        print("PATH:", request.path)
-        print("SESSION:", dict(request.session))
-
         # if more than 24 hours has passed since the user has signed in, automatically sign out
         authenticated_at = request.session.get("authenticated_at", None)
 
