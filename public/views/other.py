@@ -5,7 +5,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from openstates.data.models import Bill, Organization, Person
-from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
+from utils.common import DEFAULT_STATE, abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
     get_bills,
     get_sort_context,
@@ -33,7 +33,7 @@ def _preprocess_sponsors(bills):
 
 
 # state-specific homepage
-def home(request, state="us"):
+def home(request, state=DEFAULT_STATE.abbr.lower()):
     request.session["selected_state"] = state
     context = {"state": state}
     return render(request, "public/views/home.html", context)

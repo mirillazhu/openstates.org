@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 import re
 import us
 
-from utils.common import states, pretty_url
+from utils.common import pretty_url
 from utils.orgs import get_legislature_from_abbr
 
 
@@ -26,7 +26,8 @@ def header(context):
         "state_nav": context.get("state_nav"),
         "messages": context.get("messages"),
         "unread_bills_count": context.get("unread_bills_count"),
-        "states": states,
+        "DEFAULT_STATE_ABBR": context.get("DEFAULT_STATE_ABBR"),
+        "DEFAULT_STATE_NAME": context.get("DEFAULT_STATE_NAME"),
     }
 
 

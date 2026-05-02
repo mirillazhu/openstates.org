@@ -5,11 +5,9 @@ from django.db.models import Exists, OuterRef
 from openstates.data.models import Person, Organization
 from openstates.data.models import Bill, VoteEvent, LegislativeSession
 
-# Metadata for states that are available in the platform
-states = sorted(
-    us.STATES + [us.states.PR, us.states.DC, us.unitedstatesofamerica],
-    key=lambda s: s.name,
-)
+# Metadata for states that are available in the platform -- CT only for demo
+DEFAULT_STATE = us.states.CT
+states = [us.states.CT]
 
 
 def get_state_abbr(state):
