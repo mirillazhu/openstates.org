@@ -5,7 +5,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from openstates.data.models import Bill, Organization, Person
-from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
+from utils.common import DEFAULT_STATE, abbr_to_jid, sessions_with_bills, jid_to_abbr
 from utils.bills import (
     get_bills,
     get_sort_context,
@@ -33,8 +33,7 @@ def _preprocess_sponsors(bills):
 
 
 # state-specific homepage
-def home(request, state="us"):
-    request.session["selected_state"] = state
+def home(request, state=DEFAULT_STATE.abbr.lower()):
     context = {"state": state}
     return render(request, "public/views/home.html", context)
 
@@ -42,8 +41,6 @@ def home(request, state="us"):
 def state(request, state):
     RECENTLY_INTRODUCED_BILLS_TO_SHOW = 4
     RECENTLY_PASSED_BILLS_TO_SHOW = 4
-
-    request.session["selected_state"] = state
 
     jid = abbr_to_jid(state)
 
@@ -126,7 +123,7 @@ def state(request, state):
 
 
 def resources(request):
-    state = request.session.get("selected_state", "")
+    state = DEFAULT_STATE.abbr.lower()
     context = {"state": state}
     return render(request, "public/views/resources.html", context)
 
@@ -146,9 +143,6 @@ def state_search(request, state):
 
     # upon redirect or GET requests from filter form, pagination, sort, nav buttons, etc., get search query from session
     query = request.session.get("search_query", "")
-
-    # also save state as selected_state to session
-    request.session["selected_state"] = state
 
     bills = []
     people = []

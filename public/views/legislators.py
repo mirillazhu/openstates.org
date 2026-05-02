@@ -60,7 +60,6 @@ def _people_from_lat_lon(lat, lon):
 
 
 def find_your_legislator(request, state):
-    request.session["selected_state"] = state
 
     lat = request.GET.get("lat")
     lon = request.GET.get("lon")
@@ -81,7 +80,6 @@ def find_your_legislator(request, state):
 
 
 def legislators(request, state):
-    request.session["selected_state"] = state
 
     chambers = get_chambers_from_abbr(state)
 
@@ -193,8 +191,6 @@ def person(request, person_id):
         vote_event = vote.vote_event
         vote_event.legislator_vote = vote
         person.vote_events.append(vote_event)
-
-    request.session["selected_state"] = state
 
     return render(
         request,

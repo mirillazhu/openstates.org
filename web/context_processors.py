@@ -1,5 +1,15 @@
 from django.core.cache import cache
 from utils.bill_subscriptions import get_bill_subscriptions
+from utils.common import DEFAULT_STATE
+
+
+# return default state for templates
+def defaults(request):
+    defaults = {
+        "DEFAULT_STATE_ABBR": DEFAULT_STATE.abbr.lower(),
+        "DEFAULT_STATE_NAME": DEFAULT_STATE.name,
+    }
+    return defaults
 
 
 # add unread bills count to bill dashboard link in header
