@@ -14,6 +14,7 @@ from openstates.data.models import (
     BillDocumentLink,
 )
 from utils.common import (
+    DEFAULT_STATE,
     get_state_abbr,
     abbr_to_jid,
     jid_to_abbr,
@@ -48,7 +49,6 @@ def bills(request, state):
         classification
         subjects
     """
-    request.session["selected_state"] = state
 
     bills, form = get_bills(request, state, query=None)
     try:
@@ -93,7 +93,7 @@ def bills(request, state):
 def bill_dashboard(request):
 
     # get state for state dropdown
-    state = request.session.get("selected_state", "")
+    state = DEFAULT_STATE.abbr.lower()
 
     # clear cache so that unread count on dashboard page header always matches number of unread rows on dashboard
     session_key = request.session.session_key
@@ -214,7 +214,6 @@ def _document_sort_key(doc):
 
 def bill(request, state, session, bill_id):
 
-    request.session["selected_state"] = state
     jid = abbr_to_jid(state)
     bill_id = "ocd-bill/" + bill_id
 
@@ -339,7 +338,6 @@ def vote(request, vote_id):
     )
 
     state = jid_to_abbr(vote.organization.jurisdiction_id)
-    request.session["selected_state"] = state
 
     vote_counts = sorted(vote.counts.all(), key=_vote_sort_key)
     person_votes = sorted(
@@ -428,7 +426,6 @@ def bill_document(request, document_link_id, document_type):
         document_type_formatted = "Related Document"
 
     state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
-    request.session["selected_state"] = state
 
     return render(
         request,

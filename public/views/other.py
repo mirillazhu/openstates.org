@@ -34,7 +34,6 @@ def _preprocess_sponsors(bills):
 
 # state-specific homepage
 def home(request, state=DEFAULT_STATE.abbr.lower()):
-    request.session["selected_state"] = state
     context = {"state": state}
     return render(request, "public/views/home.html", context)
 
@@ -42,8 +41,6 @@ def home(request, state=DEFAULT_STATE.abbr.lower()):
 def state(request, state):
     RECENTLY_INTRODUCED_BILLS_TO_SHOW = 4
     RECENTLY_PASSED_BILLS_TO_SHOW = 4
-
-    request.session["selected_state"] = state
 
     jid = abbr_to_jid(state)
 
@@ -126,7 +123,7 @@ def state(request, state):
 
 
 def resources(request):
-    state = request.session.get("selected_state", "")
+    state = DEFAULT_STATE.abbr.lower()
     context = {"state": state}
     return render(request, "public/views/resources.html", context)
 
@@ -146,9 +143,6 @@ def state_search(request, state):
 
     # upon redirect or GET requests from filter form, pagination, sort, nav buttons, etc., get search query from session
     query = request.session.get("search_query", "")
-
-    # also save state as selected_state to session
-    request.session["selected_state"] = state
 
     bills = []
     people = []
