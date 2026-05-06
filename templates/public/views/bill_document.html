@@ -30,6 +30,14 @@
     </div>
 
     <div id="document-wrapper" class="document-wrapper mb1">
+
+        {% if 'html' in document_link.media_type or document_link.url|lower|slice:"-5:" == ".html" or document_link.url|lower|slice:"-4:" == ".htm" %}
+        <div>
+            <h2 class="heading--medium">Unsupported file type – HTML</h2>
+            <p>This document is in HTML. We are still building out a HTML viewer for the site, but we will have it ready by production!</p>
+        </div>
+        {% else %}
+
         <div id="pdf-viewer-div">
             <iframe id="pdf-viewer" class="pdf-viewer"></iframe>
         </div>
@@ -54,6 +62,8 @@
             <h3>Unable to Load Document</h3>
             <p id="error-message"></p>
         </div>
+
+        {% endif %}
     </div>
 
     {% sources state document_link.url %}
