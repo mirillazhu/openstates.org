@@ -194,7 +194,7 @@ def state_search(request, state):
 
         # people search
         people = []
-        for p in Person.objects.search(query, state=state):
+        for p in Person.objects.search(query, state=state).distinct():
             pd = person_as_dict(p)
             pd["current_state"] = jid_to_abbr(p.current_jurisdiction_id).upper()
             people.append(pd)
