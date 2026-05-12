@@ -64,6 +64,12 @@
     }
 }
 
+.overview__subsection a,
+.overview__subsection p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
     .overview__subsection--map {
         flex: 1;
         width:280px; 
