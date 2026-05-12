@@ -163,7 +163,19 @@ def person(request, person_id):
         person_links, key=lambda link: len(link.url), default=None
     )
 
-    person.all_offices = list(person.offices.all())
+    # choose at most one office of each classification to display
+    person_offices = list(
+        person.offices.all().order_by("classification", "address")
+    )  # fix an order
+    selected_offices = []
+    added_classifications = set()
+
+    for office in person_offices:
+        if office.classification not in added_classifications:
+            added_classifications.add(office.classification)
+            selected_offices.append(office)
+
+    person.selected_offices = selected_offices
 
     person.sponsored_bills = list(
         Bill.objects.all()
