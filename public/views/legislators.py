@@ -166,11 +166,11 @@ def person(request, person_id):
         person.offices.all().order_by("classification", "address")
     )  # fix an order
     selected_offices = []
-    added_classifications = set()
+    added_classifications = []
 
     for office in person_offices:
         if office.classification not in added_classifications:
-            added_classifications.add(office.classification)
+            added_classifications.append(office.classification)
             selected_offices.append(office)
 
     person.selected_offices = selected_offices
