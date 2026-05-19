@@ -14,7 +14,9 @@ window.addEventListener('load', function() {
     var cells = grid.getElementsByClassName('cell');
     var toggle = document.getElementById('sponsors-toggle');
 
-    toggle.onclick = function() {
-        toggleSponsors(toggle, cells);
-    };
+    if (toggle) {
+        toggle.onclick = function() {
+            toggleSponsors(toggle, cells);
+        };
+    }
 });
