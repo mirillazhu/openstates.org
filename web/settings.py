@@ -41,24 +41,25 @@ if os.environ.get("MANAGEMENT_COMMAND_ONLY"):
 elif os.environ.get("DEBUG", "true").lower() == "false":
     # non-debug settings
     DEBUG = False
-    ALLOWED_HOSTS = ["*"]
-    ADMINS = [("James Turk", "dev@jamesturk.net")]
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
+    ADMINS = [("Mirilla Zhu", "mirilla.zhu@gmail.com")]
     # DOMAIN = ''
     SECRET_KEY = os.environ["SECRET_KEY"]
-    DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "testpassword")
-    EMAIL_HOST = os.environ["EMAIL_HOST"]
-    EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
-    EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
-    EMAIL_PORT = "587"
-    EMAIL_USE_TLS = True
-    REGISTRATION_DEFAULT_FROM_EMAIL = (
-        DEFAULT_FROM_EMAIL
-    ) = SERVER_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "contact@openstates.org")
-    RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
-    RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"]
-    RECAPTCHA_USE_SSL = True
+    DEMO_PASSWORD = os.environ["DEMO_PASSWORD"]
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    # EMAIL_HOST = os.environ["EMAIL_HOST"]
+    # EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+    # EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+    # EMAIL_PORT = "587"
+    # EMAIL_USE_TLS = True
+    # REGISTRATION_DEFAULT_FROM_EMAIL = (
+    #    DEFAULT_FROM_EMAIL
+    # ) = SERVER_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "contact@openstates.org")
+    # RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
+    # RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"]
+    # RECAPTCHA_USE_SSL = True
     # todo: update when changing domains
-    SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
+    # SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
     SESSION_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
     SESSION_ENGINE = "django.contrib.sessions.backends.db"
     # enable once SSL is ready
