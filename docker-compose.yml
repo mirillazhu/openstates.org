@@ -16,6 +16,7 @@ services:
         UID: 1000
     volumes:
       - .:/code
+      - /code/.venv
     environment:
       # dev settings to reload python files when edited
       - UWSGI_PYTHON_AUTORELOAD=3
