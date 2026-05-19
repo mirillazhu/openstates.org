@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# fetch env vars from aws parameter store 
+export ALLOWED_HOSTS=$(aws ssm get-parameter --name "/openstates/demo/ALLOWED_HOSTS" --query "Parameter.Value" --output text)
+export SECRET_KEY=$(aws ssm get-parameter --name "/openstates/demo/SECRET_KEY" --with-decryption --query "Parameter.Value" --output text)
+export DEMO_PASSWORD=$(aws ssm get-parameter --name "/openstates/demo/DEMO_PASSWORD" --with-decryption --query "Parameter.Value" --output text)
+export DATABASE_URL=$(aws ssm get-parameter --name "/myapp/DATABASE_URL" --with-decryption --query "Parameter.Value" --output text)
+
 # based on https://cloudonaut.io/how-to-dockerize-your-python-django-application-for-aws-fargate/
 
 echo "running collectstatic"
