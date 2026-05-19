@@ -1,0 +1,73 @@
+networks:
+  openstates-network:
+      name: openstates-network
+      external: true
+
+volumes:
+  openstates-postgres:
+    name: openstates-postgres
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: docker/uwsgi/Dockerfile
+      args:
+        UID: 1000
+    restart: always
+    environment:
+      - UWSGI_ENABLE_THREADS=1
+      - DEBUG=False  
+      - ALLOWED_HOSTS
+      - SECRET_KEY
+      - DEMO_PASSWORD
+      - DATABASE_URL
+      # - CACHE_URL
+      # - EMAIL_HOST
+      # - EMAIL_HOST_USER
+      # - EMAIL_HOST_PASSWORD
+      # - RECAPTCHA_PUBLIC_KEY
+      # - RECAPTCHA_PRIVATE_KEY
+    networks:
+      - openstates-network
+
+  nginx:
+    build: docker/nginx
+    restart: always
+    ports:
+      - "80:80"
+      # enable once SSL is ready
+      # - "443:443"  
+    depends_on:
+      - django
+    networks:
+      - openstates-network
+
+  db:
+    profiles:
+      - db
+    restart: always  # remove when migrate to RDS
+    image: postgres
+    environment:
+      POSTGRES_DB: openstatesorg
+      POSTGRES_PASSWORD: openstates
+      POSTGRES_USER: openstates
+      POSTGRES_HOST_AUTH_METHOD: trust
+    platform: linux/amd64 # Mac M1 compatibility
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5405:5432
+    volumes:
+      - openstates-postgres:/var/lib/postgresql/data
+    networks:
+      - openstates-network
+
+  # webpack:
+  #   build: .
+  #   command: ./docker/webpack-start.sh
+  #   volumes:
+  #     - .:/code

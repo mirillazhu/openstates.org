@@ -27,32 +27,38 @@ RUN apt-get --allow-releaseinfo-change update -qq \
         libpcre2-dev \
         uwsgi-src \
         awscli \
+        curl \
+        gnupg \
     && cd /usr/lib/uwsgi/plugins \
     && uwsgi --build-plugin "/usr/src/uwsgi/plugins/python python39"
 
-# copy code and entrypoint in
+# copy code
 ADD . /code/
 WORKDIR /code/
 COPY docker/uwsgi/custom-entrypoint /usr/local/bin
 COPY docker/uwsgi/node.pin /etc/apt/preferences.d/node
 
-RUN curl https://deb.nodesource.com/setup_16.x -SsLo nodesource.sh \
-    && bash nodesource.sh \
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update -qq \
     && apt-get install -y -qq --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+ENV NODE_OPTIONS=--openssl-legacy-provider  
 RUN npm ci \
-    && npm run build
+    && npm run build \
+    && rm -rf node_modules
 RUN pip --no-cache-dir --disable-pip-version-check install poetry wheel
 
-# everything after here as openstates user
-RUN useradd -u $UID -Ulmr -d /home/openstates openstates
-USER openstates:openstates
-
-RUN poetry install --without dev \
+# install poetry deps as root user but chown to openstates user 
+# (install virtual environment in project folder so that openstates user can access)
+RUN poetry config virtualenvs.in-project true \
+    && poetry install --without dev \
     && rm -r ~/.cache/pypoetry/cache ~/.cache/pypoetry/artifacts/
+RUN useradd -u $UID -Ulmr -d /home/openstates openstates \
+    && chown -R openstates:openstates /code
 
-USER root
 RUN apt-get remove -y -qq build-essential \
       gcc \
       g++ \
@@ -63,9 +69,10 @@ RUN apt-get remove -y -qq build-essential \
       libgeos-dev \
       libgdal-dev \
       libcap-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       uwsgi-src \
     && apt-get autoremove -y
+
 USER openstates:openstates
 
 # uwsgi config
