@@ -35,8 +35,9 @@ services:
     restart: always
     ports:
       - "80:80"
-      # enable once SSL is ready
-      # - "443:443"  
+      - "443:443"  
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - django
     networks:
