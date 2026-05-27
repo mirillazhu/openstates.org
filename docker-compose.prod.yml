@@ -1,7 +1,6 @@
 networks:
   openstates-network:
       name: openstates-network
-      external: true
 
 volumes:
   openstates-postgres:
@@ -17,7 +16,7 @@ services:
     restart: always
     environment:
       - UWSGI_ENABLE_THREADS=1
-      - DEBUG=False  
+      - DEBUG=False
       - ALLOWED_HOSTS
       - SECRET_KEY
       - DEMO_PASSWORD
@@ -36,8 +35,9 @@ services:
     restart: always
     ports:
       - "80:80"
-      # enable once SSL is ready
-      # - "443:443"  
+      - "443:443"  
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - django
     networks:
@@ -47,7 +47,7 @@ services:
     profiles:
       - db
     restart: always  # remove when migrate to RDS
-    image: postgres
+    image: "postgis/postgis:17-3.5-alpine"  # changed to match os-scrapers
     environment:
       POSTGRES_DB: openstatesorg
       POSTGRES_PASSWORD: openstates

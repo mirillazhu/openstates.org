@@ -58,15 +58,14 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     # RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
     # RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"]
     # RECAPTCHA_USE_SSL = True
-    # todo: update when changing domains
-    # SESSION_COOKIE_DOMAIN = "open.pluralpolicy.com"
+    SESSION_COOKIE_DOMAIN = "demo.openstatesforjustice.org"
     SESSION_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
     SESSION_ENGINE = "django.contrib.sessions.backends.db"
-    # enable once SSL is ready
-    # SECURE_HSTS_SECONDS = 3600
-    # SECURE_SSL_REDIRECT = True
-    # SESSION_COOKIE_SECURE = True
-    # CSRF_COOKIE_SECURE = True
+    # SECURE_HSTS_SECONDS = 31536000  # HSTS set in nginx
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # CSRF_TRUSTED_ORIGINS = ["https://demo.openstatesforjustice.org"]  # enable for django 4.0+
 else:
     DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "non-secret-key")
