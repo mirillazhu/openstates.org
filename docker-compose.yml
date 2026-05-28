@@ -31,12 +31,12 @@ services:
       - openstates-network
 
   nginx:
-    build: docker/nginx
+    build:
+      context: docker/nginx
+      args: 
+        NGINX_CONF: nginx.dev.conf
     ports:
       - "8000:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx/certs:/etc/letsencrypt/live/demo.openstatesforjustice.org:ro
     depends_on:
       - django
     networks:

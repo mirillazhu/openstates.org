@@ -31,7 +31,10 @@ services:
       - openstates-network
 
   nginx:
-    build: docker/nginx
+    build:
+      context: docker/nginx
+      args: 
+        NGINX_CONF: nginx.prod.conf
     restart: always
     ports:
       - "80:80"
