@@ -7,7 +7,6 @@ from .views.bills import (
     bill,
     vote,
     bill_document,
-    document_proxy_for_development,
     bill_subscription,
 )
 from .views.committees import committees, committee
@@ -71,7 +70,7 @@ urlpatterns = [
         name="bill_document",
     ),
     # bill document proxy for development only -- remove for production
-    path("development-pdf-proxy/<path:remote_url>", document_proxy_for_development),
+    # path("development-pdf-proxy/<path:remote_url>", document_proxy_for_development),
     # committees
     re_path(
         r"^(?P<state>{})/committees/$".format(state_abbr_pattern),
