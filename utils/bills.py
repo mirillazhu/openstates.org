@@ -90,15 +90,15 @@ def search_bills(
     if sort is None:
         pass
     elif sort == "-updated":
-        bills = bills.order_by("-updated_at")
+        bills = bills.order_by("-updated_at", "id")
     elif sort == "first_action":
-        bills = bills.order_by(F("first_action_date").asc(nulls_last=True))
+        bills = bills.order_by(F("first_action_date").asc(nulls_last=True), "id")
     elif sort == "-first_action":
-        bills = bills.order_by(F("first_action_date").desc(nulls_last=True))
+        bills = bills.order_by(F("first_action_date").desc(nulls_last=True), "id")
     elif sort == "latest_action":
-        bills = bills.order_by(F("latest_action_date").asc(nulls_last=True))
+        bills = bills.order_by(F("latest_action_date").asc(nulls_last=True), "id")
     else:  # -latest_action, or not specified
-        bills = bills.order_by(F("latest_action_date").desc(nulls_last=True))
+        bills = bills.order_by(F("latest_action_date").desc(nulls_last=True), "id")
 
     return bills
 
@@ -203,7 +203,7 @@ def get_filter_options(state, base_bills):
     subjects = base_bills.annotate(sub=Unnest("subject", distinct=True)).values_list(
         "sub", flat=True
     )
-    options["subjects"] = sorted(set(subjects))
+    options["subjects"] = sorted(set(subjects), key=str.lower)
 
     sponsor_ids = base_bills.values_list(
         "sponsorships__person_id", flat=True
