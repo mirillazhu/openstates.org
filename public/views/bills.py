@@ -162,17 +162,9 @@ def bill_dashboard(request):
     bill_subscriptions = list(bill_subscriptions)
 
     field = sort.lstrip("-")
-    desc = sort.startswith("-")
-
     if field in sort_key_mapping:
         bill_subscriptions.sort(
-            key=lambda x: (
-                sort_key_mapping[field](x),
-                -x.bill.id
-                if desc
-                else x.bill.id,  # keep secondary sort by id ascending no matter what
-            ),
-            reverse=desc,
+            key=sort_key_mapping[field], reverse=sort.startswith("-")
         )
 
     # get sort context
