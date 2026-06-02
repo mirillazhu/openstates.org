@@ -37,6 +37,7 @@ from utils.bill_subscriptions import (
 )
 from .fallback import fallback
 import requests
+import boto3
 
 
 def bills(request, state):
@@ -412,7 +413,7 @@ def bill_document(request, document_link_id, document_type):
         )
         document = document_link.version
         document_type_formatted = "Bill Text"
-    else:  # related document
+    else:  # related
         document_link = get_object_or_404(
             BillDocumentLink.objects.all().select_related(
                 "document__bill",
@@ -425,7 +426,25 @@ def bill_document(request, document_link_id, document_type):
         document = document_link.document
         document_type_formatted = "Related Document"
 
+    # to do: simplify s3 path logic by storing as key in DB (this also helps keep track of which files have already been downloaded)
     state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
+    session_identifier = document.bill.legislative_session.identifier.replace(" ", "_")
+
+    # get file type from url using same logic as downloader script
+    parts = document_link.url.rsplit(".", 1)
+    file_type = parts[1].lower() if len(parts) == 2 else ""
+
+    if file_type:
+        s3_key = f"{state}/{session_identifier}/{document_type}/{document_link.id}.{file_type}"
+    else:
+        s3_key = f"{state}/{session_identifier}/{document_type}/{document_link.id}"
+
+    s3 = boto3.client("s3")
+    s3_document_url = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": "openstates-bill-documents", "Key": s3_key},
+        ExpiresIn=7200,  # 2 hours
+    )
 
     return render(
         request,
@@ -435,6 +454,7 @@ def bill_document(request, document_link_id, document_type):
             "state_nav": "bills",
             "document": document,
             "document_link": document_link,
+            "s3_document_url": s3_document_url,
             "document_type_formatted": document_type_formatted,
             "viewer_mode": "pdf",  # image or pdf, temp solution for testing
         },

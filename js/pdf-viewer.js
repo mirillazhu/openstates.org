@@ -15,7 +15,7 @@ window.addEventListener('load', function() {
     async function loadPDF() {
         try {
 
-            // check if PDF is accessible -- change for DB solution
+            // check if PDF is accessible
             const pdfResponse = await fetch(pdfUrl, { method: 'HEAD' });
             if (!pdfResponse.ok) {
                 throw new Error('This PDF is unavailable or may no longer exist.');
