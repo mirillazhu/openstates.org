@@ -444,11 +444,11 @@ def bill_document(request, document_link_id, document_type):
     else:
         s3_key = f"{state}/{session_identifier}/{document_type}/{document_link.id}"
 
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", region_name="us-east-1")
     s3_document_url = s3.generate_presigned_url(
         "get_object",
         Params={"Bucket": "openstates-bill-documents", "Key": s3_key},
-        ExpiresIn=7200,  # 2 hours
+        ExpiresIn=3600,  # 1 hour
     )
 
     return render(

@@ -6,7 +6,7 @@
 
 {% block scripts %}
     <script>
-        window.PDF_URL = '{{ s3_document_url }}';
+        window.PDF_URL = '{{ s3_document_url|safe }}';
     </script>
 
     {% if viewer_mode == 'pdf' %}
