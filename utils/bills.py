@@ -273,3 +273,24 @@ def paginate_bills(request, bills, page_size):
 class PageOutOfBounds(Exception):
     def __init__(self, last_page):
         self.last_page = last_page
+
+
+# hacky fix for CT-only demo to differentiate votes, fix upstream data for production
+# this only works for CT and is fragile
+def hacky_motion_text(vote):
+
+    vote_motion_text = vote.motion_text
+
+    # some vote motions already have numbers, so only differentiate if no numbers
+    if not re.search(r"\d", vote.motion_text):
+        # get vote number from vote source url if url is formatted as expected
+        vote_source = vote.sources.first()
+        if vote_source:
+            url = vote_source.url
+            if "-" in url:
+                vote_number = url.split("-")[1]
+                if vote_number.isdigit():
+                    vote_number = vote_number.lstrip("0")  # remove leading zeros
+                    vote_motion_text = vote.motion_text + " " + vote_number
+
+    return vote_motion_text

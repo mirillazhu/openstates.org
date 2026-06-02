@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 import re
 import us
 
+from utils.bills import hacky_motion_text
 from utils.common import pretty_url
 from utils.orgs import get_legislature_from_abbr
 
@@ -206,6 +207,13 @@ def titlecase_all(title):
     title = re.sub(r"'([A-Z])", lambda m: "'" + m.group(1).lower(), title)
 
     return title
+
+
+# hacky fix for CT-only demo to differentiate votes, fix upstream data for production
+# this only works for CT and is fragile
+@register.filter()
+def motion_text(vote):
+    return hacky_motion_text(vote)
 
 
 @register.filter()

@@ -26,6 +26,7 @@ from utils.bills import (
     get_sort_context,
     paginate_bills,
     PageOutOfBounds,
+    hacky_motion_text,
 )
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
 from utils.bill_subscriptions import (
@@ -262,6 +263,10 @@ def bill(request, state, session, bill_id):
     votes = list(
         bill.votes.all().select_related("organization")
     )  # .prefetch_related('counts')
+    votes.sort(
+        key=lambda v: hacky_motion_text(v), reverse=True
+    )  # hacky sorting fix for ct
+    votes.sort(key=lambda v: v.start_date)
 
     # stage calculation and determination of whether bill is unicameral
     first_chamber, second_chamber = get_bill_chambers(bill, actions)
