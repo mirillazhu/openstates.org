@@ -428,12 +428,10 @@ def bill_document(request, document_link_id, document_type):
 
     # to do: simplify s3 path logic by storing as key in DB (this also helps keep track of which files have already been downloaded)
     state = jid_to_abbr(document.bill.from_organization.jurisdiction_id)
-    session_identifier = document.bill.legislative_session.identifier.replace(
-        " ", "_"
-    )  # replace spaces to match downloader script
+    session_identifier = document.bill.legislative_session.identifier.replace(" ", "_")
 
     # get file type from url using same logic as downloader script
-    parts = document_link.rsplit(".", 1)
+    parts = document_link.url.rsplit(".", 1)
     file_type = parts[1].lower() if len(parts) == 2 else ""
 
     if file_type:
