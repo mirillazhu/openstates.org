@@ -67,3 +67,9 @@ tr.row-with-buttons {
     }
 }
 
+.hide-portrait {
+    @include breakpoint(medium only) {
+        display: none;
+    }
+}
+
