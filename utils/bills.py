@@ -290,7 +290,9 @@ def hacky_motion_text(vote):
             if "-" in url:
                 vote_number = url.split("-")[1]
                 if vote_number.isdigit():
-                    vote_number = vote_number.lstrip("0")  # remove leading zeros
+                    # remove leading zeros while the number is more than three digits
+                    while len(vote_number) > 3 and vote_number[0] == "0":
+                        vote_number = vote_number[1:]
                     vote_motion_text = vote.motion_text + " " + vote_number
 
     return vote_motion_text
