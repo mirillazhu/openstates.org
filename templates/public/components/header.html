@@ -16,8 +16,9 @@ context ~a little differently~.
          <a href="/bill_dashboard">
             Bill Dashboard{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
          </a>
-         <span style="margin-left: 3.5em;">
+         <span style="margin-left: 3.5em;" class="hide-mobile">
          <a href="/resources">Resources</a>
+         </span>
        </div>
     </div>
 
@@ -28,7 +29,7 @@ context ~a little differently~.
 
                 <div class="navigation__section navigation__select-wrapper">
                     <select class="navigation__select" onchange="window.location.href = '/' + this.value">
-                        <option value="{{ DEFAULT_STATE_ABBR }}" selected>{{ DEFAULT_STATE_NAME }}</option>
+                        <option value="{{ DEFAULT_STATE_ABBR|default:'' }}" selected>{{ DEFAULT_STATE_NAME|default:'' }}</option>
                         <option value="" disabled>More states added soon!</option>
                     </select>
                 </div>

@@ -90,15 +90,15 @@ def search_bills(
     if sort is None:
         pass
     elif sort == "-updated":
-        bills = bills.order_by("-updated_at")
+        bills = bills.order_by("-updated_at", "id")
     elif sort == "first_action":
-        bills = bills.order_by(F("first_action_date").asc(nulls_last=True))
+        bills = bills.order_by(F("first_action_date").asc(nulls_last=True), "id")
     elif sort == "-first_action":
-        bills = bills.order_by(F("first_action_date").desc(nulls_last=True))
+        bills = bills.order_by(F("first_action_date").desc(nulls_last=True), "id")
     elif sort == "latest_action":
-        bills = bills.order_by(F("latest_action_date").asc(nulls_last=True))
+        bills = bills.order_by(F("latest_action_date").asc(nulls_last=True), "id")
     else:  # -latest_action, or not specified
-        bills = bills.order_by(F("latest_action_date").desc(nulls_last=True))
+        bills = bills.order_by(F("latest_action_date").desc(nulls_last=True), "id")
 
     return bills
 
@@ -203,7 +203,7 @@ def get_filter_options(state, base_bills):
     subjects = base_bills.annotate(sub=Unnest("subject", distinct=True)).values_list(
         "sub", flat=True
     )
-    options["subjects"] = sorted(set(subjects))
+    options["subjects"] = sorted(set(subjects), key=str.lower)
 
     sponsor_ids = base_bills.values_list(
         "sponsorships__person_id", flat=True
@@ -273,3 +273,24 @@ def paginate_bills(request, bills, page_size):
 class PageOutOfBounds(Exception):
     def __init__(self, last_page):
         self.last_page = last_page
+
+
+# hacky fix for CT-only demo to differentiate votes, fix upstream data for production
+# this only works for CT and is fragile
+def hacky_motion_text(vote):
+
+    vote_motion_text = vote.motion_text
+
+    # some vote motions already have numbers, so only differentiate if no numbers
+    if not re.search(r"\d", vote.motion_text):
+        # get vote number from vote source url if url is formatted as expected
+        vote_source = vote.sources.first()
+        if vote_source:
+            url = vote_source.url
+            if "-" in url:
+                vote_number = url.split("-")[1]
+                if vote_number.isdigit():
+                    vote_number = vote_number.lstrip("0")  # remove leading zeros
+                    vote_motion_text = vote.motion_text + " " + vote_number
+
+    return vote_motion_text

@@ -115,7 +115,7 @@ export default class LegislatorList extends React.Component {
               </th>
               <th
                 onClick={() => this.setSortOrder("current_role.district")}
-                className="clickable"
+                className="clickable hide-mobile"
               >
                 District
                 {this.getSortArrowFor("current_role.district")}
@@ -123,7 +123,7 @@ export default class LegislatorList extends React.Component {
               {this.props.chambers.lower && (
                 <th
                   onClick={() => this.setSortOrder("current_role.org_classification")}
-                  className="clickable"
+                  className="clickable hide-mobile"
                 >
                   Chamber
                   {this.getSortArrowFor("current_role.org_classification")}
@@ -157,9 +157,9 @@ export default class LegislatorList extends React.Component {
                     <a href={b.pretty_url}>{b.name}</a>
                   </td>
                   <td>{b.primary_party}</td>
-                  <td>{b.current_role.district}</td>
+                  <td className="hide-mobile">{b.current_role.district}</td>
                   {this.props.chambers.lower && (
-                    <td>{this.props.chambers[b.current_role.org_classification]}</td>
+                    <td className="hide-mobile">{this.props.chambers[b.current_role.org_classification]}</td>
                   )}
                 </tr>
               ))}
