@@ -14,21 +14,24 @@ window.addEventListener('load', function() {
 
     async function loadPDF() {
         try {
-
-            // check if PDF is accessible
-            const pdfResponse = await fetch(pdfUrl, { method: 'HEAD' });
-            if (!pdfResponse.ok) {
-                throw new Error('This PDF is unavailable or may no longer exist.');
-            }
             
             // check if viewer is accessible
             const viewerResponse = await fetch(VIEWER_URL, { method: 'HEAD' });
             if (!viewerResponse.ok) {
                 throw new Error('The PDF viewer failed to load.');
             }
+
+            // catch any errors from if the PDF fails to load
+            iframe.addEventListener('load', () => {
+                iframe.contentWindow.addEventListener('unhandledrejection', (event) => {
+                    if (event.reason && event.reason.status === 404) {
+                        showError('This PDF is unavailable or may no longer exist.');
+                    }
+                });
+            });
             
             // load viewer with PDF
-            iframe.src = `${VIEWER_URL}?file=${pdfUrl}`;
+            iframe.src = `${VIEWER_URL}?file=${encodeURIComponent(pdfUrl)}`;
         
             // catch any errors from iframe
             iframe.addEventListener('error', () => {
