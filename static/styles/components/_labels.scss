@@ -40,7 +40,7 @@ a.label {
     }
 
     .label--red {
-        background-color: lighten($color-red, 10%);
+        background-color: lighten($color-red, 5%);
         color: darken($color-red, 90%);
         font-weight: $global-weight-bold;
     }

@@ -147,9 +147,9 @@
             right: -25px;
             width: 0;
             height: 0;
-            border-top: 0px solid transparent;
-            border-bottom: 50px solid transparent;
-            border-left: 25px solid $color-secondary;
+            border-top: 50px solid $color-secondary;
+            border-right: 25px solid transparent;
+            border-left: 7px solid transparent;
         }
     }
 }
