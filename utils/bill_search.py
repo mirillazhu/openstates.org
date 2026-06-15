@@ -23,6 +23,7 @@ SYNONYM_GROUPS = [
     ["vaccine", "immunization"],
     ["addiction", "substance abuse", "drug abuse", "substance use"],
     ["abortion", "reproductive"],
+    ["healthcare", "health"],
     # housing
     ["landlord", "lessor"],
     ["tenant", "rent", "lessee", "occupant"],

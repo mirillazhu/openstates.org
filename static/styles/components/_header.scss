@@ -149,7 +149,8 @@
             height: 0;
             border-top: 50px solid $color-secondary;
             border-right: 25px solid transparent;
-            border-left: 7px solid transparent;
+            border-left: 100px solid transparent;
+            z-index: 0;
         }
     }
 }
@@ -168,6 +169,8 @@ select.navigation__select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    position: relative;
+    z-index: 1;
 
     background-color: $color-secondary;
     color: $color-white;
