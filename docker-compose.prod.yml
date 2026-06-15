@@ -68,7 +68,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     platform: linux/amd64 # Mac M1 compatibility
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U openstates"]
+      test: ["CMD-SHELL", "pg_isready -U openstates -d openstatesorg"]
       interval: 10s
       timeout: 5s
       retries: 5
