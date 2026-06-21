@@ -4,6 +4,7 @@ export default class LegislatorImage extends React.Component {
   constructor(props) {
     super(props);
 
+    /*
     if (props.id && props.image) {
       this.state = {
         url: "https://data.openstates.org/images/small/" + props.id,
@@ -13,6 +14,12 @@ export default class LegislatorImage extends React.Component {
         url: null,
       };
     }
+    */ 
+
+    // default to placeholder image for now 
+    this.state = {
+      url: null,
+    };
   }
 
   render() {
