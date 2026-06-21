@@ -5747,7 +5747,7 @@ const defaultOptions = {
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   viewerCssTheme: {
-    value: 0,
+    value: 2,
     kind: OptionKind.VIEWER + OptionKind.PREFERENCE
   },
   viewOnLoad: {
@@ -22189,18 +22189,7 @@ const PDFViewerApplication = {
     if (AppOptions.get("pdfBugEnabled")) {
       await this._parseHashParams();
     }
-    let mode;
-    switch (AppOptions.get("viewerCssTheme")) {
-      case 1:
-        mode = "light";
-        break;
-      case 2:
-        mode = "dark";
-        break;
-    }
-    if (mode) {
-      docStyle.setProperty("color-scheme", mode);
-    }
+    docStyle.setProperty("color-scheme", "dark");
     this.l10n = await this.externalServices.createL10n();
     document.getElementsByTagName("html")[0].dir = this.l10n.getDirection();
     this.l10n.translate(appConfig.appContainer || document.documentElement);
