@@ -41,6 +41,7 @@ export default class LegislatorImage extends React.Component {
         <img
           className={"thumbnail " + modifier}
           src="/static/images/person.svg"
+          alt=""
         />
       );
     } else {
