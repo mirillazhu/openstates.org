@@ -98,7 +98,7 @@ export default class LegislatorList extends React.Component {
         <table className="hover">
           <thead>
             <tr>
-              <th></th>
+              <th className="show-for-sr">Image</th>
               <th
                 onClick={() => this.setSortOrder("name")}
                 className="clickable"
