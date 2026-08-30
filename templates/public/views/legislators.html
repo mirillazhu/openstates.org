@@ -21,7 +21,8 @@
         <form method="POST" action="/{{ state }}/find_your_legislator/">
         {% csrf_token %}
             <div class="input-group">
-                <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
+                <label class="show-for-sr" for="address">Search Address</label>
+                <input class="input-group-field" type="search" placeholder="Enter Address" name="address" id="address">
                 <div class="input-group-button">
                     <input type="submit" class="button button--primary" value="Search">
                 </div>

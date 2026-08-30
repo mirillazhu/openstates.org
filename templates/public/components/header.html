@@ -8,8 +8,13 @@ context ~a little differently~.
 
 <header class="header">
     <div class="grid-container" id="header__top">
+<<<<<<< HEAD
         <a href="{% url 'home' %}">
             <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Logo">
+=======
+        <a href="{% url 'state_homepage' state|default:'us' %}">
+            <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Home">
+>>>>>>> d04cc0c (add visually hidden label to forms)
         </a>
 
        <div id="header__login">
@@ -28,7 +33,8 @@ context ~a little differently~.
             <div class="navigation__container">
 
                 <div class="navigation__section navigation__select-wrapper">
-                    <select class="navigation__select" onchange="window.location.href = '/' + this.value">
+                    <label class="show-for-sr u-fill--white" for="state-select">Select a State</label>
+                    <select class="navigation__select" id="state-select" onchange="window.location.href = '/' + this.value">
                         <option value="{{ DEFAULT_STATE_ABBR|default:'' }}" selected>{{ DEFAULT_STATE_NAME|default:'' }}</option>
                         <option value="" disabled>More states added soon!</option>
                     </select>
@@ -49,7 +55,8 @@ context ~a little differently~.
                 id="header__search">
                 {% csrf_token %}
                 <div class="input-group">
-                    <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query">
+                    <label class="show-for-sr" for="header-search">Search</label>
+                    <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query" id="header-search">
                     <div class="input-group-button">
                         <button type="submit" class="button button--secondary">
                           Search

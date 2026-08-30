@@ -16,7 +16,8 @@
     <form method="POST" action="{% url 'state_search' state|default:DEFAULT_STATE_ABBR %}">
       {% csrf_token %}
       <div class="input-group">
-          <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query">
+          <label class="show-for-sr" for="query">Search</label>
+          <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query" id="query">
           <div class="input-group-button">
               <button type="submit" class="button button--secondary">
                 Search
