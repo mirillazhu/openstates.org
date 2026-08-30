@@ -136,11 +136,6 @@ def state_search(request, state):
         request.session["search_query"] = request.POST.get("query")
         return redirect("state_search", state)
 
-    # clear search query in session if arriving from footer link, then redirect
-    if request.GET.get("clear"):
-        request.session.pop("search_query", None)
-        return redirect("state_search", state)
-
     # upon redirect or GET requests from filter form, pagination, sort, nav buttons, etc., get search query from session
     query = request.session.get("search_query", "")
 
