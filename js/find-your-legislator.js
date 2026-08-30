@@ -291,6 +291,12 @@ export default class FindYourLegislator extends React.Component {
              Find out who represents you by entering your address below:
           </h2>
           <div className="input-group">
+            <label
+              className="show-for-sr"
+              for="fyl-address"
+            >
+              Address
+            </label>
             <input
               className="input-group-field"
               type="search"

@@ -23,7 +23,8 @@
           <form method="POST" action="{% url 'state_search' state %}">
           {% csrf_token %}
               <div class="input-group" style="width:100%">
-                  <input class="input-group-field" type="search" placeholder="SB 46, Healthcare, etc." name="query">
+                  <label class="show-for-sr" for="query">Search</label>
+                  <input class="input-group-field" type="search" placeholder="SB 46, Healthcare, etc." name="query" id="query">
                   <div class="input-group-button">
                       <input type="submit" class="button button--primary" value="Search">
                   </div>
@@ -37,7 +38,8 @@
             <form method="POST" action="{% url 'find_your_legislator' state %}">
             {% csrf_token %}
                 <div class="input-group" style="width:100%">
-                    <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
+                    <label class="show-for-sr" for="address">Search Address</label>
+                    <input class="input-group-field" type="search" placeholder="Enter Address" name="address" id="address">
                     <div class="input-group-button">
                         <input type="submit" class="button button--primary" value="Search">
                     </div>
