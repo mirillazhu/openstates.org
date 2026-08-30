@@ -218,7 +218,7 @@ export default class FindYourLegislator extends React.Component {
           <table id="results">
             <thead>
               <tr>
-                <th></th>
+                <th className="show-for-sr">Image</th>
                 <th>Name</th>
                 <th>Party</th>
                 <th>District</th>
@@ -265,7 +265,7 @@ export default class FindYourLegislator extends React.Component {
             <table id="results">
               <thead>
                 <tr>
-                  <th></th>
+                  <th className="show-for-sr">Image</th>
                   <th>Name</th>
                   <th>Party</th>
                   <th>Office</th>
