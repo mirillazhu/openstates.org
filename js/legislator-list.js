@@ -143,18 +143,16 @@ export default class LegislatorList extends React.Component {
                   legislator.current_role.org_classification === this.state.chamber
               )
               .map(b => (
-                <tr key={b.id}>
+                <tr key={b.id} className="row--clickable">
                   <td>
-                    <a href={b.pretty_url}>
-                      <LegislatorImage
-                        id={b.id}
-                        image={b.image}
-                        party={b.primary_party}
-                      />
-                    </a>
+                    <LegislatorImage
+                      id={b.id}
+                      image={b.image}
+                      party={b.primary_party}
+                    />
                   </td>
-                  <td>
-                    <a href={b.pretty_url}>{b.name}</a>
+                  <td className="u-color--primary">
+                    <a href={b.pretty_url} className="row-link">{b.name}</a>
                   </td>
                   <td>{b.primary_party}</td>
                   <td className="hide-mobile">{b.current_role.district}</td>

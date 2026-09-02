@@ -29,13 +29,11 @@
                 </thead>
                 <tbody>
                     {% for bill in bills %}
-                        <tr class="row--align-top">
+                        <tr class="row--align-top row--clickable">
                             <td>
                                 <div class="td-truncate td-truncate-long"> 
-                                    <a href="{% canonical_url bill %}">
-                                    <strong>{{ bill.identifier }}</strong>
-                                    </a>
-                                    <a href="{% canonical_url bill %}" class="td-link">
+                                    <a href="{% canonical_url bill %}" class="row-link">
+                                    <strong class="u-color--primary">{{ bill.identifier }}</strong>
                                     <span class="u-color--gray">({{ bill.legislative_session.name }})</span>
                                     <br>
                                     <span>{{ bill.title|titlecase_caps }}</span>

@@ -30,6 +30,24 @@ tr.row--align-top {
     vertical-align: top;
 }
 
+tr.row--clickable {
+  position: relative;
+  cursor: pointer;
+
+  .row-link {
+    color: inherit;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+  }
+}
+
 tr.bill-unread-action {
     font-weight: bold;
 }
@@ -59,6 +77,20 @@ tr.row-with-buttons {
 .td-truncate-long {
     -webkit-line-clamp: 11;
     max-height: 16.5em;
+}
+
+.voters-table td {
+  position: relative;
+}
+
+td .voter-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
 }
 
 .hide-mobile {
