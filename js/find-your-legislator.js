@@ -277,8 +277,8 @@ export default class FindYourLegislator extends React.Component {
             </div>
           </div>
 
-          <div className="mapbox-credit">
-              In most cases, this should be your pre-incarceration address. Learn more <a href="/resources/">here</a>.
+          <div className="mb2">
+              <p>In most cases, this should be your pre-incarceration address. Learn more with <a href="/resources/">Frequently Asked Questions</a>.</p>
           </div>
 
           {this.state.error ? ( 
