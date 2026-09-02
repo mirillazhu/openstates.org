@@ -1,0 +1,12 @@
+// Overrides
+
+
+// links in paragraphs, for WCAG 2.2
+p a {
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+}
