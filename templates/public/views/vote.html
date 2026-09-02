@@ -25,7 +25,7 @@
                     <ul class="no-bullet">
                         <li>
                             <strong>Bill:</strong> 
-                            <a href="{% canonical_url vote.bill %}">{{ vote.bill.identifier }}</a>
+                            <a href="{% canonical_url vote.bill %}" style="text-decoration: underline;">{{ vote.bill.identifier }}</a>
                         </li>
                         <li>
                             <strong>Motion Text:</strong> {{ vote.motion_text|titlecase_all }}
