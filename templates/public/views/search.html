@@ -66,13 +66,15 @@
                 </thead>
                 <tbody>
                     {% for bill in bills %}
-                        <tr class="row--align-top">
+                        <tr class="row--align-top row--clickable">
                             <td>
                               <div class="td-truncate td-truncate-long">
-                                <strong><a href="{% canonical_url bill %}">{{ bill.identifier }}</a></strong>
+                                <a href="{% canonical_url bill %}" class="row-link">
+                                <strong class="u-color--primary">{{ bill.identifier }}</strong>
                                 <span class="u-color--gray">(<strong>{{ bill.legislative_session.jurisdiction }}</strong> - {{ bill.legislative_session.name }})</span>
                                 <br>
                                 <span>{{ bill.title|titlecase_caps }}</span>
+                                </a>
                               </div>
                             </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
@@ -109,9 +111,13 @@
             </thead>
             <tbody>
               {% for p in people %}
-              <tr>
-                <td><a href="{% canonical_url p %}"><div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div></a></td>
-                <td><a href="{% canonical_url p %}">{{ p.name }}</a></td>
+              <tr class="row--clickable">
+                <td>
+                  <div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div>
+                </td>
+                <td class="u-color--primary">
+                  <a href="{% canonical_url p %}" class="row-link">{{ p.name }}</a>
+                </td>
                 <td>{{ p.primary_party }}</td>
                 <td>{{ p.current_state }}</td>
                 <td>{{ p.current_role.district }}</td>

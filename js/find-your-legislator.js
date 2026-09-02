@@ -196,12 +196,12 @@ export default class FindYourLegislator extends React.Component {
     legislators.sort((a, b) => b.chamber.localeCompare(a.chamber)); 
 
     const rows = legislators.map(leg => (
-      <tr key={leg.name}>
+      <tr key={leg.name} className="row--clickable">
         <td>
           <LegislatorImage id={leg.id} image={leg.image} party={leg.party} />
         </td>
-        <td>
-          <a href={leg.pretty_url}>{leg.name}</a>
+        <td className="u-color--primary">
+          <a href={leg.pretty_url} className="row-link">{leg.name}</a>
         </td>
         <td>{leg.party}</td>
         <td>{leg.district}</td>
@@ -245,12 +245,12 @@ export default class FindYourLegislator extends React.Component {
       const rows = legislators.map(leg => {
         const office = leg.chamber == 'upper' ? 'U.S. Senate': `U.S. House ${leg.district}`;
         return (
-        <tr key={leg.name}>
+        <tr key={leg.name} className="row--clickable">
           <td>
             <LegislatorImage id={leg.id} image={leg.image} party={leg.party} />
           </td>
-          <td>
-            <a href={leg.pretty_url}>{leg.name}</a>
+          <td className="u-color--primary">
+            <a href={leg.pretty_url} className="row-link">{leg.name}</a>
           </td>
           <td>{leg.party}</td>
           <td>{office}</td>
@@ -293,7 +293,7 @@ export default class FindYourLegislator extends React.Component {
           <div className="input-group">
             <label
               className="show-for-sr"
-              for="fyl-address"
+              htmlFor="fyl-address"
             >
               Address
             </label>

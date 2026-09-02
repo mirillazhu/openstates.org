@@ -94,7 +94,7 @@
         {% if person_votes %}
         <h2 class="heading--medium">Roll Call</h2>
         <hr>
-        <table>
+        <table class="voters-table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -106,7 +106,7 @@
                 {% for pv in person_votes %}
                 <tr>
                     {% if pv.voter %}
-                        <td><a href="{% canonical_url pv.voter %}">{{ pv.voter.name }}</a></td>
+                        <td><a href="{% canonical_url pv.voter %}" class="voter-link">{{ pv.voter.name }}</a></td>
                         <td style="white-space: nowrap; background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
                     {% else %}
                         <td>{{ pv.voter_name }}</td>

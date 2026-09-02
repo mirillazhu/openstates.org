@@ -68,10 +68,10 @@
                 </thead>
                 <tbody>
                     {% for bill in tracked_bills %}
-                        <tr class="row--align-top {% if bill.has_unread_action %} bill-unread-action {% endif %}">
+                        <tr class="row--align-top row--clickable {% if bill.has_unread_action %} bill-unread-action {% endif %}">
                             <td>
-                                <a href="{% canonical_url bill %}">
-                                <strong>{{ bill.identifier_with_state }}</strong>
+                                <a href="{% canonical_url bill %}" class="row-link">
+                                <strong class="u-color--primary">{{ bill.identifier_with_state }}</strong>
                                 </a>
                             </td>
                             <td>
