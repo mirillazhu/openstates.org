@@ -26,15 +26,16 @@
     </head>
 
     <body style="display: flex; flex-direction: column; min-height: 100%; margin: 0;">
+        <a class="show-on-focus skip-link" href="#main-content">Skip to main content</a>
         {% header %}
 
-        <div class="grid-container" style="flex: 1; width: 100%;">
+        <main class="grid-container" id="main-content" tabindex="-1" style="flex: 1; width: 100%;">
             <div class="grid-x grid-padding-x" style="width: 100%;">
                 <div class="cell medium-12 mt1 mb1">
                     {% block content %}{% endblock %}
                 </div>
             </div>
-        </div>
+        </main>
 
         {% include "./footer.html" %}
         <script src="{% static "bundles/main.js" %}"></script>

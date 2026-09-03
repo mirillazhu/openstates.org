@@ -5,7 +5,7 @@
   <script src="{% static "bundles/search_options_form.js" %}"></script>
 {% endblock %}
 
-<form id="search-options-form"> 
+<form id="search-options-form" role="form" aria-label="Filter Bills"> 
 
     {% if search_html_hidden_vars %}
         <input type="hidden" name="is_filter_form" value="true">

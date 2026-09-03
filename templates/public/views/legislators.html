@@ -18,7 +18,7 @@
         <h2 class="heading--small">Don't know who your legislator is?</h2>
         <p class="heading--small">Find them now!</p>
 
-        <form method="POST" action="/{{ state }}/find_your_legislator/">
+        <form method="POST" action="/{{ state }}/find_your_legislator/" role="search" aria-label="Find Your Legislator">
         {% csrf_token %}
             <div class="input-group">
                 <label class="show-for-sr" for="address">Search Address</label>
