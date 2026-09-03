@@ -9,7 +9,7 @@ context ~a little differently~.
 <header class="header">
     <div class="grid-container" id="header__top">
         <a href="{% url 'state_homepage' state|default:'us' %}">
-            <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Logo">
+            <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Home">
         </a>
 
        <div id="header__login">
@@ -27,7 +27,8 @@ context ~a little differently~.
             <div class="navigation__container">
 
                 <div class="navigation__section navigation__select-wrapper">
-                    <select class="navigation__select" onchange="window.location.href = '/' + this.value">
+                    <label class="show-for-sr u-fill--white" for="state-select">Select a State</label> 
+                    <select class="navigation__select" id="state-select" onchange="window.location.href = '/' + this.value">
                         {% if not state %}
                             <option value="">Select a state</option>
                         {% endif %}
@@ -51,20 +52,24 @@ context ~a little differently~.
                     <li><a {% if state_nav == "bills" %} class="is-active" {% endif %} href="{% url 'bills' state %}">Bills</a></li>
                     <li><a {% if state_nav == "legislators" %} class="is-active" {% endif %} href="{% url 'legislators' state %}">Legislators</a></li>
                     <li><a {% if state_nav == "committees" %} class="is-active" {% endif %} href="{% url 'committees' state %}">Committees</a></li>
-                    {% endif %}
+                {% endif %}
                 </ul>
 
                 {% if state %}
                 <form 
                 method="POST"
                 action="{% url 'state_search' state=state %}" 
-                id="header__search">
+                id="header__search"
+                role="search"
+                aria-label="Bill and Legislator Search"
+                >
                 {% csrf_token %}
                 <div class="input-group">
-                    <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query">
+                    <label class="show-for-sr" for="header-search">Search</label>
+                    <input class="input-group-field" type="search" placeholder="Search bills and legislators..." name="query" id="header-search">
                     <div class="input-group-button">
                         <button type="submit" class="button button--secondary">
-                          Search
+                        Search
                         </button>
                     </div>
                 </div>

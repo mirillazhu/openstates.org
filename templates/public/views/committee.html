@@ -22,7 +22,7 @@
     <table class="hover">
         <thead>
             <tr>
-                <th></th>
+                <th class="show-for-sr">Image</th>
                 <th>Name</th>
                 <th>Party</th>
                 <th>Role</th>
@@ -30,12 +30,14 @@
         </thead>
         <tbody>
             {% for membership in memberships %}
-            <tr>
+            <tr class="row--clickable">
                 {% if membership.member %}
                 <td>
                     <div data-hook="legislator-image" data-image="{{ membership.member.image }}" data-person-id="{{ membership.person_id }}"  data-party="{{ membership.member.primary_party }}"> </div>
                 </td>
-                <td><a href="{% canonical_url membership.member %}">{{ membership.member.name }}</a></td>
+                <td class="u-color--primary">
+                    <a href="{% canonical_url membership.member %}" class="row-link">{{ membership.member.name }}</a>
+                </td>
                 <td>{{ membership.member.primary_party }}</td>
                 {% else %}
                 <td>

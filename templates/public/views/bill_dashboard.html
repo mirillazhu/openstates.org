@@ -9,21 +9,22 @@
 
     {% if not tracked_bills %}
 
-    <h2 class="heading--small" style="margin-top: 48px;">
+    <h2 class="heading--small mt3">
       You aren't currently following any bills. Search for a bill to add today!
     </h2>
 
     <form method="POST" action="{% url 'state_search' state|default:'us' %}">
       {% csrf_token %}
       <div class="input-group">
-          <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query">
+          <label class="show-for-sr" for="query">Search</label>
+          <input class="input-group-field" type="search" placeholder="SB 38, Incarceration, Veterans, Public Finance" name="query" id="query">
           <div class="input-group-button">
               <button type="submit" class="button button--secondary">
                 Search
               </button>
           </div>
       </div>
-      <p>Click on the bill number of the bill you wish to follow on the search page, then click "Follow Bill."</p>
+      <p>Click on the bill you wish to follow on the search page, then click "Follow Bill."</p>
     </form>
 
     {% else %}
@@ -67,10 +68,10 @@
                 </thead>
                 <tbody>
                     {% for bill in tracked_bills %}
-                        <tr class="row--align-top {% if bill.has_unread_action %} bill-unread-action {% endif %}">
+                        <tr class="row--align-top row--clickable {% if bill.has_unread_action %} bill-unread-action {% endif %}">
                             <td>
-                                <a href="{% canonical_url bill %}">
-                                <strong>{{ bill.identifier_with_state }}</strong>
+                                <a href="{% canonical_url bill %}" class="row-link">
+                                <strong class="u-color--primary">{{ bill.identifier_with_state }}</strong>
                                 </a>
                             </td>
                             <td>

@@ -5,7 +5,7 @@
   <script src="{% static "bundles/search_options_form.js" %}"></script>
 {% endblock %}
 
-<form id="search-options-form"> 
+<form id="search-options-form" role="form" aria-label="Filter Bills"> 
 
     {% if search_html_hidden_vars %}
         <input type="hidden" name="is_filter_form" value="true">
@@ -105,9 +105,8 @@
 
     <button type="button" 
             id="clear-filters-button"
-            class="button button--primary" 
-            style="background-color: #dbe6f1; border-color: #dbe6f1; color: #015f5d;"
-            >
+            class="button" 
+        >
         Clear Filters&nbsp;
     </button>
 </form>

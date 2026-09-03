@@ -31,7 +31,7 @@
 
     <div id="document-wrapper" class="document-wrapper mb1">
         <div id="pdf-viewer-div">
-            <iframe id="pdf-viewer" class="pdf-viewer"></iframe>
+            <iframe id="pdf-viewer" class="pdf-viewer" title="Bill Document PDF"></iframe>
         </div>
 
         <div id="image-viewer" class="image-viewer">  <!-- image fallback -->
@@ -43,7 +43,7 @@
 
             <div id="viewer-scroll">
                 <div id="initial-loading">
-                    <img src="/static/pdfjs/web/images/loading.svg" class="loading-spinner"/>
+                    <img src="/static/pdfjs/web/images/loading.svg" class="loading-spinner" alt="loading spinner"/>
                     <span>Loading document...</span>
                 </div>
                 <div id="pages-wrapper" style="display:none;"></div>
@@ -51,7 +51,7 @@
         </div>
 
         <div id="error-state" class="error-state">
-            <h3>Unable to Load Document</h3>
+            <h2>Unable to Load Document</h2>
             <p id="error-message"></p>
         </div>
     </div>

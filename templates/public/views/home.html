@@ -19,11 +19,12 @@
  <div class="homepage-grid">
         <div class="text-center" style="width:100%">
           <h2 class="heading--medium">Search &amp; Track Bills</h2>
-          <img src="{% static "images/nounproject/political_2003975.svg" %}">
+          <img src="{% static "images/nounproject/political_2003975.svg" %}" alt="">
           <form method="POST" action="{% url 'state_search' state %}">
           {% csrf_token %}
               <div class="input-group" style="width:100%">
-                  <input class="input-group-field" type="search" placeholder="SB 46, Healthcare, etc." name="query">
+                  <label class="show-for-sr" for="query">Search</label>
+                  <input class="input-group-field" type="search" placeholder="SB 46, Healthcare, etc." name="query" id="query">
                   <div class="input-group-button">
                       <input type="submit" class="button button--primary" value="Search">
                   </div>
@@ -33,11 +34,12 @@
 
         <div class="text-center" style="width:100%">
             <h2 class="heading--medium">Find Your Legislators</h2>
-            <img src="{% static "images/nounproject/people_2911761.svg" %}">
+            <img src="{% static "images/nounproject/people_2911761.svg" %}" alt="">
             <form method="POST" action="{% url 'find_your_legislator' state %}">
             {% csrf_token %}
                 <div class="input-group" style="width:100%">
-                    <input class="input-group-field" type="search" placeholder="Enter Address" name="address">
+                    <label class="show-for-sr" for="address">Search Address</label>
+                    <input class="input-group-field" type="search" placeholder="Enter Address" name="address" id="address">
                     <div class="input-group-button">
                         <input type="submit" class="button button--primary" value="Search">
                     </div>
@@ -48,7 +50,7 @@
         <div class="text-center">
             <hr>
             <h2 class="heading--medium">Explore Committee Data</h2>
-            <img height="150" src="{% static "images/nounproject/organization-7840994.svg" %}">
+            <img height="150" src="{% static "images/nounproject/organization-7840994.svg" %}" alt="">
             <br>
             <a href="{% url 'committees' state %}" class="button button--primary">Go to Committees</a>
         </div>
@@ -56,7 +58,7 @@
         <div class="text-center">
             <hr>
             <h2 class="heading--medium">Resources</h2>
-            <img height="150" src="{% static "images/nounproject/news-822273.svg" %}">
+            <img height="150" src="{% static "images/nounproject/news-822273.svg" %}" alt="">
             <br>
             <p>What is a bill? What can my legislator do for me? <a href="/resources/">Learn about policy and how you can have a say</a> in which bills become law.</p>
         </div>

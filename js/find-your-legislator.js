@@ -196,12 +196,12 @@ export default class FindYourLegislator extends React.Component {
     legislators.sort((a, b) => b.chamber.localeCompare(a.chamber)); 
 
     const rows = legislators.map(leg => (
-      <tr key={leg.name}>
+      <tr key={leg.name} className="row--clickable">
         <td>
           <LegislatorImage id={leg.id} image={leg.image} party={leg.party} />
         </td>
-        <td>
-          <a href={leg.pretty_url}>{leg.name}</a>
+        <td className="u-color--primary">
+          <a href={leg.pretty_url} className="row-link">{leg.name}</a>
         </td>
         <td>{leg.party}</td>
         <td>{leg.district}</td>
@@ -218,7 +218,7 @@ export default class FindYourLegislator extends React.Component {
           <table id="results">
             <thead>
               <tr>
-                <th></th>
+                <th className="show-for-sr">Image</th>
                 <th>Name</th>
                 <th>Party</th>
                 <th>District</th>
@@ -245,12 +245,12 @@ export default class FindYourLegislator extends React.Component {
       const rows = legislators.map(leg => {
         const office = leg.chamber == 'upper' ? 'U.S. Senate': `U.S. House ${leg.district}`;
         return (
-        <tr key={leg.name}>
+        <tr key={leg.name} className="row--clickable">
           <td>
             <LegislatorImage id={leg.id} image={leg.image} party={leg.party} />
           </td>
-          <td>
-            <a href={leg.pretty_url}>{leg.name}</a>
+          <td className="u-color--primary">
+            <a href={leg.pretty_url} className="row-link">{leg.name}</a>
           </td>
           <td>{leg.party}</td>
           <td>{office}</td>
@@ -265,7 +265,7 @@ export default class FindYourLegislator extends React.Component {
             <table id="results">
               <thead>
                 <tr>
-                  <th></th>
+                  <th className="show-for-sr">Image</th>
                   <th>Name</th>
                   <th>Party</th>
                   <th>Office</th>
@@ -291,6 +291,12 @@ export default class FindYourLegislator extends React.Component {
              Find out who represents you by entering your address below:
           </h2>
           <div className="input-group">
+            <label
+              className="show-for-sr"
+              htmlFor="fyl-address"
+            >
+              Address
+            </label>
             <input
               className="input-group-field"
               type="search"
@@ -311,8 +317,8 @@ export default class FindYourLegislator extends React.Component {
             </div>
           </div>
 
-          <div className="mapbox-credit">
-              In most cases, this should be your pre-incarceration address. Learn more <a href="/resources/">here</a>.
+          <div className="mb2">
+              <p>In most cases, this should be your pre-incarceration address. Learn more with <a href="/resources/">Frequently Asked Questions</a>.</p>
           </div>
 
           {this.state.error ? ( 

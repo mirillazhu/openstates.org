@@ -26,7 +26,7 @@ export default class CommitteeList extends LegislatorList {
             setChamber={this.setChamber}
           />
         )}
-        <table>
+        <table className="hover">
           <thead>
             <tr>
               <th
@@ -64,9 +64,9 @@ export default class CommitteeList extends LegislatorList {
                   committee.chamber === this.state.chamber
               )
               .map(b => (
-                <tr key={b.id}>
-                  <td>
-                    <a href={b.pretty_url}>{b.name}</a>
+                <tr key={b.id} className="row--clickable">
+                  <td className="u-color--primary">
+                    <a href={b.pretty_url} className="row-link">{b.name}</a>
                   </td>
                   <td>{this.props.chambers[b.chamber]}</td>
                   <td>{b.member_count}</td>

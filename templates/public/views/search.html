@@ -22,6 +22,8 @@
     <h2 class="heading--small">Found {{ bills.paginator.count|default:0 }} bill{{ bills.paginator.count|default:0|pluralize }} and {{ people|length }} {% if people|length == 1 %}person{% else %}people{% endif %}.</h2>
 
   {% else %}
+    <h1 class="show-for-sr">{% if state %}{{ state|upper }} {% endif %}Bill and Legislator Search</h1>
+
     <h2 class="heading--small">
       Try searching for something:
     </h2>
@@ -31,7 +33,8 @@
         <input type="hidden" name="state" value="{{ state }}">
       {% endif %}
       <div class="input-group">
-          <input class="input-group-field" type="search" placeholder="HB 21, Housing, Taxation, Maria" name="query">
+          <label class="show-for-sr" for="query">Search</label>
+          <input class="input-group-field" type="search" placeholder="HB 21, Housing, Taxation, Maria" name="query" id="query">
           <div class="input-group-button">
               <button type="submit" class="button button--secondary">
                 Search
@@ -65,13 +68,15 @@
                 </thead>
                 <tbody>
                     {% for bill in bills %}
-                        <tr class="row--align-top">
+                        <tr class="row--align-top row--clickable">
                             <td>
                               <div class="td-truncate td-truncate-long">
-                                <strong><a href="{% canonical_url bill %}">{{ bill.identifier }}</a></strong>
+                                <a href="{% canonical_url bill %}" class="row-link">
+                                <strong class="u-color--primary">{{ bill.identifier }}</strong>
                                 <span class="u-color--gray">(<strong>{{ bill.legislative_session.jurisdiction }}</strong> - {{ bill.legislative_session.name }})</span>
                                 <br>
                                 <span>{{ bill.title|titlecase_caps }}</span>
+                                </a>
                               </div>
                             </td>
                             <td>{{ bill.first_action_date|fdate:"%b %d %Y" }}</td>
@@ -99,7 +104,7 @@
           <table class="hover">
             <thead>
               <tr>
-                <th></th>
+                <th class="show-for-sr">Image</th>
                 <th>Name</th>
                 <th>Party</th>
                 <th>State</th>
@@ -108,9 +113,13 @@
             </thead>
             <tbody>
               {% for p in people %}
-              <tr>
-                <td><a href="{% canonical_url p %}"><div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div></a></td>
-                <td><a href="{% canonical_url p %}">{{ p.name }}</a></td>
+              <tr class="row--clickable">
+                <td>
+                  <div data-hook="legislator-image" data-image="{{ p.image }}" data-person-id="{{ p.id }}" data-size="small" data-party="{{p.primary_party}}"> </div>
+                </td>
+                <td class="u-color--primary">
+                  <a href="{% canonical_url p %}" class="row-link">{{ p.name }}</a>
+                </td>
                 <td>{{ p.primary_party }}</td>
                 <td>{{ p.current_state }}</td>
                 <td>{{ p.current_role.district }}</td>
