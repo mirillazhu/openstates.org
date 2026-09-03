@@ -22,6 +22,8 @@
     <h2 class="heading--small">Found {{ bills.paginator.count|default:0 }} bill{{ bills.paginator.count|default:0|pluralize }} and {{ people|length }} {% if people|length == 1 %}person{% else %}people{% endif %}.</h2>
 
   {% else %}
+    <h1 class="show-for-sr">{% if state %}{{ state|upper }} {% endif %}Bill and Legislator Search</h1>
+
     <h2 class="heading--small">
       Try searching for something:
     </h2>
