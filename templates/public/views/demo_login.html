@@ -16,7 +16,8 @@
     <form method="POST" id="demo-login">
     {% csrf_token %}
     <div class="input-group">
-        <input class="input-group-field" type="password" name="password" placeholder="">
+        <label class="show-for-sr" for="password">Enter Password</label>
+        <input class="input-group-field" type="password" name="password" id="password" placeholder="">
         <div class="input-group-button">
             <button class="button button--primary" type="submit">
                 Sign In
