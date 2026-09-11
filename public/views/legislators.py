@@ -1,59 +1,84 @@
+import datetime
+from django.db.models import Q, Prefetch
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
-from graphapi.schema import schema
-from openstates.data.models import Person, Bill
+from openstates.data.models import Bill, Person, Membership
 from utils.common import decode_uuid, jid_to_abbr, pretty_url
+from utils.geo import coords_to_divisions
 from utils.orgs import get_chambers_from_abbr
 from utils.people import person_as_dict
 
 
 def _people_from_lat_lon(lat, lon):
-    PERSON_GEO_QUERY = """{
-      people(latitude: %s, longitude: %s, first: 15) {
-        edges {
-          node {
-            id
-            image
-            name
-            primaryParty
-            currentMemberships(classification: ["upper", "lower", "legislature", "party"]) {
-              post {
-                label
-                division { id }
-              }
-              organization {
-                classification
-                name
-                jurisdictionId
-              }
-            }
-          }
-        }
-      }
-    }"""
-    resp = schema.execute(PERSON_GEO_QUERY % (lat, lon))
+    today = datetime.date.today()
 
-    nodes = [node["node"] for node in resp.data["people"]["edges"]]
+    # map coordinates to division, then filter legislators by specified division
+    legislators_qs = Person.objects.all()
+
+    if lat and lon:
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except ValueError:
+            raise ValueError("invalid lat or lon")
+
+        divisions = coords_to_divisions(lat, lon)
+
+        legislators_qs = legislators_qs.filter(
+            Q(memberships__post__division__id__in=divisions),
+            Q(memberships__end_date="") | Q(memberships__end_date__gt=today),
+        )
+
+    elif lat or lon:
+        raise ValueError("must provide lat & lon together")
+
+    # build memberships queryset for prefetch related
+    memberships_qs = Membership.objects.filter(
+        Q(start_date="") | Q(start_date__lte=today),
+        Q(end_date="") | Q(end_date__gte=today),
+    )  # current memberships only
+
+    memberships_qs = memberships_qs.filter(
+        organization__classification__in=["upper", "lower", "legislature"]
+    )  # exclude committee, subcommittee, executive
+
+    memberships_qs = memberships_qs.select_related(
+        "post",
+        "post__division",
+        "organization",
+    )
+
+    # prefetch memberships
+    legislators_qs = legislators_qs.prefetch_related(
+        Prefetch(
+            "memberships",
+            queryset=memberships_qs,
+            to_attr="current_memberships",
+        )
+    )
+
     people = []
-    for node in nodes:
+
+    for legislator in legislators_qs:
         person = {
-            "name": node["name"],
-            "id": node["id"],
-            "image": node["image"],
-            "party": node["primaryParty"],
-            "pretty_url": pretty_url(node),
+            "id": legislator.id,
+            "name": legislator.name,
+            "image": legislator.image,
+            "party": legislator.primary_party,
+            "pretty_url": pretty_url(legislator),
         }
-        for m in node["currentMemberships"]:
-            person["chamber"] = m["organization"]["classification"]
-            person["district"] = m["post"]["label"]
-            person["division_id"] = m["post"]["division"]["id"]
-            person["jurisdiction_id"] = m["organization"]["jurisdictionId"]
+        for membership in legislator.current_memberships:
+            person["chamber"] = membership.organization.classification
+            person["district"] = membership.post.label
+            person["division_id"] = membership.post.division.id
+            person["jurisdiction_id"] = membership.organization.jurisdiction_id
             person["level"] = (
                 "federal"
-                if m["organization"]["jurisdictionId"]
+                if membership.organization.jurisdiction_id
                 == "ocd-jurisdiction/country:us/government"
                 else "state"
             )
+            break
         people.append(person)
 
     return people
