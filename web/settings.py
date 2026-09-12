@@ -1,7 +1,6 @@
 import os
 import dj_database_url
 import structlog
-from corsheaders.defaults import default_headers
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -121,16 +120,12 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.github",
     "openstates.data",
-    "graphene_django",
-    "graphene_graphiql_explorer",
     "public",
-    "graphapi",
     "profiles.apps.ProfilesConfig",
     "dashboards",
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -209,7 +204,6 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "graphapi": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
         "openstates": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
@@ -242,15 +236,6 @@ ACCOUNT_RATE_LIMITS = {
     "signup": "10/h",
     # NOTE: Login is already protected via `ACCOUNT_LOGIN_ATTEMPTS_LIMIT`
 }
-
-# API
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r"^/(graphql).*$"
-CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
-CORS_ALLOW_HEADERS = default_headers + ("x-api-key",)
-
-
-GRAPHENE = {"SCHEMA": "graphapi.schema.schema", "MIDDLEWARE": []}
 
 
 # structlog config
