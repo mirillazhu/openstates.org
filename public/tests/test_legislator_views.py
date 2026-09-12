@@ -1,6 +1,7 @@
 import pytest
 from graphapi.tests.utils import populate_db
 from openstates.data.models import Person
+from public.views.legislators import _people_from_lat_lon
 from utils.common import pretty_url
 
 
@@ -70,4 +71,43 @@ def test_person_view_invalid_uuid(client, django_assert_num_queries):
     assert resp.status_code == 404
 
 
-# TODO: test find_your_legislator
+@pytest.mark.django_db
+def test_people_from_lat_lon(django_assert_num_queries):
+    lat = 44.4032
+    lon = -104.3700  # sundance, wyoming (WY State House 1)
+
+    with django_assert_num_queries(2):
+        people = _people_from_lat_lon(lat, lon)
+        assert len(people) == 2
+
+        names = set(p["name"] for p in people)
+        assert names == set(["Greta Gonzalez", "Hank Horn"])
+
+
+@pytest.mark.django_db
+def test_people_from_lat_lon_past_memberships(django_assert_num_queries):
+    lat = 59.4166667
+    lon = -135.9330556  # wells, alaska (AK State House 3, Senate B)
+
+    with django_assert_num_queries(2):
+        people = _people_from_lat_lon(lat, lon)
+        assert len(people) == 2
+
+        names = set(p["name"] for p in people)
+        assert (
+            "Rhonda Retired" not in names
+        )  # previously AK Senate B but should not be included because she is retired
+        assert names == set(["Carrie Carr", "Frank Fur"])
+
+
+@pytest.mark.django_db
+def test_people_from_lat_lon_no_legislators(django_assert_num_queries):
+    lat = 42.368195
+    lon = -73.285858  # lenox, massachusetts (no test DB legislators for MA)
+
+    with django_assert_num_queries(1):
+        people = _people_from_lat_lon(lat, lon)
+        assert len(people) == 0
+
+
+# TODO: test _people_from_lat_lon with federal legislators
