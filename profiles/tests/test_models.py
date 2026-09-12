@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
-from graphapi.tests.utils import populate_db
 from openstates.data.models import Person
 from profiles.models import Subscription
+from testutils.populators import populate_db
 
 pytestmark = pytest.mark.skip(
     reason="Deactivated accounts for now and changed bill subscription logic"

@@ -1,5 +1,5 @@
 import pytest
-from graphapi.tests.utils import populate_db, populate_unicam
+from testutils.populators import populate_db, populate_unicam
 
 
 @pytest.mark.django_db

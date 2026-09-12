@@ -1,6 +1,5 @@
 import pytest
 from django.core.cache import cache
-from graphapi.tests.utils import populate_db, populate_unicam
 from openstates.data.models import (
     Bill,
     Person,
@@ -8,7 +7,8 @@ from openstates.data.models import (
     BillDocumentLink,
     BillVersionLink,
 )
-from testutils.factories import create_test_bill
+from testutils.factories import make_specific_bill
+from testutils.populators import populate_db, populate_unicam
 
 
 @pytest.mark.django_db
@@ -21,15 +21,15 @@ def sortable_bills(kansas):
     # A's introduced first
     # B's latest action is first
     # C's introduced last
-    b = create_test_bill("2020", "upper", identifier="A")
+    b = make_specific_bill("2020", "upper", identifier="A")
     b.first_action_date = "2020-01-01"
     b.latest_action_date = "2020-08-01"
     b.save()
-    b = create_test_bill("2020", "upper", identifier="B")
+    b = make_specific_bill("2020", "upper", identifier="B")
     b.first_action_date = "2020-01-02"
     b.latest_action_date = "2020-06-01"
     b.save()
-    b = create_test_bill("2020", "upper", identifier="C")
+    b = make_specific_bill("2020", "upper", identifier="C")
     b.first_action_date = "2020-07-01"
     b.latest_action_date = "2020-07-01"
     b.save()

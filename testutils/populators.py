@@ -1,98 +1,14 @@
-import uuid
-import random
 from django.contrib.postgres.search import SearchVector
 from openstates.data.models import (
     Division,
     Jurisdiction,
     Organization,
-    Person,
     Bill,
     VoteEvent,
     SearchableBill,
 )
 from openstates.importers.computed_fields import update_bill_fields
-
-
-def make_random_bill(name):
-    state = Jurisdiction.objects.get(name=name)
-    session = random.choice(state.legislative_sessions.all())
-    org = state.organizations.get(classification=random.choice(("upper", "lower")))
-    b = Bill.objects.create(
-        id="ocd-bill/" + str(uuid.uuid4()),
-        title="Bill Title",
-        identifier=(
-            random.choice(("HB", "SB", "HR", "SR")) + str(random.randint(1000, 3000))
-        ),
-        legislative_session=session,
-        from_organization=org,
-        classification=[random.choice(["bill", "resolution"])],
-        subject=[random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10)],
-    )
-    b.actions.create(
-        description="Introduced", order=10, organization=org, date="2018-01-01"
-    )
-
-    for n in range(random.randint(1, 2)):
-        ve = VoteEvent.objects.create(
-            bill=b,
-            legislative_session=session,
-            motion_text="Motion Text",
-            organization=org,
-            result=random.choice(("failed", "passed")),
-        )
-        ve.counts.create(option="yes", value=random.randint(0, 10))
-        ve.counts.create(option="no", value=random.randint(0, 10))
-        for m in range(random.randint(1, 5)):
-            ve.votes.create(option=random.choice(("yes", "no")), voter_name="Voter")
-    return b
-
-
-def make_person(name, state, chamber, district, party, person_links=None):
-    org = Organization.objects.get(jurisdiction__name=state, classification=chamber)
-    # not currently using memberships table for party
-    # party, _ = Organization.objects.get_or_create(classification="party", name=party)
-    jurisdiction = Jurisdiction.objects.get(name=state)
-    chamber_letter = chamber[0]
-    if state == "Alaska":
-        state = "ak"
-    elif state == "Wyoming":
-        state = "wy"
-    elif state == "Nebraska":
-        state = "ne"
-        chamber_letter = "u"
-    div, _ = Division.objects.get_or_create(
-        id="ocd-division/country:us/state:{}/sld{}:{}".format(
-            state, chamber_letter, district.lower()
-        ),
-        name="Division " + district,
-    )
-    post = org.posts.create(
-        label=district,
-        division=div,
-        role="Representative" if chamber == "lower" else "Senator",
-    )
-    try:
-        district = int(district)
-    except ValueError:
-        pass
-    p = Person.objects.create(
-        name=name,
-        primary_party=party,
-        current_jurisdiction=jurisdiction,
-        current_role={
-            "org_classification": chamber,
-            "district": district,
-            "division_id": div.id,
-            "title": post.role,
-        },
-    )
-    p.memberships.create(post=post, organization=org)
-    # not currently using memberships table for party
-    # p.memberships.create(organization=party)
-    if person_links:
-        for link in person_links:
-            p.links.create(url=link["url"], note=link.get("note", ""))
-    return p
+from .factories import make_person, make_random_bill
 
 
 def populate_db():

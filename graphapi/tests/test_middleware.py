@@ -1,6 +1,6 @@
 import pytest
 from graphapi.schema import schema
-from .utils import populate_db
+from testutils.populators import populate_db
 from ..middleware import QueryProtectionMiddleware
 
 

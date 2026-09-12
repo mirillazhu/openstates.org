@@ -3,7 +3,7 @@ from django.test import RequestFactory
 from django.core.paginator import Paginator
 from django.http import Http404
 from openstates.data.models import Bill
-from graphapi.tests.utils import populate_db, populate_unicam
+from testutils.populators import populate_db, populate_unicam
 from utils.bills import (
     get_filter_options,
     get_sort_context,

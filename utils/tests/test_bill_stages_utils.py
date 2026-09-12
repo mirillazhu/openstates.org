@@ -1,6 +1,6 @@
 import pytest
 from openstates.data.models import Bill, Organization
-from graphapi.tests.utils import populate_db, populate_unicam
+from testutils.populators import populate_db, populate_unicam
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
 
 

@@ -1,7 +1,7 @@
 import pytest
 from graphapi.schema import schema
 from openstates.data.models import Bill, Person
-from .utils import populate_db
+from testutils.populators import populate_db
 
 
 @pytest.mark.django_db
