@@ -26,6 +26,18 @@ table {
     }
 }
 
+.th-introduced {
+  width: 100px;
+}
+
+.th-latest-action {
+  width: 150px;
+
+  @include breakpoint(large) {
+      width: 250px;
+  }
+}
+
 tr.row--align-top {
     vertical-align: top;
 }

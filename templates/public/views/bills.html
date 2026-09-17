@@ -12,18 +12,18 @@
     {% endif %}
 
     <div class="grid-x grid-margin-x">
-        <div class="cell medium-9">
+        <div class="cell large-9 sidebarbreak-8">
 
             <table class="hover">
                 <thead>
                     <tr>
                         <th>Bill Title</th>
-                        <th width="100">
+                        <th class="th-introduced">
                           <a href="{{ first_action_sort_url }}">
                             Introduced{{ first_action_arrow }}
                           </a>
                         </th>
-                        <th width="250">
+                        <th width="th-latest-action">
                           <a href="{{ latest_action_sort_url }}">
                             Latest Action{{ latest_action_arrow }}
                           </a>
@@ -59,7 +59,7 @@
             <p>Showing {{ bills.start_index }} to {{ bills.end_index }} of {{ bills.paginator.count }} bills</p>
             {% pagination bills request.GET %}</p>
         </div>
-        <div class="cell medium-3">
+        <div class="cell large-3 sidebarbreak-4">
             <div class="sidebar">
                 <h2 class="heading--medium">Filter Bills</h2> 
                 {% include 'public/components/search-options-form.html' %}

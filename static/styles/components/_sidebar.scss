@@ -1,17 +1,19 @@
-
 .sidebar {
+    border-top: 1px solid $color-gray;
+    margin-top: 1rem;
+    padding-top: 1rem;
 
-    border-bottom: 1px solid $color-gray;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    @include breakpoint(sidebarbreak) {
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0;
 
-    @include breakpoint(medium) {
-        border-bottom: none;
-        height: 100%; 
+        border-left: 1px solid $color-gray;
         margin-left: 1rem;
         padding-left: 2rem;
-        border-left: 1px solid $color-gray;
+        border-bottom: none;
         margin-bottom: 0;
+        height: 100%; 
     }
 
 }
