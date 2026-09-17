@@ -1,15 +1,15 @@
 // Meters
 
 .meter-container {
-    @include breakpoint(medium) {
+    @include breakpoint(meterbreak) {
         display: flex;
     }
 }
 
 .meter {
     margin-left: 0;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
     list-style-type: none;
     display: flex;
 }
@@ -21,7 +21,11 @@
     height: 12px;
     min-width: 25%;
     margin-top: 1rem;
-    @include breakpoint(medium) {
+    @include breakpoint(meterbreak) {
+        min-width: 125px;
+        margin-top: 0;
+    }
+    @include breakpoint(large) {
         min-width: 135px;
         margin-top: 0;
     }
@@ -90,14 +94,13 @@
 
 .meter-bar__title {
     color: $color-primary;
-    top: -2.5rem;
-    @include breakpoint(medium) {
-        top: -2rem;
-    }
+    bottom: 100%;
+    top: unset;
 }
 
 .meter-bar__detail {
-    bottom: -1.5rem;
+    top: 100%;
+    bottom: auto;
     font-size: 0.65rem;
 }
 
