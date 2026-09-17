@@ -213,7 +213,7 @@ export default class FindYourLegislator extends React.Component {
     if (this.state.legislators.length) {
       // have to wrap this in a div or the grid sizing will explode the table
       table = (
-        <div>
+        <div className="fyl-tables">
           <h3>State</h3>
           <table id="results">
             <thead>
@@ -347,7 +347,7 @@ export default class FindYourLegislator extends React.Component {
         </div>
         
         <div>
-          
+
           {legTables}
 
         </div>
