@@ -40,17 +40,14 @@
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 3em;
 
-    @include breakpoint(small down) {
+    @include breakpoint(gridbreak down) {
         grid-template-columns: auto;
     }
 }
-.find-your-legislator label {
-    font-size: 120%;
-    display: inline-block;
-    margin-right: 1em;
-
-    @include breakpoint(small down) {
-        display: none;
+.fyl-tables {
+    @include breakpoint(gridbreak down) {
+        border-top: 1px solid $color-gray;
+        padding-top: 1rem;
     }
 }
 .find-your-legislator input {
