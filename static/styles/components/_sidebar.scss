@@ -1,19 +1,35 @@
 .sidebar {
-    border-top: 1px solid $color-gray;
-    margin-top: 1rem;
-    padding-top: 1rem;
+    border-left: 1px solid $color-gray;
+    margin-left: 1rem;
+    padding-left: 2rem;
+    height: 100%; 
 
-    @include breakpoint(sidebarbreak) {
-        border-top: none;
-        margin-top: 0;
-        padding-top: 0;
+    @include breakpoint(sidebarbreak down) {
+        border-top: 1px solid $color-gray;
+        margin-top: 1rem;
+        padding-top: 1rem;
 
-        border-left: 1px solid $color-gray;
-        margin-left: 1rem;
-        padding-left: 2rem;
-        border-bottom: none;
-        margin-bottom: 0;
-        height: 100%; 
+        border-left: none;
+        margin-left: 0;
+        padding-left: 0;
     }
 
+}
+
+
+#fyl-aside.sidebar {
+    @include breakpoint(sidebarbreak down) {
+        position: relative;
+        margin-bottom: 3rem;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 1rem;
+            border-bottom: 1px solid $color-gray;
+            margin-bottom: 2rem;
+        }
+    }
 }
