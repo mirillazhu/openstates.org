@@ -10,9 +10,9 @@
         <div class="overview">
             <div class="overview__header">
                 <div style="width: 100%;">
-                    <div class="flex-container align-justify">
+                    <div class="align-justify vote-title-container">
                         <h1 class="overview__heading">Vote on {{ vote.bill.identifier }} - {{ vote.motion_text|titlecase_all }}</h1>
-                        <span style="height: min-content;" class="label
+                        <span class="label vote-label
                             {% if vote.result == 'pass' %}
                                 label--green
                             {% elif vote.result == 'fail' %}
@@ -43,7 +43,7 @@
             </div>
             </div>
             <div class="overview__section overview__section--parent">
-                <div class="overview__subsection">
+                <div class="overview__subsection overview__subsection--votes">
                     <table>
                         <thead>
                             <tr>
@@ -62,7 +62,7 @@
                     </table>
                 </div>
                 
-                <div class="overview__subsection {% if not party_votes %}overview__subsection--empty{% endif %}">
+                <div class="overview__subsection overview__subsection--votes {% if not party_votes %}overview__subsection--empty{% endif %}">
                 {% if party_votes %}
                     <table>
                         <thead>
@@ -97,9 +97,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th style="white-space: nowrap; width: 25%;">{% if has_voter_parties %}Party{% endif %}</th>
-                    <th style="width: 15%;">Vote</th>
+                    <th style="width: 30%">Name</th>
+                    <th>{% if has_voter_parties %}Party{% endif %}</th>
+                    <th>Vote</th>
                 </tr>
             </thead>
             <tbody>
@@ -107,7 +107,7 @@
                 <tr>
                     {% if pv.voter %}
                         <td><a href="{% canonical_url pv.voter %}" class="voter-link">{{ pv.voter.name }}</a></td>
-                        <td style="white-space: nowrap; background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
+                        <td style="background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
                     {% else %}
                         <td>{{ pv.voter_name }}</td>
                         <td></td>
