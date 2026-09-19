@@ -10,7 +10,7 @@
     }
 
     @include breakpoint(sidebarbreak down) {
-        grid-template-columns: auto;
+        grid-template-columns: 100%;
     }
 }
 #fyl-aside {
@@ -19,6 +19,7 @@
 
     @include breakpoint(sidebarbreak down) {
         grid-column: 1;
+        max-width: 100%;
     }
 }
 #fyl-input {
@@ -41,7 +42,7 @@
     grid-column-gap: 3em;
 
     @include breakpoint(gridbreak down) {
-        grid-template-columns: auto;
+        grid-template-columns: 100%;
     }
 }
 .fyl-tables {
