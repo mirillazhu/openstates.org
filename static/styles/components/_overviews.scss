@@ -48,7 +48,7 @@
     }
 
     & + & {
-        border-top: 1px solid $color-gray;
+        border-top: 1px dashed $color-gray;
     
         @include breakpoint(medium) {
             border-top: 0;
