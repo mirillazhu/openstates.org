@@ -8,15 +8,15 @@ context ~a little differently~.
 
 <header class="header">
 
-    <input type="checkbox" id="menu-toggle" class="menu-toggle show-for-sr">
-
     <div class="grid-container" id="header__top">
         <a href="{% url 'state_homepage' state|default:'us' %}">
             <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Home">
         </a>
 
-        <!-- dropdown menu on mobile -->
-        <label for="menu-toggle" class="menu-icon" aria-label="Toggle menu">&#9776;</label>
+        <!-- menu button on mobile -->
+        <button class="menu-icon" aria-label="Toggle menu" aria-expanded="false">
+            &#9776;
+        </button>
 
         <!-- bill dashboard/resources links for desktop only -->
 
@@ -24,7 +24,6 @@ context ~a little differently~.
           <a href="/bill_dashboard">
             Bill Dashboard{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
           </a>
-          <span style="margin-left: 3.5em;">
           <a href="/resources">Resources</a>
         </div>
 

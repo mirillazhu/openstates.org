@@ -36,11 +36,7 @@
   }
 }
 
-// mobile dropdown menu
-#menu-toggle {
-  display: none;
-}
-
+// menu button on mobile
 .menu-icon {
   display: block;
   cursor: pointer;
@@ -60,12 +56,13 @@
   display: none;  
 
   @include breakpoint(medium) {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 3.5em;  
       padding-top: 2rem;
       padding-bottom: 2rem;
 
       font-size: 120%;
-      align-self: center;
       white-space: nowrap;
       justify-self: end;
   }
@@ -77,6 +74,7 @@
 
   @include breakpoint(medium) {
     width: auto;
+    margin-left: auto;
   }
 }
 
@@ -103,7 +101,7 @@
 .navigation {
     display: none;
 
-    .menu-toggle:checked ~ & {
+    &.is-open {
         display: block;
     }
 
@@ -179,7 +177,7 @@
     display: none;
 
     @include breakpoint(small only) {
-        .menu-toggle:checked ~ .navigation & {
+        .navigation.is-open & {
             display: block;
         }
     }
