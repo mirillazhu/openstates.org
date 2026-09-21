@@ -3,8 +3,10 @@
     margin-left: 1rem;
     padding-left: 2rem;
     height: 100%; 
+}
 
-    @include breakpoint(sidebarbreak down) {
+.sidebar.search-options-form {
+    @include breakpoint(medium down) {
         border-top: 1px solid $color-gray;
         margin-top: 1rem;
         padding-top: 1rem;
@@ -13,14 +15,16 @@
         margin-left: 0;
         padding-left: 0;
     }
-
 }
 
-
-#fyl-aside.sidebar {
+.sidebar.fyl-aside {
     @include breakpoint(sidebarbreak down) {
         position: relative;
         margin-bottom: 3rem;
+
+        border-left: 0;
+        margin-left: 0;
+        padding-left: 0;
 
         &::after {
             content: '';
@@ -29,7 +33,7 @@
             right: 0;
             bottom: 1rem;
             border-bottom: 1px solid $color-gray;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
     }
 }
