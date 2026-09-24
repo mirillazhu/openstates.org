@@ -7,18 +7,10 @@ context ~a little differently~.
 {% endcomment %}
 
 <header class="header">
-
     <div class="grid-container" id="header__top">
         <a href="{% url 'state_homepage' state|default:'us' %}">
             <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Home">
         </a>
-
-        <!-- menu button on mobile -->
-        <button class="menu-icon" aria-label="Toggle menu" aria-expanded="false">
-            &#9776;
-        </button>
-
-        <!-- bill dashboard/resources links for desktop only -->
 
         <div id="header__top-level-links">
           <a href="/bill_dashboard">
@@ -26,7 +18,6 @@ context ~a little differently~.
           </a>
           <a href="/resources">Resources</a>
         </div>
-
     </div>
 
     {% if state_nav != "disabled" %}
@@ -55,21 +46,12 @@ context ~a little differently~.
                     </select>
                 </div>
 
-                <!-- state-specific links for mobile and desktop -->
-
                 <ul class="navigation__section navigation__menu">
                 {% if state %}
                     <li><a {% if state_nav == "bills" %} class="is-active" {% endif %} href="{% url 'bills' state %}">Bills</a></li>
                     <li><a {% if state_nav == "legislators" %} class="is-active" {% endif %} href="{% url 'legislators' state %}">Legislators</a></li>
                     <li><a {% if state_nav == "committees" %} class="is-active" {% endif %} href="{% url 'committees' state %}">Committees</a></li>
                 {% endif %}
-                </ul>
-
-                 <!-- bill dashboard/resources links for mobile only -->
-
-                <ul class="navigation__section navigation__menu navigation__menu--mobile-only">
-                    <li><a href="/bill_dashboard">Bill Dashboard{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}</a></li>
-                    <li><a href="/resources">Resources</a></li>
                 </ul>
 
                 {% if state %}

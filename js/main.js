@@ -34,16 +34,3 @@ function reloadPage(event) {
 }
 
 window.addEventListener("pageshow", reloadPage);
-
-// menu toggle for mobile
-function toggleMenu() {
-  const menuButton = document.querySelector(".menu-icon");
-  const navigation = document.querySelector(".navigation");
-
-  menuButton.addEventListener("click", function() {
-    const isOpen = navigation.classList.toggle("is-open");
-    menuButton.setAttribute("aria-expanded", isOpen);
-  });
-}
-
-window.addEventListener("load", toggleMenu);

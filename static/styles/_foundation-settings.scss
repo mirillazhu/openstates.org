@@ -107,6 +107,7 @@ $print-transparent-backgrounds: true;
 
 $breakpoints: (
     small: 0,
+    headerbreak: 450px,
     medium: 680px,
     sidebarbreak: 760px,
     meterbreak: 770px,
@@ -116,7 +117,7 @@ $breakpoints: (
     xxlarge: 1440px,
 );
 $print-breakpoint: large;
-$breakpoint-classes: (small medium sidebarbreak meterbreak gridbreak large);
+$breakpoint-classes: (small headerbreak medium sidebarbreak meterbreak gridbreak large);
 
 // 3. The Grid
 // -----------
