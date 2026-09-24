@@ -10,14 +10,14 @@ from dashboards.management.commands.data_quality import (
     bills_versions,
     DataQualityReport,
 )
-from testutils.factories import create_test_bill, create_test_vote
+from testutils.factories import make_specific_bill, make_vote
 
 
 @pytest.mark.django_db
 def test_avg_number_data(django_assert_num_queries, kansas):
     # one bill with 0 of everything, another with 10 of everything
-    create_test_bill("2020", "upper")
-    create_test_bill(
+    make_specific_bill("2020", "upper")
+    make_specific_bill(
         "2020", "upper", sponsors=10, versions=10, actions=10, votes=10, documents=10
     )
     upper = kansas.organizations.get(classification="upper")
@@ -45,14 +45,14 @@ def test_avg_number_data(django_assert_num_queries, kansas):
 @pytest.mark.django_db
 def test_vote_data(django_assert_num_queries, kansas):
     # two bills without votesr
-    b = create_test_bill("2020", "upper")
-    create_test_vote(b, yes_count=1)  # without voter
-    create_test_vote(b, yes_count=1, yes_votes=["A", "B"])  # bad count
-    b = create_test_bill("2020", "upper")
-    create_test_vote(b, yes_count=1)  # without voters
-    create_test_vote(b, yes_count=1, yes_votes=["A", "B"])  # bad count
-    create_test_vote(b, yes_count=2, yes_votes=["A", "B"])  # good count
-    create_test_vote(b, no_count=2, no_votes=["A"])  # bad count
+    b = make_specific_bill("2020", "upper")
+    make_vote(b, yes_count=1)  # without voter
+    make_vote(b, yes_count=1, yes_votes=["A", "B"])  # bad count
+    b = make_specific_bill("2020", "upper")
+    make_vote(b, yes_count=1)  # without voters
+    make_vote(b, yes_count=1, yes_votes=["A", "B"])  # bad count
+    make_vote(b, yes_count=2, yes_votes=["A", "B"])  # good count
+    make_vote(b, no_count=2, no_votes=["A"])  # bad count
     upper = kansas.organizations.get(classification="upper")
     with django_assert_num_queries(4):
         data = vote_data("KS", "2020", upper)
@@ -63,7 +63,7 @@ def test_vote_data(django_assert_num_queries, kansas):
 def test_bills_per_session(django_assert_num_queries, kansas):
     upper = kansas.organizations.get(classification="upper")
 
-    b = create_test_bill("2020", "upper")
+    b = make_specific_bill("2020", "upper")
     b.actions.create(
         description="First", order=1, organization=upper, date="2020-01-01"
     )
@@ -82,8 +82,8 @@ def test_bills_per_session(django_assert_num_queries, kansas):
 
 @pytest.mark.django_db
 def test_no_sources(django_assert_num_queries, kansas):
-    create_test_bill("2020", "upper", votes=1)
-    create_test_bill("2020", "upper", sources=1, votes=5)
+    make_specific_bill("2020", "upper", votes=1)
+    make_specific_bill("2020", "upper", sources=1, votes=5)
 
     upper = kansas.organizations.get(classification="upper")
 
@@ -94,9 +94,9 @@ def test_no_sources(django_assert_num_queries, kansas):
 
 @pytest.mark.django_db
 def test_bill_subjects(django_assert_num_queries, kansas):
-    create_test_bill("2020", "upper", subjects=["A", "B", "C"])
-    create_test_bill("2020", "upper", subjects=["A", "B"])
-    create_test_bill("2020", "upper", subjects=[])
+    make_specific_bill("2020", "upper", subjects=["A", "B", "C"])
+    make_specific_bill("2020", "upper", subjects=["A", "B"])
+    make_specific_bill("2020", "upper", subjects=[])
 
     upper = kansas.organizations.get(classification="upper")
 
@@ -110,10 +110,10 @@ def test_bill_subjects(django_assert_num_queries, kansas):
 
 @pytest.mark.django_db
 def test_bill_versions(django_assert_num_queries, kansas):
-    create_test_bill("2020", "upper", versions=1)
-    create_test_bill("2020", "upper", versions=4)
-    create_test_bill("2020", "upper")
-    create_test_bill("2020", "upper")
+    make_specific_bill("2020", "upper", versions=1)
+    make_specific_bill("2020", "upper", versions=4)
+    make_specific_bill("2020", "upper")
+    make_specific_bill("2020", "upper")
 
     upper = kansas.organizations.get(classification="upper")
     with django_assert_num_queries(1):
@@ -125,7 +125,7 @@ def test_bill_versions(django_assert_num_queries, kansas):
 def test_full_command(django_assert_num_queries, kansas):
     for session in ("2019", "2020"):
         for chamber in ("upper", "lower"):
-            create_test_bill(
+            make_specific_bill(
                 session,
                 chamber,
                 sponsors=10,
@@ -135,7 +135,7 @@ def test_full_command(django_assert_num_queries, kansas):
                 documents=10,
             )
             for n in range(100):
-                create_test_bill(session, chamber)
+                make_specific_bill(session, chamber)
 
     # Unsure about the exact query count here, as lots of these queries are checkpoints, etc.
     # but 91 for 2 sessions & 2 chambers seems OK and was stable with changing number of bills
