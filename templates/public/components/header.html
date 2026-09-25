@@ -12,13 +12,12 @@ context ~a little differently~.
             <img class="header__logo" width="300" src="{% static 'images/openstates_logo_new.png' %}" alt="OpenStates Home">
         </a>
 
-       <div id="header__login">
-         <a href="/bill_dashboard">
+        <div id="header__top-level-links">
+          <a href="/bill_dashboard">
             Bill Dashboard{% if unread_bills_count > 0 %} ({{ unread_bills_count }}){% endif %}
-         </a>
-         <span style="margin-left: 3.5em;">
-         <a href="/resources">Resources</a>
-       </div>
+          </a>
+          <a href="/resources">Resources</a>
+        </div>
     </div>
 
     {% if state_nav != "disabled" %}

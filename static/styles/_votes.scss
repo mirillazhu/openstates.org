@@ -1,3 +1,23 @@
+.vote-title-container {
+    display: block;
+
+    @include breakpoint(medium) {
+        display: flex;
+    }
+}
+
+.vote-label {
+    height: min-content;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    @include breakpoint(medium) {
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 1rem;
+    }
+}
+
 .horizontal-bar {
     background-color: $color-primary;
     height: 0.8em;
@@ -5,4 +25,8 @@
 
 .bar-column {
     width: 60%;
+}
+
+.voter-link {
+  display: block;
 }

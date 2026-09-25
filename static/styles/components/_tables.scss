@@ -26,6 +26,18 @@ table {
     }
 }
 
+.th-introduced {
+  width: 100px;
+}
+
+.th-latest-action {
+  width: 150px;
+
+  @include breakpoint(large) {
+      width: 250px;
+  }
+}
+
 tr.row--align-top {
     vertical-align: top;
 }
@@ -78,24 +90,3 @@ tr.row-with-buttons {
     -webkit-line-clamp: 11;
     max-height: 16.5em;
 }
-
-.voters-table td {
-  position: relative;
-}
-
-td .voter-link {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-}
-
-.hide-mobile {
-    @include breakpoint(small only) {
-        display: none;
-    }
-}
-

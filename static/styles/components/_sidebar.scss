@@ -1,17 +1,39 @@
-
 .sidebar {
+    border-left: 1px solid $color-gray;
+    margin-left: 1rem;
+    padding-left: 2rem;
+    height: 100%; 
+}
 
-    border-bottom: 1px solid $color-gray;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+.sidebar.search-options-form {
+    @include breakpoint(medium down) {
+        border-top: 1px solid $color-gray;
+        margin-top: 1rem;
+        padding-top: 1rem;
 
-    @include breakpoint(medium) {
-        border-bottom: none;
-        height: 100%; 
-        margin-left: 1rem;
-        padding-left: 2rem;
-        border-left: 1px solid $color-gray;
-        margin-bottom: 0;
+        border-left: none;
+        margin-left: 0;
+        padding-left: 0;
     }
+}
 
+.sidebar.fyl-aside {
+    @include breakpoint(sidebarbreak down) {
+        position: relative;
+        margin-bottom: 3rem;
+
+        border-left: 0;
+        margin-left: 0;
+        padding-left: 0;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 1rem;
+            border-bottom: 1px solid $color-gray;
+            margin-bottom: 1rem;
+        }
+    }
 }

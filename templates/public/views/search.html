@@ -46,7 +46,7 @@
 
 
     <div class="grid-x grid-margin-x">
-        <div class="cell medium-9">
+        <div class="cell large-9 sidebarbreak-8">
         {% if bills.paginator.count %}
         <section>    
         <h2 class="heading--medium">Bills</h2>
@@ -54,12 +54,12 @@
                 <thead>
                     <tr>
                         <th>Bill Title</th>
-                        <th width="100">
+                        <th class="th-introduced">
                           <a href="{{ first_action_sort_url }}">
                             Introduced{{ first_action_arrow }}
                           </a>
                         </th>
-                        <th width="250">
+                        <th class="th-latest-action">
                           <a href="{{ latest_action_sort_url }}">
                             Latest Action{{ latest_action_arrow }}
                           </a>
@@ -131,9 +131,9 @@
         {% endif %}
 
         </div>
-        <div class="cell medium-3">
+        <div class="cell large-3 sidebarbreak-4">
           {% if query and state and base_bills_exist %} 
-            <div class="sidebar">
+            <div class="sidebar search-options-form">
               <h2 class="heading--medium">Filter Bills</h2>
               {% include 'public/components/search-options-form.html' with search_html_hidden_vars=True %} <!-- Pass is_filter_form as hidden var to form -->
             </div>
