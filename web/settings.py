@@ -141,6 +141,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = "web.urls"
 WSGI_APPLICATION = "web.wsgi.application"
 
+SITE_ID = 1
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -153,8 +155,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-SITE_ID = 1
-
 # Internationalization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -163,12 +163,14 @@ USE_L10N = True
 USE_TZ = True
 
 
+# static
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
 STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 # redefine entire logging tree
 LOGGING = {
@@ -207,6 +209,7 @@ LOGGING = {
         "openstates": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
+
 
 # allauth backends
 AUTHENTICATION_BACKENDS = (
