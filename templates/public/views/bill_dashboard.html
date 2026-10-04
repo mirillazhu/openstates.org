@@ -45,12 +45,12 @@
                             Bill Title{{ bill_title_arrow }}
                           </a>
                         </th>
-                        <th class="hide-mobile" width="250">
+                        <th width="250">
                           <a href="{{ bill_status_sort_url }}">
                             Bill Status{{ bill_status_arrow }}
                           </a>
                         </th>
-                        <th class="hide-mobile" width="150">
+                        <th width="150">
                           <a href="{{ session_sort_url }}">
                             Session{{ session_arrow }}
                           </a>
@@ -79,12 +79,12 @@
                                     {{ bill.title|titlecase_caps }}
                                 </div>
                             </td>
-                            <td class="hide-mobile">
+                            <td>
                                 <div class="td-truncate td-truncate-short">
                                     {{ bill.status }}
                                 </div>
                             </td>
-                            <td class="hide-mobile">
+                            <td>
                                 <div class="td-truncate td-truncate-short">
                                     {{ bill.legislative_session.name }}
                                 </div>
