@@ -154,7 +154,7 @@ export default class LegislatorList extends React.Component {
                   <td className="u-color--primary">
                     <a href={b.pretty_url} className="row-link">{b.name}</a>
                   </td>
-                  <td>{b.primary_party}</td>
+                  <td>{b && b.primary_party && b.primary_party.replace(/\//g, '/\u200B')}</td>
                   <td>{b.current_role.district}</td>
                   {this.props.chambers.lower && (
                     <td>{this.props.chambers[b.current_role.org_classification]}</td>
