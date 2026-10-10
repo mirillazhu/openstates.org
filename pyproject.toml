@@ -27,7 +27,8 @@ yamlordereddictloader = "^0.4.0"
 snowballstemmer = "^3.0.1"
 openstates = {path = "../openstates-core", develop = true}
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+django-upgrade = "^1.32.0"
 pytest = "^6.2.5"
 pytest-django = "^3.5"
 flake8 = "^3.7"
