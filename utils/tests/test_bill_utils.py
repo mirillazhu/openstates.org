@@ -12,8 +12,8 @@ from utils.bills import (
 )
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture(autouse=True)
+def setup(db):
     populate_db()
 
 

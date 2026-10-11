@@ -4,8 +4,8 @@ from testutils.populators import populate_db, populate_unicam
 from utils.bill_stages import get_bill_chambers, compute_bill_stages
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture(autouse=True)
+def setup(db):
     populate_db()
 
 

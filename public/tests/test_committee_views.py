@@ -4,8 +4,8 @@ from testutils.populators import populate_db
 from utils.common import pretty_url
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture(autouse=True)
+def setup(db):
     populate_db()
     house = Organization.objects.get(
         classification="lower", jurisdiction__name="Alaska"

@@ -7,7 +7,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.13"
-Django = "3.2.14"
+django = "4.2.30"
 django-allauth = "^0.57.0"
 django-recaptcha = "^3.0.0"
 django-redis-cache = "^3.0.0"
@@ -29,8 +29,8 @@ openstates = {path = "../openstates-core", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 django-upgrade = "^1.32.0"
-pytest = "^6.2.5"
-pytest-django = "^3.5"
+pytest = "^8.4.2"
+pytest-django = "4.12.0"
 flake8 = "^3.7"
 freezegun = "^1.5"
 ipython = "^7.31"
