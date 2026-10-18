@@ -5,7 +5,7 @@
 {% block title %}{{ legislature.name }} - Open States{% endblock %}
 
 {% block content %}
-    <script> window.chambers = {{ chambers_json|jsonify }}; </script>
+    <script> window.chambers = {{ chambers_json }}; </script>
 
     <h1 class="heading--large">{{ legislature.name }}</h1>
 
