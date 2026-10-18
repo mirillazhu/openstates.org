@@ -30,12 +30,11 @@
         </form>
     </div>
 
+    {{ legislators|json_script:"legislators-data" }}
+    {{ chambers|json_script:"chambers-data" }}
+
     <div id="legislator-list" data-hook="legislator-list"></div>
 
-    <script>
-        window.legislators = {{ legislators|jsonify }};
-        window.chambers = {{ chambers|jsonify }};
-    </script>
     <noscript>
         <ul>
         {% for leg in legislators %}
