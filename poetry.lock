@@ -831,18 +831,21 @@ saml = ["python3-saml (>=1.15.0,<2.0.0)"]
 
 [[package]]
 name = "django-recaptcha"
-version = "3.0.0"
+version = "4.1.0"
 description = "Django recaptcha form field/widget app."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "django-recaptcha-3.0.0.tar.gz", hash = "sha256:253197051288923cae675d7eff91b619e3775311292a5dbaf27a8a55ffebc670"},
-    {file = "django_recaptcha-3.0.0-py3-none-any.whl", hash = "sha256:1aed69fd6ac8fd9e99e52665392ae6748f8b6339ace656fad779fe0c6c915a52"},
+    {file = "django_recaptcha-4.1.0-py3-none-any.whl", hash = "sha256:463aa65967e973de466b28ce8e8b6abb2faffb1ce0c7faa1bf0e5b041e0497cb"},
+    {file = "django_recaptcha-4.1.0.tar.gz", hash = "sha256:73097b958733f65b729d4e4630c51fc2bf147aca6f026017d18898dfc25cb4c5"},
 ]
 
 [package.dependencies]
 django = "*"
+
+[package.extras]
+testing = ["coveralls", "tox", "tox-gh-actions"]
 
 [[package]]
 name = "django-redis-cache"
@@ -3233,4 +3236,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "934623a435d122f3a0e200a35e6b3153996fabdc08057ce20b3ceed31af491c0"
+content-hash = "bb917407d6b703b02d438c05b87ef5439c97548edca9d4fc73e7afaae6b28e8f"
