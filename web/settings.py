@@ -6,6 +6,13 @@ import structlog
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+GDAL_LIBRARY_PATH = (
+    "/opt/homebrew/lib/libgdal.dylib"  # added as goreman could not find GDAL
+)
+GEOS_LIBRARY_PATH = (
+    "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added as goreman could not find GEOS
+)
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -63,7 +70,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     # SECURE_SSL_REDIRECT = True
     # SESSION_COOKIE_SECURE = True
     # CSRF_COOKIE_SECURE = True
-    # CSRF_TRUSTED_ORIGINS = ["https://demo.openstatesforjustice.org"]  # for django 4.0+
+    # CSRF_TRUSTED_ORIGINS = ["https://demo.openstatesforjustice.org"]
 else:
     DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "non-secret-key")
@@ -97,8 +104,11 @@ CONN_MAX_AGE = 60
 if "CACHE_URL" in os.environ:
     CACHES = {
         "default": {
-            "BACKEND": "redis_cache.RedisCache",
+            "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": os.environ["CACHE_URL"],
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
         }
     }
 
