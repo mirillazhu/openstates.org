@@ -10,8 +10,8 @@ window.addEventListener("load", () => {
   if (ll) {
     ReactDOM.render(
       React.createElement(LegislatorList, {
-        legislators: window.legislators,
-        chambers: window.chambers,
+        legislators: JSON.parse(document.getElementById('legislators-data').textContent),
+        chambers: JSON.parse(document.getElementById('chambers-data').textContent),
       }),
       ll
     );
@@ -21,8 +21,8 @@ window.addEventListener("load", () => {
   if (cl) {
     ReactDOM.render(
       React.createElement(CommitteeList, {
-        committees: window.committees,
-        chambers: window.chambers,
+        committees: JSON.parse(document.getElementById('committees-data').textContent),
+        chambers: JSON.parse(document.getElementById('chambers-data').textContent),
       }),
       cl
     );
