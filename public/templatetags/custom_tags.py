@@ -1,6 +1,6 @@
 import dateutil.parser
 import json
-import bleach
+import nh3
 from django import template
 from django.utils.safestring import mark_safe
 import re
@@ -237,7 +237,7 @@ def format_address(address):
 def jsonify(data):
     # Source: https://gist.github.com/pirate/c18bfe4fd96008ffa0aef25001a2e88f
     uncleaned = json.dumps(data)
-    clean = bleach.clean(uncleaned)
+    clean = nh3.clean(uncleaned)
     return mark_safe(clean)
 
 
