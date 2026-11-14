@@ -15,11 +15,14 @@ RUN apt-get --allow-releaseinfo-change update -qq \
         postgresql-client \
         uwsgi \
         libpq5 \
+        libgdal36 \
         libpcre2-8-0 \
         python3-dev \
         git \
         build-essential \
         libpq-dev \
+        libgeos-dev \
+        libgdal-dev \
         libcap-dev \
         libpcre2-dev \
         uwsgi-src \
@@ -59,6 +62,8 @@ RUN apt-get remove -y -qq build-essential \
       python3-dev \
       git \
       libpq-dev \
+      libgeos-dev \
+      libgdal-dev \
       libcap-dev \
       libpcre3-dev \
       uwsgi-src \

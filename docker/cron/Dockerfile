@@ -10,6 +10,8 @@ RUN BUILD_DEPS=" \
       git \
       build-essential \
       libpq-dev \
+      libgeos-dev \
+      libgdal-dev \
       libcap-dev \
       wget \
       postgresql-client \
