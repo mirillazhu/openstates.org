@@ -120,19 +120,19 @@ def district_maybe(district):
 
 
 @register.filter()
-def party_color_bg(party_name):
+def party_color_bg_class(party_name):
     if not party_name:
-        return "#ffffff"
+        return "party-bg-none"
     elif "Democratic" in party_name and "Republican" in party_name:  # just in case
-        return "#fff3cd"
+        return "party-bg-other"
     elif "Democratic" in party_name:  # includes Democratic-Farmer-Labor party
-        return "#cfe5f4"
+        return "party-bg-dem"
     elif "Republican" in party_name:
-        return "#f5d7db"
+        return "party-bg-rep"
     elif party_name == "Unknown":
-        return "#edf3f8"
+        return "party-bg-unknown"
     else:
-        return "#fff3cd"
+        return "party-bg-other"
 
 
 @register.filter()

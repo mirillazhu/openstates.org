@@ -55,7 +55,9 @@
                                 <tr>
                                     <th>{{ vc.option|title }}</th>
                                     <td>{{ vc.value }}</td>
-                                    <td class="bar-column"><div class="horizontal-bar" style="width: {{ vc.percent }}%"></div></td>
+                                    <td class="bar-column">
+                                      <progress class="horizontal-bar" value="{{ vc.percent }}" max="100"></progress>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -76,7 +78,7 @@
                         <tbody>
                             {% for party, counts in party_votes %}
                                 <tr>
-                                    <td style="background-color: {{ party|party_color_bg }}">{{ party }}</td>
+                                    <td class="{{ party|party_color_bg_class }}">{{ party }}</td>
                                     <td>{{ counts.yes }}</td>
                                     <td>{{ counts.no }}</td>
                                     <td>{{ counts.other }}</td>
@@ -107,7 +109,7 @@
                 <tr>
                     {% if pv.voter %}
                         <td><a href="{% canonical_url pv.voter %}" class="voter-link">{{ pv.voter.name }}</a></td>
-                        <td style="background-color: {{ pv.party|party_color_bg }}">{{ pv.party }}</td>
+                        <td class="{{ pv.party|party_color_bg_class }}">{{ pv.party }}</td>
                     {% else %}
                         <td>{{ pv.voter_name }}</td>
                         <td></td>
