@@ -11,8 +11,8 @@ from testutils.factories import make_specific_bill
 from testutils.populators import populate_db, populate_unicam
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture
+def setup(db):
     populate_db()
 
 
@@ -40,7 +40,7 @@ ALASKA_BILLS = 13
 
 
 @pytest.mark.django_db
-def test_bills_view_basics(client, django_assert_num_queries):
+def test_bills_view_basics(client, setup, django_assert_num_queries):
     with django_assert_num_queries(BILLS_QUERY_COUNT + 7):
         resp = client.get("/ak/bills/")
     assert resp.status_code == 200
@@ -57,7 +57,7 @@ def test_bills_view_basics(client, django_assert_num_queries):
 
 # no longer including query in bills view
 # @pytest.mark.django_db
-# def test_bills_view_query(client, django_assert_num_queries):
+# def test_bills_view_query(client, setup, django_assert_num_queries):
 #     # title search works
 #     with django_assert_num_queries(BILLS_QUERY_COUNT):
 #         resp = client.get("/ak/bills/?query=moose")
@@ -79,7 +79,7 @@ def test_bills_view_basics(client, django_assert_num_queries):
 
 
 # @pytest.mark.django_db
-# def test_bills_view_query_bill_id(client, django_assert_num_queries):
+# def test_bills_view_query_bill_id(client, setup, django_assert_num_queries):
 #     # query by bill id
 #     with django_assert_num_queries(BILLS_QUERY_COUNT):
 #         resp = client.get("/ak/bills/?query=HB 1")
@@ -93,32 +93,32 @@ def test_bills_view_basics(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_bills_view_chamber(client):
+def test_bills_view_chamber(client, setup):
     upper = len(client.get("/ak/bills/?chamber=upper").context["bills"])
     lower = len(client.get("/ak/bills/?chamber=lower").context["bills"])
     assert upper + lower == ALASKA_BILLS
 
 
 @pytest.mark.django_db
-def test_bills_view_session(client):
+def test_bills_view_session(client, setup):
     b17 = len(client.get("/ak/bills/?session=2017").context["bills"])
     b18 = len(client.get("/ak/bills/?session=2018").context["bills"])
     assert b17 + b18 == ALASKA_BILLS
 
 
 @pytest.mark.django_db
-def test_bills_view_sponsor(client):
+def test_bills_view_sponsor(client, setup):
     amanda = Person.objects.get(name="Amanda Adams")
     assert len(client.get(f"/ak/bills/?sponsor={amanda.id}").context["bills"]) == 2
 
 
 @pytest.mark.django_db
-def test_bills_view_sponsor_name(client):
+def test_bills_view_sponsor_name(client, setup):
     assert len(client.get("/ak/bills/?sponsor_name=Amanda+Adams").context["bills"]) == 2
 
 
 @pytest.mark.django_db
-def test_bills_view_classification(client):
+def test_bills_view_classification(client, setup):
     bills = len(client.get("/ak/bills/?classification=bill").context["bills"])
     resolutions = len(
         client.get("/ak/bills/?classification=resolution").context["bills"]
@@ -135,19 +135,19 @@ def test_bills_view_classification(client):
 
 
 @pytest.mark.django_db
-def test_bills_view_subject(client):
+def test_bills_view_subject(client, setup):
     assert len(client.get("/ak/bills/?subjects=nature").context["bills"]) == 3
 
 
 @pytest.mark.django_db
-def test_bills_view_status(client):
+def test_bills_view_status(client, setup):
     assert (
         len(client.get("/ak/bills/?status=passed-lower-chamber").context["bills"]) == 1
     )
 
 
 @pytest.mark.django_db
-def test_bills_view_status_unicameral(client):
+def test_bills_view_status_unicameral(client, setup):
     populate_unicam()
     assert (
         len(client.get("/ne/bills/?status=passed-upper-chamber").context["bills"]) == 1
@@ -206,13 +206,13 @@ def test_bills_view_sort_first_action(client, sortable_bills):
 
 
 @pytest.mark.django_db
-def test_bills_view_bad_page(client):
+def test_bills_view_bad_page(client, setup):
     resp = client.get("/ak/bills/?page=A")
     assert resp.status_code == 404
 
 
 @pytest.mark.django_db
-def test_bills_view_caching(client, django_assert_num_queries):
+def test_bills_view_caching(client, setup, django_assert_num_queries):
     state = "ak"
     cache_key = f"filter_options_{state}"
 
@@ -235,7 +235,7 @@ def test_bills_view_caching(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_bill_view(client, django_assert_num_queries):
+def test_bill_view(client, setup, django_assert_num_queries):
     with django_assert_num_queries(24):
         resp = client.get("/ak/bills/2018/1/")
     assert resp.status_code == 200
@@ -257,7 +257,7 @@ def test_bill_view(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_bill_view_no_bill_text(client):
+def test_bill_view_no_bill_text(client, setup):
     bill = Bill.objects.get(legislative_session__identifier="2018", identifier="HB 1")
     bill.versions.all().delete()
 
@@ -266,7 +266,7 @@ def test_bill_view_no_bill_text(client):
 
 
 @pytest.mark.django_db
-def test_vote_view(client, django_assert_num_queries):
+def test_vote_view(client, setup, django_assert_num_queries):
     vid = VoteEvent.objects.get(motion_text="Vote on House Passage").id.split("/")[1]
     with django_assert_num_queries(13):
         resp = client.get(f"/vote/{vid}/")
@@ -295,7 +295,7 @@ def test_vote_view(client, django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_bill_document_view_bill_text(client):
+def test_bill_document_view_bill_text(client, setup):
     text_id = BillVersionLink.objects.get(url="https://example.com/f.pdf").id
     resp = client.get(f"/document/bill_text/{text_id}/")
 
@@ -309,7 +309,7 @@ def test_bill_document_view_bill_text(client):
 
 
 @pytest.mark.django_db
-def test_bill_document_view_related_document(client):
+def test_bill_document_view_related_document(client, setup):
     text_id = BillDocumentLink.objects.get(url="https://example.com/fn").id
     resp = client.get(f"/document/related/{text_id}/")
 

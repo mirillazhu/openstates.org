@@ -1,7 +1,7 @@
 import time
-import datetime
 from django.core.cache import caches
 from django.http import JsonResponse
+from .utils import utcnow
 from .models import Profile
 
 
@@ -84,7 +84,7 @@ def verify(key, zone):
         )
 
     # enforce daily quota
-    quota_range = datetime.datetime.utcnow().strftime("%Y%m%d")
+    quota_range = utcnow().strftime("%Y%m%d")
 
     if backend.get_and_inc_quota_value(key, zone, quota_range) > limit.daily_requests:
         raise QuotaError(f"quota exceeded: {limit.daily_requests}/day")
@@ -93,7 +93,7 @@ def verify(key, zone):
 
 
 def get_key_from_request(request):
-    key = request.META.get("HTTP_X_API_KEY")
+    key = request.headers.get("x-api-key")
     if not key:
         key = request.GET.get("apikey")
     return key

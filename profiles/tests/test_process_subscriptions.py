@@ -1,4 +1,3 @@
-import pytz
 import datetime
 import pytest
 from django.contrib.auth.models import User
@@ -21,8 +20,8 @@ pytestmark = pytest.mark.skip(
 )
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture(autouse=True)
+def setup(db):
     populate_db()
 
 
@@ -30,8 +29,8 @@ def setup():
 def user():
     u = User.objects.create(username="testuser")
     u.profile.feature_subscriptions = True
-    u.profile.subscription_last_checked = pytz.utc.localize(
-        datetime.datetime(2020, 1, 1)
+    u.profile.subscription_last_checked = datetime.datetime(
+        2020, 1, 1, tzinfo=datetime.timezone.utc
     )
     u.profile.save()
     u.emailaddress_set.create(email="valid@example.com", verified=True, primary=True)

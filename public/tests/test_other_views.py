@@ -2,8 +2,8 @@ import pytest
 from testutils.populators import populate_db, populate_unicam
 
 
-@pytest.mark.django_db
-def setup():
+@pytest.fixture(autouse=True)
+def setup(db):
     populate_db()
 
 

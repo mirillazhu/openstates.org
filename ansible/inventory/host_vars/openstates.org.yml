@@ -7,7 +7,6 @@ django_environment:
     EMAIL_HOST_PASSWORD: "{{ lookup('aws_ssm', '/site/EMAIL_HOST_PASSWORD') }}"
     DATABASE_URL: "{{ lookup('aws_ssm', '/site/DATABASE_URL') }}"
     CACHE_URL: "{{ lookup('aws_ssm', '/site/CACHE_URL') }}"
-    RRL_REDIS_HOST: "{{ lookup('aws_ssm', '/site/RRL_REDIS_HOST') }}"
     RECAPTCHA_PUBLIC_KEY: "{{ lookup('aws_ssm', '/site/RECAPTCHA_PUBLIC_KEY_V2') }}"
     RECAPTCHA_PRIVATE_KEY: "{{ lookup('aws_ssm', '/site/RECAPTCHA_PRIVATE_KEY_V2') }}"
     NEW_RELIC_LICENSE_KEY: "{{ lookup('aws_ssm', '/site/NEWRELIC_INI_KEY') }}"

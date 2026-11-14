@@ -63,6 +63,7 @@ elif os.environ.get("DEBUG", "true").lower() == "false":
     # SECURE_SSL_REDIRECT = True
     # SESSION_COOKIE_SECURE = True
     # CSRF_COOKIE_SECURE = True
+    # CSRF_TRUSTED_ORIGINS = ["https://demo.openstatesforjustice.org"]
 else:
     DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY", "non-secret-key")
@@ -96,8 +97,11 @@ CONN_MAX_AGE = 60
 if "CACHE_URL" in os.environ:
     CACHES = {
         "default": {
-            "BACKEND": "redis_cache.RedisCache",
+            "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": os.environ["CACHE_URL"],
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
         }
     }
 
@@ -111,7 +115,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
-    "captcha",
+    "django_recaptcha",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -159,7 +163,6 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 
@@ -169,7 +172,14 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
 STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 # redefine entire logging tree

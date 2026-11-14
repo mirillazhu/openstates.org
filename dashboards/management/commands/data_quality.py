@@ -1,11 +1,11 @@
 import datetime
+import zoneinfo
 from django.core.management.base import BaseCommand
 from django import db
 from openstates.data.models import LegislativeSession, Bill, VoteEvent
 from utils.cli import yield_state_sessions
 from utils.common import abbr_to_jid
 from utils.orgs import get_chambers_from_abbr
-import pytz
 from statistics import mean
 from dashboards.models import DataQualityReport
 from django.db.models import Max, Min, Count, Q
@@ -32,7 +32,7 @@ def clean_date(action_date):
     if isinstance(action_date, str):
         action_date = datetime.datetime.strptime(action_date[:10], "%Y-%m-%d")
     if isinstance(action_date, datetime.datetime):
-        return pytz.UTC.localize(action_date)
+        return action_date.replace(tzinfo=zoneinfo.ZoneInfo("UTC"))
 
 
 def total_bills_per_session(state, session, chamber):

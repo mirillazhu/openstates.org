@@ -122,13 +122,6 @@
     minute: "30"
     name: "process subscriptions"
 
-- name: add aggregate usage cron
-  cron:
-    job: ". /home/openstates/env_vars && /home/openstates/virt/bin/python /home/openstates/src/openstates.org/manage.py aggregate_api_usage /var/log/uwsgi/app/openstates.log /var/log/uwsgi/app/openstates.log.1 >> /tmp/aggregation.log"
-    hour: "*/2"
-    minute: "19"
-    name: "aggregate usage"
-
 - name: restart nginx weekly
   cron:
     job: "systemctl restart nginx"
