@@ -9,6 +9,7 @@ package-mode = false
 python = "^3.13"
 django = "5.2.18"
 django-allauth = "^0.57.0"
+django-csp = "^4.0"
 django-recaptcha = "^4.1.0"
 django-redis = "^7.0.0"
 dj-database-url = "^3.0.0"
