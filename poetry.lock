@@ -1820,7 +1820,7 @@ optional = false
 python-versions = "^3.13"
 groups = ["main"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 attrs = "^20.2.0"
@@ -1846,8 +1846,10 @@ urllib3 = "^2.7.0"
 us = "^3.1.1"
 
 [package.source]
-type = "directory"
-url = "../openstates-core"
+type = "git"
+url = "https://github.com/mirillazhu/openstates-core"
+reference = "f9e1436a9236a7adcbcf699312028cb3c7d692ba"
+resolved_reference = "f9e1436a9236a7adcbcf699312028cb3c7d692ba"
 
 [[package]]
 name = "opentelemetry-api"
@@ -3201,4 +3203,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "038c41004021202e1d92dedbda0a664fc84e554d9c50982be1e8b7915c3501f5"
+content-hash = "5ac96611de293dc187df833de2a3106eef3b2f128c1040231d8eaf0dceb50720"
