@@ -6,13 +6,6 @@ import structlog
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-GDAL_LIBRARY_PATH = (
-    "/opt/homebrew/lib/libgdal.dylib"  # added as goreman could not find GDAL
-)
-GEOS_LIBRARY_PATH = (
-    "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"  # added as goreman could not find GEOS
-)
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
