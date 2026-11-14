@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.13-slim
 LABEL maintainer="James Turk <dev@jamesturk.net>"
 
 # global environment settings
@@ -10,8 +10,6 @@ RUN BUILD_DEPS=" \
       git \
       build-essential \
       libpq-dev \
-      libgeos-dev \
-      libgdal-dev \
       libcap-dev \
       wget \
       postgresql-client \

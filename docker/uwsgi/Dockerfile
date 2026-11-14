@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.13-slim
 LABEL maintainer="James Turk <dev@jamesturk.net>"
 
 ARG UID=999
@@ -15,20 +15,19 @@ RUN apt-get --allow-releaseinfo-change update -qq \
         postgresql-client \
         uwsgi \
         libpq5 \
-        libgdal36 \
         libpcre2-8-0 \
         python3-dev \
         git \
         build-essential \
         libpq-dev \
-        libgeos-dev \
-        libgdal-dev \
         libcap-dev \
         libpcre2-dev \
         uwsgi-src \
         awscli \
+        uuid-dev \
+        curl \
     && cd /usr/lib/uwsgi/plugins \
-    && uwsgi --build-plugin "/usr/src/uwsgi/plugins/python python39"
+    && uwsgi --build-plugin "/usr/src/uwsgi/plugins/python python313"
 
 # copy code and entrypoint in
 ADD . /code/
@@ -60,11 +59,10 @@ RUN apt-get remove -y -qq build-essential \
       python3-dev \
       git \
       libpq-dev \
-      libgeos-dev \
-      libgdal-dev \
       libcap-dev \
       libpcre3-dev \
       uwsgi-src \
+      uuid-dev \
     && apt-get autoremove -y
 USER openstates:openstates
 
@@ -78,7 +76,7 @@ ENV UWSGI_MASTER=1 \
   UWSGI_BUFFER_SIZE=8096 \
   UWSGI_HARAKIRI=30 \
   UWSGI_SINGLE_INTERPRETER=1 \
-  UWSGI_PLUGIN=python39 \
+  UWSGI_PLUGIN=python313 \
   UWSGI_SOCKET=:9999
 
 ENTRYPOINT ["custom-entrypoint"]
