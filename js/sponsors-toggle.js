@@ -2,7 +2,7 @@ function toggleSponsors(toggle, cells) {
     var expanded = toggle.getAttribute('data-expanded') === 'true';
     
     for (var i = 18; i < cells.length; i++) {
-        cells[i].style.display = expanded ? 'none' : '';
+        cells[i].classList.toggle('hide', expanded);
     }
     
     toggle.setAttribute('data-expanded', expanded ? 'false' : 'true');

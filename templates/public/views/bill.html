@@ -98,7 +98,7 @@
                 <div class="grid-container full">
                     <div class="grid-x grid-margin-x medium-up-2 large-up-3" id="sponsors-grid">
                         {% for sponsor in sponsorships|dictsortreversed:"primary" %}
-                        <div class="cell" {% if forloop.counter > 18 %}style="display: none;"{% endif %}">
+                        <div class="cell {% if forloop.counter > 18 %}hide{% endif %}">
                             {% if sponsor.person %}
                             <a href="{% canonical_url sponsor.person %}">
                                 <div class="card card--profile">
