@@ -48,3 +48,17 @@
     font-weight: normal;
     margin-bottom: 0;
 }
+
+.card--clickable {
+    position: relative;
+    cursor: pointer;
+
+    a::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+}
