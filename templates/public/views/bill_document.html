@@ -18,13 +18,13 @@
 
 {% block content %}
 <section class="section">
-    <div style="width: 100%;">
+    <div class="full-width">
         <div class="flex-container align-justify">
             <h1 class="heading--large document-header">
                 {{ document_type_formatted }} for {{ document.bill.identifier }} - {{ document.note }}
             </h1>
             <div class="back-to-bill-button">
-                <a class = "button" href="{% canonical_url document.bill %}" style="width: 120px;">Back to Bill</a>
+                <a class="button back-to-bill-button-text" href="{% canonical_url document.bill %}">Back to Bill</a>
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
                     <img src="/static/pdfjs/web/images/loading.svg" class="loading-spinner" alt="loading spinner"/>
                     <span>Loading document...</span>
                 </div>
-                <div id="pages-wrapper" style="display:none;"></div>
+                <div id="pages-wrapper"></div>
             </div>
         </div>
 

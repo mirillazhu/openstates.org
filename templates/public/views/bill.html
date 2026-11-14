@@ -20,7 +20,7 @@
         <div class="overview">
 
             <div class="overview__header">
-                <div style="width: 100%;">
+                <div class="full-width">
                     <div class="align-justify meter-container">
                         <div>
                             <h1 class="overview__heading">{{ bill.identifier }}</h1>
@@ -86,7 +86,7 @@
                     <div class="mb2">
                         <h3 class="heading--xsmall">Abstract</h3>
                         {% for abstract in abstracts %}
-                            <p style="white-space: pre-line">{{ abstract.abstract | safe }}</p>
+                            <p class="bill-abstract">{{ abstract.abstract | safe }}</p>
                         {% endfor %}
                     </div>
                     {% endif %}
@@ -122,7 +122,7 @@
                         {% endfor %}
                     </div>
                     {% if sponsorships|length > 18 %}
-                        <span class="heading--xsmall clickable" style="padding-right: 0.5rem;" id="sponsors-toggle">+ More</span>
+                        <span class="heading--xsmall clickable" id="sponsors-toggle">+ More</span>
                     {% endif %}
                 </div>
 

@@ -9,7 +9,7 @@
     <section class="mb1">
         <div class="overview">
             <div class="overview__header">
-                <div style="width: 100%;">
+                <div class="full-width">
                     <div class="align-justify vote-title-container">
                         <h1 class="overview__heading">Vote on {{ vote.bill.identifier }} - {{ vote.motion_text|titlecase_all }}</h1>
                         <span class="label vote-label
@@ -25,7 +25,7 @@
                     <ul class="no-bullet">
                         <li>
                             <strong>Bill:</strong> 
-                            <a href="{% canonical_url vote.bill %}" style="text-decoration: underline;">{{ vote.bill.identifier }}</a>
+                            <a href="{% canonical_url vote.bill %}" class="bill-link">{{ vote.bill.identifier }}</a>
                         </li>
                         <li>
                             <strong>Motion Text:</strong> {{ vote.motion_text|titlecase_all }}
@@ -97,7 +97,7 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 30%">Name</th>
+                    <th class="width-30">Name</th>
                     <th>{% if has_voter_parties %}Party{% endif %}</th>
                     <th>Vote</th>
                 </tr>
