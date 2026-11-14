@@ -5,10 +5,6 @@
 {% block title %}{{ document_type_formatted }} for {{ document.bill.identifier }} - Open States{% endblock %}
 
 {% block scripts %}
-    <script>
-        window.PDF_URL = '/development-pdf-proxy/{{ document_link.url }}';
-    </script>
-
     {% if viewer_mode == 'pdf' %}
         <script src="{% static 'bundles/pdf_viewer.js' %}"></script>
     {% else %}
@@ -31,7 +27,12 @@
 
     <div id="document-wrapper" class="document-wrapper mb1">
         <div id="pdf-viewer-div">
-            <iframe id="pdf-viewer" class="pdf-viewer" title="Bill Document PDF"></iframe>
+            <iframe 
+              id="pdf-viewer"
+              class="pdf-viewer"
+              title="Bill Document PDF"
+              data-pdf-url="/development-pdf-proxy/{{ document_link.url }}"  
+            ></iframe>  <!-- data-pdf_url for development only -->
         </div>
 
         <div id="image-viewer" class="image-viewer">  <!-- image fallback -->

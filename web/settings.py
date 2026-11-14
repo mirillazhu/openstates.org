@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 import structlog
+from csp.constants import NONE, SELF
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -271,3 +272,24 @@ structlog.configure(
     wrapper_class=structlog.stdlib.BoundLogger,
     cache_logger_on_first_use=True,
 )
+
+
+# content security policy
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [NONE],
+        "script-src": [SELF],  # add CDN as needed
+        "style-src": [SELF],
+        "img-src": [SELF, "data:"],
+        "font-src": [SELF],
+        "connect-src": [SELF, "https://api.mapbox.com"],
+        "frame-src": [SELF],
+        "worker-src": [SELF],
+        "manifest-src": [SELF],
+        "frame-ancestors": [NONE],
+        "form-action": [SELF],
+        "object-src": [NONE],
+        "base-uri": [NONE],
+        "upgrade-insecure-requests": True,
+    }
+}
