@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 import structlog
+from csp.constants import NONE, SELF
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -108,7 +109,7 @@ if "CACHE_URL" in os.environ:
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    # "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -123,6 +124,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.twitter",
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.github",
+    "csp",
     "openstates.data",
     "public",
     "profiles.apps.ProfilesConfig",
@@ -132,6 +134,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "csp.middleware.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -269,3 +272,24 @@ structlog.configure(
     wrapper_class=structlog.stdlib.BoundLogger,
     cache_logger_on_first_use=True,
 )
+
+
+# content security policy
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [NONE],
+        "script-src": [SELF],  # add CDN as needed
+        "style-src": [SELF],
+        "img-src": [SELF, "data:"],
+        "font-src": [SELF],
+        "connect-src": [SELF, "https://api.mapbox.com"],
+        "frame-src": [SELF],
+        "worker-src": [SELF],
+        "manifest-src": [SELF],
+        "frame-ancestors": [NONE],
+        "form-action": [SELF],
+        "object-src": [NONE],
+        "base-uri": [NONE],
+        "upgrade-insecure-requests": True,
+    }
+}

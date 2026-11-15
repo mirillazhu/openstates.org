@@ -28,7 +28,7 @@ function resetFilters(form) {
     form.submit();
 }
 
-window.addEventListener('load', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const searchOptionsForm = document.getElementById('search-options-form');
     const clearFiltersButton = document.getElementById('clear-filters-button');
 

@@ -12,6 +12,17 @@ function addBanner(content) {
   document.querySelector("body header").appendChild(div);
 }
 
+function handleStateSelect() {
+  var stateSelect = document.getElementById('state-select');
+    if (stateSelect) {
+        stateSelect.addEventListener('change', function() {
+            window.location.href = '/' + this.value;
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", handleStateSelect)
+
 function checkIE() {
   var ua = window.navigator.userAgent;
   if (ua.indexOf("MSIE") > 0 || ua.indexOf("Trident/") > 0) {

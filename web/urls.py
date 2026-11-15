@@ -1,7 +1,8 @@
 from django.urls import path, include
 from django.conf import settings
-from django.contrib import admin
 from django.views.generic import TemplateView
+
+# from django.contrib import admin
 
 
 class FlatPageView(TemplateView):
@@ -13,10 +14,10 @@ class FlatPageView(TemplateView):
 
 
 urlpatterns = [
-    path("djadmin/", admin.site.urls),
+    # path("djadmin/", admin.site.urls),
     # path("accounts/", include("allauth.urls")),
     # path("accounts/profile/", include("profiles.urls")),
-    path("dashboard/", include("dashboards.urls")),
+    # path("dashboard/", include("dashboards.urls")),
     path("", include("public.urls")),
     # path("", include("web.redirects")),
     # flatpages

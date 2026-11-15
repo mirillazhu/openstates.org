@@ -5,10 +5,6 @@
 {% block title %}{{ document_type_formatted }} for {{ document.bill.identifier }} - Open States{% endblock %}
 
 {% block scripts %}
-    <script>
-        window.PDF_URL = '/development-pdf-proxy/{{ document_link.url }}';
-    </script>
-
     {% if viewer_mode == 'pdf' %}
         <script src="{% static 'bundles/pdf_viewer.js' %}"></script>
     {% else %}
@@ -18,20 +14,25 @@
 
 {% block content %}
 <section class="section">
-    <div style="width: 100%;">
+    <div class="full-width">
         <div class="flex-container align-justify">
             <h1 class="heading--large document-header">
                 {{ document_type_formatted }} for {{ document.bill.identifier }} - {{ document.note }}
             </h1>
             <div class="back-to-bill-button">
-                <a class = "button" href="{% canonical_url document.bill %}" style="width: 120px;">Back to Bill</a>
+                <a class="button back-to-bill-button-text" href="{% canonical_url document.bill %}">Back to Bill</a>
             </div>
         </div>
     </div>
 
     <div id="document-wrapper" class="document-wrapper mb1">
         <div id="pdf-viewer-div">
-            <iframe id="pdf-viewer" class="pdf-viewer" title="Bill Document PDF"></iframe>
+            <iframe 
+              id="pdf-viewer"
+              class="pdf-viewer"
+              title="Bill Document PDF"
+              data-pdf-url="/development-pdf-proxy/{{ document_link.url }}"  
+            ></iframe>  <!-- data-pdf_url for development only -->
         </div>
 
         <div id="image-viewer" class="image-viewer">  <!-- image fallback -->
@@ -46,7 +47,7 @@
                     <img src="/static/pdfjs/web/images/loading.svg" class="loading-spinner" alt="loading spinner"/>
                     <span>Loading document...</span>
                 </div>
-                <div id="pages-wrapper" style="display:none;"></div>
+                <div id="pages-wrapper"></div>
             </div>
         </div>
 

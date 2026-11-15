@@ -1,10 +1,10 @@
 const VIEWER_URL = '/static/pdfjs/web/viewer.html';
 
 window.addEventListener('load', function() {
-    const pdfUrl = window.PDF_URL;
     const iframe = document.getElementById('pdf-viewer');
     const errorState = document.getElementById('error-state');
     const errorMessage = document.getElementById('error-message');
+    const pdfUrl = iframe.getAttribute('data-pdf-url');
 
     function showError(message) {
         iframe.style.display = 'none';
