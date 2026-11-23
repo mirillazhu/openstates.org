@@ -4,12 +4,12 @@
   "description": "",
   "dependencies": {
     "foundation-sites": "^6.6.3",
-    "js-cookie": "^2.2.1",
-    "lodash": "^4.17.21",
+    "js-cookie": "^3.0.7",
+    "lodash": "^4.18.1",
     "promise-polyfill": "8.1.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "recharts": "^2.0.0-beta.7",
+    "recharts": "^3.0.0",
     "url-search-params-polyfill": "^5.0.0",
     "whatwg-fetch": "^3.5.0"
   },
