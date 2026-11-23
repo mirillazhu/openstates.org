@@ -44,7 +44,8 @@ RUN curl https://deb.nodesource.com/setup_16.x -SsLo nodesource.sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN npm ci \
-    && npm run build
+    && npm run build \
+    && npm ci --omit=dev
 RUN pip --no-cache-dir --disable-pip-version-check install poetry wheel
 
 # everything after here as openstates user
