@@ -449,5 +449,7 @@ def document_proxy_for_development(request, remote_url):
     if "://" not in remote_url:
         remote_url = remote_url.replace(":/", "://", 1)
 
-    response = requests.get(remote_url, verify=False)
+    response = requests.get(
+        remote_url
+    )  # may need to add verify=False for local testing
     return HttpResponse(response.content, content_type="application/pdf")
