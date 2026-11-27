@@ -1,9 +1,7 @@
-from collections import Counter
-from django.db.models import Sum
 from django.http import Http404
 from django.shortcuts import render, redirect
-from openstates.data.models import Bill, Organization, Person
-from utils.common import abbr_to_jid, sessions_with_bills, jid_to_abbr
+from openstates.data.models import Person
+from utils.common import jid_to_abbr
 from utils.bills import (
     get_bills,
     get_sort_context,
@@ -18,109 +16,11 @@ def styleguide(request):
     return render(request, "public/views/styleguide.html")
 
 
-def _preprocess_sponsors(bills):
-    FIRST_SPONSORS_COUNT = 3
-
-    for bill in bills:
-        bill.first_sponsors = []
-        sponsorships = list(bill.sponsorships.all())
-        bill.first_sponsors = sorted(
-            sponsorships, key=lambda s: (s.primary, s.person_id or "zzz", s.id)
-        )[:FIRST_SPONSORS_COUNT]
-        bill.extra_sponsors = len(sponsorships) - len(bill.first_sponsors)
-
-
 # state-specific homepage
 def home(request, state="us"):
     request.session["selected_state"] = state
     context = {"state": state}
     return render(request, "public/views/home.html", context)
-
-
-def state(request, state):
-    RECENTLY_INTRODUCED_BILLS_TO_SHOW = 4
-    RECENTLY_PASSED_BILLS_TO_SHOW = 4
-
-    request.session["selected_state"] = state
-
-    jid = abbr_to_jid(state)
-
-    # we need basically all of the orgs, so let's just do one big query for them
-    legislature = None
-    chambers = []
-
-    organizations = (
-        Organization.objects.filter(jurisdiction_id=jid)
-        .annotate(seats=Sum("posts__maximum_memberships"))
-        .select_related("parent")
-    )
-
-    for org in organizations:
-        if org.classification == "legislature":
-            legislature = org
-        elif org.classification in ("upper", "lower"):
-            chambers.append(org)
-
-    # unicameral
-    if not chambers:
-        chambers = [legislature]
-
-    # legislators
-    legislators = Person.objects.current_legislators_with_roles(chambers)
-
-    for chamber in chambers:
-        parties = []
-        titles = []
-        for legislator in legislators:
-            if legislator.current_role["org_classification"] == chamber.classification:
-                parties.append(legislator.primary_party)
-                titles.append(legislator.current_role["title"])
-
-        chamber.parties = dict(Counter(parties).most_common())
-        try:
-            chamber.title = titles[0]
-        except IndexError:
-            chamber.title = "Legislator"
-
-    # bills
-    bills = (
-        Bill.objects.all()
-        .select_related("legislative_session", "legislative_session__jurisdiction")
-        .filter(from_organization__in=chambers)
-        .prefetch_related("sponsorships", "sponsorships__person")
-    )
-
-    recently_introduced_bills = list(
-        bills.filter(first_action_date__isnull=False).order_by("-first_action_date")[
-            :RECENTLY_INTRODUCED_BILLS_TO_SHOW
-        ]
-    )
-
-    recently_passed_bills = list(
-        bills.filter(latest_passage_date__isnull=False).order_by(
-            "-latest_passage_date"
-        )[:RECENTLY_PASSED_BILLS_TO_SHOW]
-    )
-
-    _preprocess_sponsors(recently_introduced_bills)
-    _preprocess_sponsors(recently_passed_bills)
-
-    all_sessions = sessions_with_bills(jid)
-
-    return render(
-        request,
-        "public/views/state.html",
-        {
-            "state": state,
-            "state_nav": "overview",
-            "legislature": legislature,
-            "chambers": chambers,
-            "chambers_json": {c.classification: c.name for c in chambers},
-            "recently_introduced_bills": recently_introduced_bills,
-            "recently_passed_bills": recently_passed_bills,
-            "all_sessions": all_sessions,
-        },
-    )
 
 
 def resources(request):

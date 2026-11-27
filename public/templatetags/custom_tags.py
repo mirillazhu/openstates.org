@@ -1,6 +1,6 @@
 import dateutil.parser
 from django import template
-from django.utils.safestring import mark_safe
+from django.template.defaultfilters import linebreaksbr
 import re
 import us
 
@@ -228,7 +228,8 @@ def format_uuid(person_id):
 
 @register.filter()
 def format_address(address):
-    return mark_safe(address.replace(";", "<br>"))
+    # linebreaksbr replaces newlines with <br>
+    return linebreaksbr(address.replace(";", "\n"))
 
 
 @register.filter()
