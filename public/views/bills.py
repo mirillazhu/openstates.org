@@ -34,7 +34,6 @@ from utils.bill_subscriptions import (
     is_bill_followed,
     update_last_viewed_bill_action,
 )
-from .fallback import fallback
 import requests
 
 
@@ -229,9 +228,7 @@ def bill(request, state, session, bill_id):
             id=bill_id,
         )
     except Bill.DoesNotExist:
-        return fallback(
-            request
-        )  # to do: figure out fallback rerouting given url change
+        raise Http404()
 
     # sponsorships, attach people manually
     sponsorships = list(bill.sponsorships.all())

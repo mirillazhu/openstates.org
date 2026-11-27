@@ -11,7 +11,6 @@ from .views.bills import (
     bill_subscription,
 )
 from .views.committees import committees, committee
-from .views.fallback import fallback, legislator_fallback
 from utils.common import states
 
 
@@ -83,11 +82,5 @@ urlpatterns = [
         ),
         committee,
         name="committee-detail",
-    ),
-    # fallbacks
-    # path("reportcard/", fallback),
-    re_path(r"[a-z]{2}/votes/[A-Z]{2}V\d{8}/$", fallback),
-    re_path(
-        r"[a-z]{2}/legislators/(?P<legislator_id>[A-Z]{2}L\d{6})/", legislator_fallback
     ),
 ]
