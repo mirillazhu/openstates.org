@@ -20,7 +20,7 @@ boto3 = "^1.9"
 newrelic = "^12.0.0"
 structlog = "^20.1.0"
 snowballstemmer = "^3.0.1"
-openstates = {git = "https://github.com/mirillazhu/openstates-core", rev = "e3e7e75bbde8079878a553cb3e6a53c5a41bbe69"}
+openstates = {git = "https://github.com/mirillazhu/openstates-core", rev = "8971fa95d7810206de0aa6438a74c3771f83510c"}
 
 [tool.poetry.group.dev.dependencies]
 django-upgrade = "^1.32.0"
