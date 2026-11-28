@@ -38,11 +38,14 @@ WORKDIR /code/
 COPY docker/uwsgi/custom-entrypoint /usr/local/bin
 COPY docker/uwsgi/node.pin /etc/apt/preferences.d/node
 
-RUN curl https://deb.nodesource.com/setup_16.x -SsLo nodesource.sh \
-    && bash nodesource.sh \
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_24.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update -qq \
     && apt-get install -y -qq --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm ci \
     && npm run build \
     && npm ci --omit=dev
@@ -66,7 +69,7 @@ RUN apt-get remove -y -qq build-essential \
       libgeos-dev \
       libgdal-dev \
       libcap-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       uwsgi-src \
       uuid-dev \
     && apt-get autoremove -y
